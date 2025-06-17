@@ -1,0 +1,31 @@
+﻿@model MexicanRestaurant.Core.Models.Ingredient
+@{
+    ViewData["Title"] = "Ingredient Details";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h5 class="card-title">@Model.Name Details</h5>
+@if (Model.ProductIngredients != null && Model.ProductIngredients.Any())
+{
+    <h4>Products</h4>
+    <table class="table table-bordered">
+        <thead class="table-striped">
+            <tr>
+                <th>Product Name</th>
+                <th>Description</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var productIngredient in Model.ProductIngredients)
+            {
+                <tr>
+                    <td>@productIngredient.Product.Name</td>
+                    <td>@productIngredient.Product.Description</td>
+                    <td>@productIngredient.Product.Price</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+

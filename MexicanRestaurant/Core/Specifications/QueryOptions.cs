@@ -4,7 +4,7 @@ namespace MexicanRestaurant.Core.Specifications
 {
     public class QueryOptions<T> where T : class
     {
-        public Expression<Func<T, object>> OrderyBy { get; set; } = null!;
+        public Expression<Func<T, object>> OrderBy { get; set; } = null!;
         public Expression<Func<T, bool>> Where { get; set; } = null!;
 
         private string[] includes = Array.Empty<string>();
@@ -15,6 +15,6 @@ namespace MexicanRestaurant.Core.Specifications
         public string[] GetIncludes() => includes;
 
         public bool HasWhere => Where != null;
-        public bool HasOrderBy => OrderyBy != null;
+        public bool HasOrderBy => OrderBy != null;
     }
 }

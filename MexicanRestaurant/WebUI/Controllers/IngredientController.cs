@@ -2,6 +2,7 @@
 using MexicanRestaurant.Infrastructure.Data;
 using MexicanRestaurant.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using MexicanRestaurant.Core.Specifications;
 
 namespace MexicanRestaurant.WebUI.Controllers
 {
@@ -16,6 +17,16 @@ namespace MexicanRestaurant.WebUI.Controllers
         {
             var ingredientList = await ingredients.GetAllAsync();
             return View(ingredientList);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var ingredient = await ingredients.GetByIdAsync(id, new QueryOptions<Ingredient>() { Includes="ProductIngredients.Product"});
+            if (ingredient == null)
+            {
+                return NotFound();
+            }
+            return View(ingredient);
         }
     }
 }
