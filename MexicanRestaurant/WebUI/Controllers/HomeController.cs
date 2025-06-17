@@ -1,8 +1,8 @@
 using System.Diagnostics;
-using MexicanRestaurant.Models;
+using MexicanRestaurant.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MexicanRestaurant.Controllers
+namespace MexicanRestaurant.WebUI.Controllers
 {
     public class HomeController : Controller
     {

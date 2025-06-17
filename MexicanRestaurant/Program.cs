@@ -1,5 +1,5 @@
-using MexicanRestaurant.Data;
-using MexicanRestaurant.Models;
+using MexicanRestaurant.Core.Models;
+using MexicanRestaurant.Infrastructure.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

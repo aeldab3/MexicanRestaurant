@@ -1,8 +1,8 @@
-﻿using MexicanRestaurant.Models;
+﻿using MexicanRestaurant.Core.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace MexicanRestaurant.Data
+namespace MexicanRestaurant.Infrastructure.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
