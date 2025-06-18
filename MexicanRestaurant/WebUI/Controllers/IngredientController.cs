@@ -49,5 +49,48 @@ namespace MexicanRestaurant.WebUI.Controllers
             }
             return View(ingredient);
         }
+        public async Task<IActionResult> Edit(int id)
+        {
+            var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient> { Includes = "ProductIngredients.Product" });
+            if (ingredient == null)
+            {
+                return NotFound();
+            }
+            return View(ingredient);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, Ingredient ingredient)
+        {
+            if (id != ingredient.IngredientId)
+            {
+                return NotFound();
+            }
+            if (ModelState.IsValid)
+            {
+                await _ingredients.UpdateAsync(ingredient);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(ingredient);
+        }
+
+        public async Task<IActionResult> Delete(int id)
+        {
+            var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient> { Includes = "ProductIngredients.Product" });
+            if (ingredient == null)
+            {
+                return NotFound();
+            }
+            return View(ingredient);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            await _ingredients.DeleteAsync(id);
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

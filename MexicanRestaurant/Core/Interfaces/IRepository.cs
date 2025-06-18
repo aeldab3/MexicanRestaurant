@@ -7,7 +7,7 @@ namespace MexicanRestaurant.Core.Interfaces
         Task<IEnumerable<T>> GetAllAsync();
         Task<T> GetByIdAsync(int id, QueryOptions<T> options);
         Task AddAsync(T entity);
-        Task<T> UpdateAsync(T entity);
+        Task UpdateAsync(T entity);
         Task DeleteAsync(int id);
     }
 }
