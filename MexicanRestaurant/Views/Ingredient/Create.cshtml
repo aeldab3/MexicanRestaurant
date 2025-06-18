@@ -1,0 +1,20 @@
+﻿@model MexicanRestaurant.Core.Models.Ingredient
+@{
+    ViewData["Title"] = "Create Ingredient";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label asp-for="Name" class="form-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <a asp-action="Index" class="btn btn-secondary">Return</a>
+            <button type="submit" class="btn btn-primary">Create</button>
+        </form>
+    </div>
+</div>

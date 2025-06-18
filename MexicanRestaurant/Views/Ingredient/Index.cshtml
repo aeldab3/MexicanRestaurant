@@ -2,15 +2,15 @@
 @{
     ViewData["Title"] = "Ingredients";
 }
-
-<h1>Ingredients</h1>
+<h1 class="mb-3">Ingredients</h1>
+<a asp-action="Create" class="btn btn-primary">Create New Ingredient</a>
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Name</th>
             <th>Details</th>
-            <th></th>
-            <th></th>
+            <th>Edit</th>
+            <th>Delete</th>
         </tr>
     </thead>
     <tbody>

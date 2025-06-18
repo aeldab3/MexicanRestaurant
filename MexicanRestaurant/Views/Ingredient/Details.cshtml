@@ -4,7 +4,7 @@
 }
 
 <h1>@ViewData["Title"]</h1>
-<h5 class="card-title">@Model.Name Details</h5>
+<h3 class="card-title">@Model.Name Details</h3>
 @if (Model.ProductIngredients != null && Model.ProductIngredients.Any())
 {
     <h4>Products</h4>
@@ -28,4 +28,7 @@
         </tbody>
     </table>
 }
+<div>
+    <a asp-action="Index" class="btn btn-secondary">Return</a>
+</div>
 

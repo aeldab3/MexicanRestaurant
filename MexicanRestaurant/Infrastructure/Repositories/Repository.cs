@@ -14,9 +14,14 @@ namespace MexicanRestaurant.Infrastructure.Repositories
             _context = context;
             _dbSet = context.Set<T>();
         }
-        public Task<T> AddAsync(T entity)
+        public async Task AddAsync(T entity)
         {
-            throw new NotImplementedException();
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity), "Entity cannot be null");
+            }
+            await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
         }
 
         public Task DeleteAsync(int id)
