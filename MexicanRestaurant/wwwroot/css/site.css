@@ -29,3 +29,9 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+.fixed-image-height {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}

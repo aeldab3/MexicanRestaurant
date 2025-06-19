@@ -9,12 +9,10 @@ namespace MexicanRestaurant.WebUI.Controllers
 {
     public class IngredientController : Controller
     {
-        //private Repository<Ingredient> ingredients;
         private readonly IRepository<Ingredient> _ingredients;
 
         public IngredientController(IRepository<Ingredient> ingredients)
         {
-            //ingredients = new Repository<Ingredient>(context);
             _ingredients = ingredients;
         }
         public async Task<IActionResult> Index()
