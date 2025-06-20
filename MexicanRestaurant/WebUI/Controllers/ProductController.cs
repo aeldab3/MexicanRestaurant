@@ -57,6 +57,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEdit(Product product, int[] ingredientIds, string ExistingImageUrl)
         {
             var categories = await _categories.GetAllAsync();
@@ -94,7 +95,7 @@ namespace MexicanRestaurant.WebUI.Controllers
                 if (product.ProductId == 0)
                 {
 
-                   product.ProductIngredients = ingredientIds.Select(id => new ProductIngredient { IngredientId = id }).ToList();
+                    product.ProductIngredients = ingredientIds.Select(id => new ProductIngredient { IngredientId = id }).ToList();
                     await _products.AddAsync(product);
                 }
                 else
@@ -139,5 +140,29 @@ namespace MexicanRestaurant.WebUI.Controllers
             return View(product);
         }
 
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var product = await _products.GetByIdAsync(id, new QueryOptions<Product>
+            {
+                Includes = "ProductIngredients.Ingredient, Category"
+            });
+
+            if (product == null)
+                return NotFound();
+
+            if (!string.IsNullOrEmpty(product.ImageUrl))
+            {
+                var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", product.ImageUrl);
+                if (System.IO.File.Exists(imagePath))
+                {
+                    System.IO.File.Delete(imagePath);
+                }
+            }
+            await _products.DeleteAsync(id);
+            return RedirectToAction("Index");
+        }
     }
 }

@@ -4,7 +4,7 @@
 } 
 
 <div class="container mt-4">
-    <h1 class="text-center text-primary mb-4">@ViewData["Title"]</h1>
+    <h1 class="text-center text-success mb-4">@ViewData["Title"]</h1>
     <div class="row justify-content-center">
         <div class="col-md-8">
             <form asp-action="AddEdit" method="post" enctype="multipart/form-data" class="p-4 shadow-lg bg-light rounded">
@@ -32,14 +32,14 @@
                     </div>
 
                     <div class="col-md-6 mb-3">
-                    <label asp-for="Stock" class="form-label fw-bold">Quantity In Stock:</label>
+                    <label asp-for="Stock" class="form-label fw-bold">Quantity In Stock</label>
                     <input asp-for="Stock" class="form-control" />
                     <span asp-validation-for="Stock" class="text-danger"></span>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="CategoryId" class="form-label fw-bold">Category:</label>
+                    <label asp-for="CategoryId" class="form-label fw-bold">Category</label>
                         <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
                         <option value="">Select Category</option>
                         </select>
@@ -47,8 +47,14 @@
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="ImageFile" class="form-label fw-bold"></label>
-                    <input asp-for="ImageFile" type="file" class="form-control-file" name="ImageFile" />
+                    <label asp-for="ImageFile" class="form-label fw-bold">Upload Image</label>
+                    <div class="d-flex align-items-center gap-3">
+                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('imageFileInput').click();">
+                            <i class="bi bi-upload"></i> Upload
+                        </button>
+                        <span id="fileName" class="text-muted">No file chosen</span>
+                    </div>
+                    <input asp-for="ImageFile" type="file" id="imageFileInput" name="ImageFile" class="d-none" accept="image/*" onchange="updateFileName(this)" />
                     <span asp-validation-for="ImageFile" class="text-danger"></span>
                 </div>
 
@@ -75,6 +81,17 @@
                     <a asp-action="Index" asp-controller="Product" class="btn btn-secondary">Cancel</a>
                 </div>
             </form>
+            <script>
+                function updateFileName(input) {
+                    const fileNameSpan = document.getElementById('fileName');
+                    if (input.files && input.files.length > 0) {
+                        fileNameSpan.textContent = input.files[0].name;
+                    } else {
+                        fileNameSpan.textContent = 'No file chosen';
+                    }
+                }
+            </script>
+
          </div>
     </div>
 </div>
