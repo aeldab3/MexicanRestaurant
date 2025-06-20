@@ -1,29 +1,34 @@
 ﻿@model IEnumerable<MexicanRestaurant.Core.Models.Product>
 @{
-    ViewData["Title"] = "Mexican Restaurantuct Menu Items";
+    ViewData["Title"] = "Menu Items";
 }
 
-<h1>@ViewData["Title"]</h1>
-<p>Welcome to the Products page!</p>
-<a asp-action="AddEdit" asp-controller="Product" class="btn btn-primary">Create New Item</a>
-<div class="row">
-    @foreach (Product product in Model)
-    {
-        <div class="col-md-4">
-        <div class="card mb-3">
-            <div class="card-header">
-                 <h2>@product.Name</h2>
-            </div>
-              <div class="card-body">
-                <div>
-                   <img src="@Url.Content("~/images/" + product?.ImageUrl)" class="card-img-top fixed-image-height" alt="@product?.Description" />
+<div class="container my-4">
+    <h1 class="text-center mb-4 text-success fw-bold">@ViewData["Title"]</h1>
+    <div class="d-flex justify-content-end mb-3">
+        <a asp-action="AddEdit" asp-controller="Product" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Create New Item
+        </a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        @foreach (Product product in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-lg border-0">
+                    <img src="@Url.Content("~/images/" + product?.ImageUrl)" class="card-img-top img-fluid" style="height: 220px; object-fit: cover;" alt="@product?.Name" />
+                    <div class="card-body">
+                        <h5 class="card-title">@product?.Name</h5>
+                        <p class="card-text text-muted">@product?.Description</p>
+                        <p class="text-muted"><strong>Category:</strong> <span class="text-dark">@product.Category?.Name</span></p>
+                        <p class="card-text"><strong>Price:</strong> @product?.Price.ToString("C")</p>
+                        <p class="card-text"><strong>Stock:</strong> @product?.Stock</p>
+                    </div>
+                    <div class="card-footer bg-white border-0 text-end">
+                        <a asp-action="AddEdit" asp-route-id="@product?.ProductId" class="btn btn-outline-primary btn-sm">Edit</a>
+                    </div>
                 </div>
-                 <p>@product?.Description</p>
-                 <p>@product?.Category</p>
-                 <p>Price: @product?.Price.ToString("C")</p>
-                 <p>Quantity In Stock: @product?.Stock</p>
-              </div>
-        </div>
-        </div>
-    }
+            </div>
+        }
+    </div>
 </div>

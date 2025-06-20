@@ -3,39 +3,79 @@
     ViewData["Title"] = $"{ViewBag.Operation} Menu Item";
 } 
 
-<h1 class="mb-3">@ViewData["Title"]</h1>
-<form asp-action="AddEdit" method="post" enctype="multipart/form-data">
-    <input type="hidden" asp-for="ProductId" />
-    <input type="hidden" asp-for="CategoryId" />
-    <div class="form-group mb-3">
-        <label asp-for="Name"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+<div class="container mt-4">
+    <h1 class="text-center text-primary mb-4">@ViewData["Title"]</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form asp-action="AddEdit" method="post" enctype="multipart/form-data" class="p-4 shadow-lg bg-light rounded">
+                <input type="hidden" asp-for="ProductId" />
+                <input type="hidden" name="ExistingImageUrl" value="@Model.ImageUrl" />
+
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-bold"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label fw-bold"></label>
+                    <input asp-for="Description" class="form-control" />
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                    <label asp-for="Price" class="form-label fw-bold"></label>
+                    <input asp-for="Price" class="form-control" />
+                    <span asp-validation-for="Price" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                    <label asp-for="Stock" class="form-label fw-bold">Quantity In Stock:</label>
+                    <input asp-for="Stock" class="form-control" />
+                    <span asp-validation-for="Stock" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="CategoryId" class="form-label fw-bold">Category:</label>
+                        <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
+                        <option value="">Select Category</option>
+                        </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ImageFile" class="form-label fw-bold"></label>
+                    <input asp-for="ImageFile" type="file" class="form-control-file" name="ImageFile" />
+                    <span asp-validation-for="ImageFile" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Ingredients</label>
+                    <div class="row">
+                        @foreach (Ingredient ingredient in ViewBag.Ingredients)
+                        {
+                            var isChecked = Model.ProductIngredients != null && Model.ProductIngredients.Any(i => i.IngredientId == ingredient.IngredientId);
+                            <div class="col-sm-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="ingredient_@ingredient.IngredientId"
+                                           name="ingredientIds" value="@ingredient.IngredientId"
+                                           @(isChecked ? "checked" : "") />
+                                    <label class="form-check-label" for="ingredient_@ingredient.IngredientId">@ingredient.Name</label>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success">@ViewBag.Operation</button>
+                    <a asp-action="Index" asp-controller="Product" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+         </div>
     </div>
-    <div class="form-group mb-3">
-        <label asp-for="Description"></label>
-        <input asp-for="Description" class="form-control" />
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-    <div class="form-group mb-3">
-        <label asp-for="Price"></label>
-        <input asp-for="Price" class="form-control" />
-        <span asp-validation-for="Price" class="text-danger"></span>
-    </div>
-    <div class="form-group mb-3">
-        <label asp-for="Stock">Quantity In Stock:</label>
-        <input asp-for="Stock" class="form-control" />
-        <span asp-validation-for="Stock" class="text-danger"></span>
-    </div>
-    <div class="form-group mb-3">
-        <label asp-for="Category"></label>
-        <input asp-for="Category" class="form-control" />
-        <span asp-validation-for="Category" class="text-danger"></span>
-    </div>
-    <div class="form-group mb-3">
-        <label asp-for="ImageFile"></label>
-        <input asp-for="ImageFile" type="file" class="form-control-file" name="ImageFile" />
-        <span asp-validation-for="ImageFile" class="text-danger"></span>
-    </div>
-</form>
+</div>
 

@@ -39,6 +39,27 @@ namespace MexicanRestaurant.Infrastructure.Repositories
         {
             return await _dbSet.ToListAsync();
         }
+        public async Task<IEnumerable<T>> GetAllAsync(QueryOptions<T> options)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (options.HasWhere)
+            {
+                query = query.Where(options.Where);
+            }
+
+            if (options.HasOrderBy)
+            {
+                query = query.OrderBy(options.OrderBy);
+            }
+
+            foreach (var include in options.GetIncludes())
+            {
+                query = query.Include(include);
+            }
+
+            return await query.ToListAsync();
+        }
 
         public async Task<T> GetByIdAsync(int id, QueryOptions<T> options)
         {
