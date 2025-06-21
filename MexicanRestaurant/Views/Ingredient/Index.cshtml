@@ -2,32 +2,37 @@
 @{
     ViewData["Title"] = "Ingredients";
 }
-<h1 class="mb-3">Ingredients</h1>
-<a asp-action="Create" class="btn btn-primary">Create New Ingredient</a>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Details</th>
-            <th>Edit</th>
-            <th>Delete</th>
-        </tr>
-    </thead>
-    <tbody>
+
+<div class="container my-4">
+    <h1 class="text-center text-success mb-3 fw-bold">@ViewData["Title"]</h1>
+
+    <div class="d-flex justify-content-start mb-4">
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Create New Ingredient
+        </a>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
         @foreach (var ingredient in Model)
         {
-            <tr>
-                <td>@ingredient.Name</td>
-                 <td>
-                    <a asp-action="Details" asp-route-id="@ingredient.IngredientId" class="btn btn-info">Details</a>
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@ingredient.IngredientId" class="btn btn-primary">Edit</a>
-                </td>
-                <td>
-                    <a asp-action="Delete" asp-route-id="@ingredient.IngredientId" class="btn btn-danger">Delete</a>
-                </td> 
-            </tr>
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-success fw-bold">@ingredient.Name</h5>
+                    </div>
+                    <div class="card-footer bg-white border-0 d-flex justify-content-between">
+                        <a asp-action="Details" asp-route-id="@ingredient.IngredientId" class="btn btn-info btn-sm w-100 m-1">
+                            <i class="bi bi-info-circle"></i> Details
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@ingredient.IngredientId" class="btn btn-secondary btn-sm w-100 m-1">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@ingredient.IngredientId" class="btn btn-danger btn-sm w-100 m-1">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
         }
-    </tbody>
-</table>
+    </div>
+</div>

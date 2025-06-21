@@ -3,32 +3,50 @@
     ViewData["Title"] = "Ingredient Details";
 }
 
-<h1>@ViewData["Title"]</h1>
-<h3 class="card-title">@Model.Name Details</h3>
-@if (Model.ProductIngredients != null && Model.ProductIngredients.Any())
-{
-    <h5>Products</h5>
-    <table class="table table-bordered">
-        <thead class="table-striped">
-            <tr>
-                <th>Product Name</th>
-                <th>Description</th>
-                <th>Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var productIngredient in Model.ProductIngredients)
-            {
-                <tr>
-                    <td>@productIngredient.Product.Name</td>
-                    <td>@productIngredient.Product.Description</td>
-                    <td>@productIngredient.Product.Price</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-<div>
-    <a asp-action="Index" class="btn btn-secondary">Return</a>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <h2 class="fw-bold mb-0">@Model.Name</h2>
+                    <p class="fw-light mb-0">Used in Products</p>
+                </div>
+                <div class="card-body">
+                    @if (Model.ProductIngredients != null && Model.ProductIngredients.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" style="width: 20%;">Product Name</th>
+                                        <th scope="col">Description</th>
+                                        <th scope="col" style="width: 10%;">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var pi in Model.ProductIngredients)
+                                    {
+                                        <tr onclick="location.href='@Url.Action("Details", "Product", new { id = pi.Product.ProductId })'" style="cursor: pointer;">
+                                            <td class="fw-semibold text-nowrap">@pi.Product.Name</td>
+                                            <td>@pi.Product.Description</td>
+                                            <td>@pi.Product.Price.ToString("C")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">No products use this ingredient.</p>
+                    }
+                </div>
+                <div class="card-footer bg-white border-top-0 text-start">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Return
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
