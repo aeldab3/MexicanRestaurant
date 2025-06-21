@@ -1,4 +1,6 @@
-﻿@using MexicanRestaurant.Core.Models
+﻿@using MexicanRestaurant.Core.Extensions
+@using MexicanRestaurant.Core.Models
+@using MexicanRestaurant.WebUI.ViewModels
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
@@ -6,6 +8,23 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+        <li class="nav-item mx-2">
+            @{
+                int cartCount = 0;
+                if (Context.Session.Get<OrderViewModel>("OrderViewModel") != null) 
+                {
+                    OrderViewModel model = Context.Session.Get<OrderViewModel>("OrderViewModel");
+                    cartCount = model.OrderItems.Sum(product => product.Quantity);
+                }
+            }
+            <a class="nav-link position-relative" asp-action="Cart" asp-controller="Order">
+                <i class="bi bi-cart2"></i>
+                <span class="position-absolute start-100 translate-middle badge rounded-pill bg-success">
+                    @cartCount
+                    <span class="visually-hidden">Cart Quantity</span>
+                </span>
+            </a>
+    </li>
     <li class="nav-item">
         <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
     </li>
