@@ -5,28 +5,49 @@
     <h1 class="text-center text-success fw-bold mb-4">🛒 My Cart</h1>
 
     <form asp-action="PlaceOrder" method="post">
-        <table class="table table-bordered table-hover">
+        <table class="table table-striped align-middle">
             <thead class="table-success">
                 <tr>
                     <th>Product</th>
-                    <th style="width: 100px;">Quantity</th>
-                    <th style="width: 100px;">Price</th>
-                    <th style="width: 100px;">Total</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in Model.OrderItems)
                 {
                     <tr>
-                        <td>@item.ProductName</td>
-                        <td>@item.Quantity</td>
-                        <td>@item.Price.ToString("C")</td>
-                        <td>@((item.Price* item.Quantity).ToString("C"))</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="~/images/@item.ImageUrl" class="cart-img" />
+                                <span>@item.ProductName</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                @if (item.Quantity > 1)
+                                {
+                                    <button type="submit" formaction="/Order/Decrease?productId=@item.ProductId" class="qty-btn">−</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" formaction="/Order/Remove?productId=@item.ProductId" class="qty-btn">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                }
+                                <span>@item.Quantity</span>
+                                <button type="submit" formaction="/Order/Increase?productId=@item.ProductId" class="qty-btn">+</button>
+                            </div>
+                        </td>
+                        <td style="min-width: 100px;" class="text-end">@item.Price.ToString("C")</td>
+                        <td>@((item.Price * item.Quantity).ToString("C"))</td>
                     </tr>
                 }
+
                 <tr class="table-primary fw-bold">
                     <td colspan="3" class="text-end">Total:</td>
-                    <td>@Model.TotalAmount.ToString("C")</td>
+                    <td class="text-end fw-bold" style="min-width: 100px;">@Model.TotalAmount.ToString("C")</td>
                 </tr>
             </tbody>
         </table>
@@ -36,3 +57,26 @@
         </div>
     </form>
 </div>
+
+
+<style>
+    .cart-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .qty-btn {
+        border: none;
+        background-color: #eee;
+        width: 30px;
+        height: 30px;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+
+        .qty-btn:hover {
+            background-color: #ccc;
+        }
+</style>

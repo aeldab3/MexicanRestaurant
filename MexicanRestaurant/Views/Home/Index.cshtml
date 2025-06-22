@@ -1,8 +1,62 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Welcome to Mexican Restaurant";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    /* حل لتوسيع الصورة خارج container */
+    .full-width-home {
+        position: relative;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        width: 100vw;
+        background-image: url('/images/mexicanResturant.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 91vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+    }
+
+    .full-width-home .home-content {
+        z-index: 2;
+        color: white;
+        text-align: center;
+        text-shadow: 1px 1px 10px #000;
+    }
+
+    .full-width-home h1 {
+        font-size: 4rem;
+    }
+
+    .full-width-home p {
+        font-size: 1.5rem;
+    }
+
+    .full-width-home .btn {
+        margin-top: 5rem;
+    }
+
+    .section {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+</style>
+
+<div class="full-width-home">
+    <div class="home-content">
+        <h1>Authentic Mexican Taste</h1>
+        <p>Order your favorite tacos, burritos, and more!</p>
+        <a asp-controller="Order" asp-action="Create" class="btn btn-lg btn-warning">Explore Menu</a>
+    </div>
 </div>

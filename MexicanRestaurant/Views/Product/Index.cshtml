@@ -15,8 +15,17 @@
         @foreach (Product product in Model)
         {
             <div class="col">
-                <div class="card h-100 shadow-lg border-0">
-                    <img src="@Url.Content("~/images/" + product?.ImageUrl)" class="card-img-top img-fluid" style="height: 220px; object-fit: cover;" alt="@product?.Name" />
+                <div class="card h-100 shadow-lg border-0" style="background-color: #f9f5d985">
+                    <div class="product-wrapper">
+                        <img src="@Url.Content("~/images/" + product?.ImageUrl)"
+                             class="card-img-top img-fluid"
+                             style="height: 220px; object-fit: cover;" alt="@product?.Name" />
+
+                        <a asp-action="Details" asp-controller="Product" asp-route-id="@product.ProductId"
+                           class="btn btn-lg btn-success details-btn">
+                            Details
+                        </a>
+                    </div>
                     <div class="card-body">
                         <h5 class="card-title">@product?.Name</h5>
                         <p class="card-text text-muted">@product?.Description</p>
@@ -24,7 +33,7 @@
                         <p class="card-text"><strong>Price:</strong> @product?.Price.ToString("C")</p>
                         <p class="card-text"><strong>Stock:</strong> @product?.Stock</p>
                     </div>
-                    <div class="card-footer bg-white border-0 d-flex justify-content-between">
+                    <div class="card-footer border-0 d-flex justify-content-between">
                         <a asp-action="AddEdit" asp-route-id="@product?.ProductId" class="btn btn-secondary btn-sm"><i class="bi bi-pencil-square"></i> Edit</a>
                         <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
                                 data-bs-target="#deleteModal" data-product-id="@product.ProductId" data-product-name="@product.Name">

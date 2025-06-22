@@ -19,6 +19,8 @@ namespace MexicanRestaurant.WebUI.Controllers
             _ingredients = ingredients;
             _webHostEnvironment = webHostEnvironment;
         }
+
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var products = await _products.GetAllAsync(new QueryOptions<Product>
@@ -28,6 +30,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             return View(products);
         }
 
+        [HttpGet]
         public async Task<IActionResult> AddEdit(int id)
         {
             var categories = await _categories.GetAllAsync();
@@ -140,6 +143,19 @@ namespace MexicanRestaurant.WebUI.Controllers
             return View(product);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Details(int id)
+        {
+            var product = await _products.GetByIdAsync(id, new QueryOptions<Product>
+            {
+                Includes = "ProductIngredients.Ingredient, Category"
+            });
+
+            if (product == null)
+                return NotFound();
+
+            return View(product);
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

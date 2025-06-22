@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Order>
+@{
+    ViewData["Title"] = "View Orders";
+}
+
+<div class="container my-4">
+    <h2 class="text-success text-center fw-bold mb-4">🧾 My Orders</h2>
+    <table class="table table-striped table-bordered shadow-sm">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Items</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td class="text-center">@order.OrderId</td>
+                    <td class="text-center">@order.OrderDate.ToString("g")</td>
+                    <td>@order.TotalAmount.ToString("C")</td>
+                    <td>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var item in order.OrderItems)
+                            {
+                                <li class="list-group-item d-flex justify-content-between">
+                                    <span>@item.Product.Name</span>
+                                    <span class="text-muted">Qty: @item.Quantity × @item.Price.ToString("C")</span>
+                                </li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
