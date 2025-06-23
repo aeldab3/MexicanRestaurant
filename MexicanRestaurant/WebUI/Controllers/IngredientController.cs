@@ -23,7 +23,7 @@ namespace MexicanRestaurant.WebUI.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient>() { Includes="ProductIngredients.Product"});
+            var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient>() { Includes = "ProductIngredients.Product"});
             if (ingredient == null)
             {
                 return NotFound();
@@ -49,7 +49,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         }
         public async Task<IActionResult> Edit(int id)
         {
-            var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient> { Includes = "ProductIngredients.Product" });
+            var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient>() { Includes = "ProductIngredients.Product"});
             if (ingredient == null)
             {
                 return NotFound();
@@ -75,7 +75,7 @@ namespace MexicanRestaurant.WebUI.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient> { Includes = "ProductIngredients.Product" });
+            var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient>() { Includes = "ProductIngredients.Product"});
             if (ingredient == null)
             {
                 return NotFound();
