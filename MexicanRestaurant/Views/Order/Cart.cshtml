@@ -14,7 +14,7 @@
                     <th>Total</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="table-secondary">
                 @foreach (var item in Model.OrderItems)
                 {
                     <tr>
@@ -40,12 +40,12 @@
                                 <button type="submit" formaction="/Order/Increase?productId=@item.ProductId" class="qty-btn">+</button>
                             </div>
                         </td>
-                        <td style="min-width: 100px;" class="text-end">@item.Price.ToString("C")</td>
+                        <td style="min-width: 100px;">@item.Price.ToString("C")</td>
                         <td>@((item.Price * item.Quantity).ToString("C"))</td>
                     </tr>
                 }
 
-                <tr class="table-primary fw-bold">
+                <tr class="table-success fw-bold">
                     <td colspan="3" class="text-end">Total:</td>
                     <td class="text-end fw-bold" style="min-width: 100px;">@Model.TotalAmount.ToString("C")</td>
                 </tr>

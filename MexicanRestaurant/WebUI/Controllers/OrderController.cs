@@ -28,7 +28,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         [Authorize]
         public async Task<IActionResult> Create()
         {
-            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel") ?? new OrderViewModel
+            var model = GetSessionModel() ?? new OrderViewModel
             {
                 OrderItems = new List<OrderItemViewModel>(),
                 Products = await _products.GetAllAsync(),
@@ -44,7 +44,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             if (product == null || prodQty <= 0)
                 return NotFound();
 
-            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel") ?? new OrderViewModel
+            var model = GetSessionModel() ?? new OrderViewModel
             {
                 OrderItems = new List<OrderItemViewModel>(),
                 Products = await _products.GetAllAsync(),
@@ -66,8 +66,7 @@ namespace MexicanRestaurant.WebUI.Controllers
                     Price = product.Price
                 });
             }
-            model.TotalAmount = model.OrderItems.Sum(i => i.Price * i.Quantity);
-            HttpContext.Session.Set("OrderViewModel", model);
+            SaveSessionModel(model);
             return RedirectToAction("Create");
         }
 
@@ -75,7 +74,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         [Authorize]
         public async Task<IActionResult> Cart()
         {
-            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            var model = GetSessionModel();
             if (model == null || model.OrderItems.Count == 0)
                 return RedirectToAction("Create");
 
@@ -86,7 +85,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         [Authorize]
         public async Task<IActionResult> PlaceOrder()
         {
-            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            var model = GetSessionModel();
             if (model == null || model.OrderItems.Count == 0)
                 return RedirectToAction("Create");
 
@@ -125,15 +124,14 @@ namespace MexicanRestaurant.WebUI.Controllers
         [HttpPost]
         public IActionResult Increase(int productId)
         {
-            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            var model = GetSessionModel();
             if (model == null)
                 return NotFound();
             var item = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
             if (item != null)
             {
                 item.Quantity++;
-                model.TotalAmount = model.OrderItems.Sum(i => i.Price * i.Quantity);
-                HttpContext.Session.Set("OrderViewModel", model);
+                SaveSessionModel(model);
             }
             return RedirectToAction("Cart");
         }
@@ -141,7 +139,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         [HttpPost]
         public IActionResult Decrease(int productId)
         {
-            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            var model = GetSessionModel();
             if (model == null)
                 return NotFound();
             var item = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
@@ -150,14 +148,12 @@ namespace MexicanRestaurant.WebUI.Controllers
                 if (item.Quantity > 1)
                 {
                     item.Quantity--;
-                    model.TotalAmount = model.OrderItems.Sum(i => i.Price * i.Quantity);
-                    HttpContext.Session.Set("OrderViewModel", model);
+                    SaveSessionModel(model);
                 }
                 else
                 {
                     model.OrderItems.Remove(item);
-                    model.TotalAmount = model.OrderItems.Sum(i => i.Price * i.Quantity);
-                    HttpContext.Session.Set("OrderViewModel", model);
+                    SaveSessionModel(model);
                 }
             }
             return RedirectToAction("Cart");
@@ -166,21 +162,20 @@ namespace MexicanRestaurant.WebUI.Controllers
         [HttpPost]
         public IActionResult Remove(int productId)
         {
-            var model = HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            var model = GetSessionModel();
             if (model == null)
                 return NotFound();
             var item = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
             if (item != null)
             {
                 model.OrderItems.Remove(item);
-                model.TotalAmount = model.OrderItems.Sum(i => i.Price * i.Quantity);
-                HttpContext.Session.Set("OrderViewModel", model);
+                SaveSessionModel(model);
             }
             return RedirectToAction("Cart");
         }
-        public OrderViewModel GetSessionModel()
+        private OrderViewModel GetSessionModel()
         {
-            return HttpContext.Session.Get<OrderViewModel>("OrderViewModel") ?? new OrderViewModel();
+            return HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
         }
 
         private void SaveSessionModel(OrderViewModel model)
@@ -188,6 +183,5 @@ namespace MexicanRestaurant.WebUI.Controllers
             model.TotalAmount = model.OrderItems.Sum(i => i.Price * i.Quantity);
             HttpContext.Session.Set("OrderViewModel", model);
         }
-    }
-        
-    }
+    }    
+}

@@ -64,7 +64,7 @@
                         @foreach (Ingredient ingredient in ViewBag.Ingredients)
                         {
                             var isChecked = Model.ProductIngredients != null && Model.ProductIngredients.Any(i => i.IngredientId == ingredient.IngredientId);
-                            <div class="col-sm-6">
+                            <div class="col-sm-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="ingredient_@ingredient.IngredientId"
                                            name="ingredientIds" value="@ingredient.IngredientId"
