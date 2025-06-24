@@ -27,14 +27,16 @@
                         </a>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">@product?.Name</h5>
+                        <h5 class="card-title text-success fw-bold">@product?.Name</h5>
                         <p class="card-text text-muted">@product?.Description</p>
                         <p class="text-muted"><strong>Category:</strong> <span class="text-dark">@product.Category?.Name</span></p>
+                        <div class="d-flex justify-content-around">
                         <p class="card-text"><strong>Price:</strong> @product?.Price.ToString("C")</p>
                         <p class="card-text"><strong>Stock:</strong> @product?.Stock</p>
+                        </div>
                     </div>
                     <div class="card-footer border-0 d-flex justify-content-between">
-                        <a asp-action="AddEdit" asp-route-id="@product?.ProductId" class="btn btn-secondary btn-sm"><i class="bi bi-pencil-square"></i> Edit</a>
+                        <a asp-action="AddEdit" asp-route-id="@product?.ProductId" class="btn btn-secondary btn-sm" style="width: 75.53px"><i class="bi bi-pencil-square"></i> Edit</a>
                         <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
                                 data-bs-target="#deleteModal" data-product-id="@product.ProductId" data-product-name="@product.Name">
                             <i class="bi bi-trash-fill"></i> Delete

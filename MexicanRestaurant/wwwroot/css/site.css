@@ -35,13 +35,13 @@ body {
     overflow: hidden;
 }
 
-    .product-wrapper img {
-        transition: transform 0.3s ease;
-    }
+ .product-wrapper img {
+     transition: transform 0.3s ease;
+ }
 
-    .product-wrapper:hover img {
-        transform: scale(1.05);
-    }
+ .product-wrapper:hover img {
+     transform: scale(1.05);
+ }
 
 .details-btn {
     position: absolute;
@@ -55,5 +55,4 @@ body {
 .product-wrapper:hover .details-btn {
     bottom: 40%;
     opacity: 1;
-}
 }

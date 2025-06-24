@@ -1,63 +1,85 @@
 ﻿@using MexicanRestaurant.WebUI.ViewModels
 @model OrderViewModel
 
-<div class="container my-4">
-    <h1 class="text-center text-success fw-bold mb-4">🛒 My Cart</h1>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center">
+                    <h2 class="fw-bold mb-0">🛒 My Cart</h2>
+                    <p class="fw-light mb-0">Review your order before placing it</p>
+                </div>
 
-    <form asp-action="PlaceOrder" method="post">
-        <table class="table table-striped align-middle">
-            <thead class="table-success">
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                </tr>
-            </thead>
-            <tbody class="table-secondary">
-                @foreach (var item in Model.OrderItems)
-                {
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <img src="~/images/@item.ImageUrl" class="cart-img" />
-                                <span>@item.ProductName</span>
+                <div class="card-body">
+                    @if (Model.OrderItems != null && Model.OrderItems.Any())
+                    {
+                        <form asp-action="PlaceOrder" method="post">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.OrderItems)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-3">
+                                                        <img src="~/images/@item.ImageUrl" class="cart-img" />
+                                                        <span class="fw-semibold">@item.ProductName</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        @if (item.Quantity > 1)
+                                                        {
+                                                            <button type="submit" formaction="/Order/Decrease?productId=@item.ProductId" class="qty-btn">−</button>
+                                                        }
+                                                        else
+                                                        {
+                                                            <button type="submit" formaction="/Order/Remove?productId=@item.ProductId" class="qty-btn">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        }
+                                                        <span>@item.Quantity</span>
+                                                        <button type="submit" formaction="/Order/Increase?productId=@item.ProductId" class="qty-btn">+</button>
+                                                    </div>
+                                                </td>
+                                                <td>@item.Price.ToString("C")</td>
+                                                <td>@((item.Price* item.Quantity).ToString("C"))</td>
+                                            </tr>
+                                        }
+
+                                        <tr class="table-success fw-bold">
+                                            <td colspan="3" class="text-end">Total:</td>
+                                            <td class="text-end fw-bold">@Model.TotalAmount.ToString("C")</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                @if (item.Quantity > 1)
-                                {
-                                    <button type="submit" formaction="/Order/Decrease?productId=@item.ProductId" class="qty-btn">−</button>
-                                }
-                                else
-                                {
-                                    <button type="submit" formaction="/Order/Remove?productId=@item.ProductId" class="qty-btn">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                }
-                                <span>@item.Quantity</span>
-                                <button type="submit" formaction="/Order/Increase?productId=@item.ProductId" class="qty-btn">+</button>
+
+                            <div class="text-end mt-4 d-flex justify-content-between">
+                                <a asp-action="Create" class="btn btn-lg btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Back to Products
+                                </a>
+                                <input type="submit" value="Place Order" class="btn btn-lg btn-success px-5 shadow-sm" />
                             </div>
-                        </td>
-                        <td style="min-width: 100px;">@item.Price.ToString("C")</td>
-                        <td>@((item.Price * item.Quantity).ToString("C"))</td>
-                    </tr>
-                }
-
-                <tr class="table-success fw-bold">
-                    <td colspan="3" class="text-end">Total:</td>
-                    <td class="text-end fw-bold" style="min-width: 100px;">@Model.TotalAmount.ToString("C")</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div class="text-end mt-3">
-            <input type="submit" value="Place Order" class="btn btn-lg btn-success px-4" />
+                        </form>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center">🛒 Your cart is currently empty.</p>
+                    }
+                </div>
+            </div>
         </div>
-    </form>
+    </div>
 </div>
-
 
 <style>
     .cart-img {
@@ -65,15 +87,17 @@
         height: 80px;
         object-fit: cover;
         border-radius: 8px;
+        border: 1px solid #ddd;
     }
 
     .qty-btn {
         border: none;
         background-color: #eee;
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         font-weight: bold;
-        border-radius: 5px;
+        border-radius: 6px;
+        transition: 0.3s;
     }
 
         .qty-btn:hover {

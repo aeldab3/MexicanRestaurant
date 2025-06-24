@@ -24,10 +24,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient>() { Includes = "ProductIngredients.Product"});
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
+            if (ingredient == null) return NotFound();
             return View(ingredient);
         }
 
@@ -50,10 +47,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient>() { Includes = "ProductIngredients.Product"});
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
+            if (ingredient == null) return NotFound();
             return View(ingredient);
         }
 
@@ -61,10 +55,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Ingredient ingredient)
         {
-            if (id != ingredient.IngredientId)
-            {
-                return NotFound();
-            }
+            if (id != ingredient.IngredientId) return NotFound();
             if (ModelState.IsValid)
             {
                 await _ingredients.UpdateAsync(ingredient);
@@ -76,10 +67,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var ingredient = await _ingredients.GetByIdAsync(id, new QueryOptions<Ingredient>() { Includes = "ProductIngredients.Product"});
-            if (ingredient == null)
-            {
-                return NotFound();
-            }
+            if (ingredient == null) return NotFound();
             return View(ingredient);
         }
 

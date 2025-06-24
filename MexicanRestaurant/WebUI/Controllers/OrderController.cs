@@ -18,6 +18,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             _userManager = userManager;
             _orderService = orderService;
         }
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Create()
@@ -28,6 +29,7 @@ namespace MexicanRestaurant.WebUI.Controllers
 
         [HttpPost]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddItem(int prodId, int prodQty)
         {
             await _orderService.AddItemToOrderAsync(prodId, prodQty);
@@ -41,12 +43,12 @@ namespace MexicanRestaurant.WebUI.Controllers
             var model = _orderService.GetCurrentOrderFromSession();
             if (model == null || model.OrderItems.Count == 0)
                 return RedirectToAction("Create");
-
             return View(model);
         }
 
         [HttpPost]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder()
         {
             await _orderService.PlaceOrderAsync(_userManager.GetUserId(User));
@@ -71,9 +73,15 @@ namespace MexicanRestaurant.WebUI.Controllers
         [HttpPost]
         public IActionResult Decrease(int productId)
         {
-           
             _orderService.DecreaseItemQuantity(productId);
             return RedirectToAction("Cart");
         }
-    }    
+
+        [HttpPost]
+        public IActionResult Remove(int productId)
+        {
+            _orderService.RemoveItemFromOrder(productId);
+            return RedirectToAction("Cart");
+        }
+    }
 }

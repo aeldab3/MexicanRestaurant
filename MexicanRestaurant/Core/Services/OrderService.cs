@@ -128,5 +128,16 @@ namespace MexicanRestaurant.Core.Services
                 }
             }
         }
+        public void RemoveItemFromOrder(int productId)
+        {
+            var model = GetCurrentOrderFromSession();
+            if (model == null) return;
+            var item = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
+            if (item != null)
+            {
+                model.OrderItems.Remove(item);
+                SaveCurrentOrderToSession(model);
+            }
+        }
     }
 }

@@ -14,5 +14,6 @@ namespace MexicanRestaurant.Core.Interfaces
         Task<List<Order>> GetUserOrdersAsync(string userId);
         void IncreaseItemQuantity(int productId);
         void DecreaseItemQuantity(int productId);
+        void RemoveItemFromOrder(int productId);
     }
 }
