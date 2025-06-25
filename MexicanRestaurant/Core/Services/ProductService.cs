@@ -10,14 +10,14 @@ namespace MexicanRestaurant.Core.Services
         private readonly IRepository<Product> _products;
         private readonly IRepository<Category> _categories;
         private readonly IRepository<Ingredient> _ingredients;
-        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly IImageService _imageService;
 
-        public ProductService(IRepository<Product> products, IRepository<Category> categories, IRepository<Ingredient> ingredients, IWebHostEnvironment webHostEnvironment)
+        public ProductService(IRepository<Product> products, IRepository<Category> categories, IRepository<Ingredient> ingredients, IWebHostEnvironment webHostEnvironment, IImageService imageService)
         {
             _products = products;
             _categories = categories;
             _ingredients = ingredients;
-            _webHostEnvironment = webHostEnvironment;
+            _imageService = imageService;
         }
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
@@ -48,19 +48,13 @@ namespace MexicanRestaurant.Core.Services
         {
             if (product.ImageFile != null)
             {
-                var fileName = Path.GetFileNameWithoutExtension(product.ImageFile.FileName);
-                var extension = Path.GetExtension(product.ImageFile.FileName);
-                product.ImageUrl = $"{fileName}_{DateTime.Now:yyyyMMddHHmmssfff}{extension}";
-                var path = Path.Combine(_webHostEnvironment.WebRootPath, "images", product.ImageUrl);
-                using (var stream = new FileStream(path, FileMode.Create))
-                {
-                    await product.ImageFile.CopyToAsync(stream);
-                }
+                if (!string.IsNullOrEmpty(existingImageUrl))
+                    await _imageService.DeleteImageAsync(existingImageUrl, "images");
+
+                product.ImageUrl = await _imageService.UploadImageAsync(product.ImageFile, "images");
             }
             else
-            {
                 product.ImageUrl = existingImageUrl;
-            }
 
             if (product.ProductId == 0)
             {
@@ -100,12 +94,7 @@ namespace MexicanRestaurant.Core.Services
 
             if (product == null) return;
 
-            if (!string.IsNullOrEmpty(product.ImageUrl))
-            {
-                var imagePath = Path.Combine(_webHostEnvironment.WebRootPath, "images", product.ImageUrl);
-                if (System.IO.File.Exists(imagePath))
-                    System.IO.File.Delete(imagePath);
-            }
+            await _imageService.DeleteImageAsync(product.ImageUrl, "images");
             await _products.DeleteAsync(id);
         }
 
