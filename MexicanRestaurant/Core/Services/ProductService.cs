@@ -1,6 +1,7 @@
 ﻿using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
+using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MexicanRestaurant.Core.Services
@@ -111,6 +112,26 @@ namespace MexicanRestaurant.Core.Services
         public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync()
         {
             return await _ingredients.GetAllAsync();
+        }
+
+        public async Task<ProductListViewModel> GetPagedProductsAsync(int pageNumber, int pageSize)
+        {
+            var options = new QueryOptions<Product>
+            {
+                Includes = nameof(Product.Category),
+                OrderBy = p => p.ProductId,
+            };
+
+            var allProducts = await _products.GetAllAsync(options);
+            var totalProducts = allProducts.Count();
+            var products = allProducts.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+            return new ProductListViewModel
+            {
+                Products = products.ToList(),
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize)
+            };
         }
     }
 }

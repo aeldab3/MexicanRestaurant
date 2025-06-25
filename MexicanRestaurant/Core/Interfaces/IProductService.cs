@@ -1,4 +1,5 @@
 ﻿using MexicanRestaurant.Core.Models;
+using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MexicanRestaurant.Core.Interfaces
@@ -12,5 +13,7 @@ namespace MexicanRestaurant.Core.Interfaces
         Task DeleteProductAsync(int id);
         Task<List<SelectListItem>> GetCategorySelectListAsync();
         Task<IEnumerable<Ingredient>> GetAllIngredientsAsync();
+        Task<ProductListViewModel> GetPagedProductsAsync(int pageNumber, int pageSize);
+
     }
 }
