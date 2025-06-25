@@ -6,7 +6,7 @@ namespace MexicanRestaurant.Core.Interfaces
 {
    public interface IOrderService
     {
-        Task<OrderViewModel> InitializeOrderViewModelAsync();
+        Task<OrderViewModel> InitializeOrderViewModelAsync(int pageNumber = 1, int pageSize = 8);
         Task AddItemToOrderAsync(int productId, int productQantity);
         OrderViewModel GetCurrentOrderFromSession();
         void SaveCurrentOrderToSession(OrderViewModel model);

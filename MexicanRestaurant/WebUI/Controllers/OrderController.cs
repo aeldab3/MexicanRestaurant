@@ -21,9 +21,9 @@ namespace MexicanRestaurant.WebUI.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int page = 1)
         {
-            var model = _orderService.GetCurrentOrderFromSession() ?? await _orderService.InitializeOrderViewModelAsync();
+            var model = _orderService.GetCurrentOrderFromSession() ?? await _orderService.InitializeOrderViewModelAsync(page);
             return View(model);
         }
 

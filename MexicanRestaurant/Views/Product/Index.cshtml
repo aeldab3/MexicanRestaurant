@@ -5,7 +5,7 @@
     ViewData["MetaDescription"] = "Explore our delicious selection of authentic Mexican food items, freshly made with quality ingredients.";
 }
 
-<div class="container my-4">
+<div class="container my-4 d-flex flex-column justify-content-between" style="min-height: 80vh;">
     <h1 class="text-center mb-3 text-success fw-bold">@ViewData["Title"]</h1>
     <div class="d-flex justify-content-start mb-3">
         <a asp-action="AddEdit" asp-controller="Product" class="btn btn-success">
@@ -48,19 +48,21 @@
             </div>
         }
     </div>
-    <nav class="mt-4 d-flex justify-content-center">
-        <ul class="pagination pagination-sm">
-            @for (int i = 1; i <= Model.TotalPages; i++)
-            {
-                <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                    <a class="page-link shadow-sm @(i == Model.CurrentPage ? "bg-success text-white border-success" : "")"
-                       href="?page=@i" style="margin: 0 2px;">
-                        @i
-                    </a>
-                </li>
-            }
-        </ul>
-    </nav>
+    <div class="pagination-wrapper mt-4">
+        <nav class="d-flex justify-content-center">
+            <ul class="pagination pagination-sm">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link shadow-sm @(i == Model.CurrentPage ? "bg-success text-white border-success" : "")"
+                           href="?page=@i" style="margin: 0 2px;">
+                            @i
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
 
 </div>
 

@@ -114,7 +114,7 @@ namespace MexicanRestaurant.Core.Services
             return await _ingredients.GetAllAsync();
         }
 
-        public async Task<ProductListViewModel> GetPagedProductsAsync(int pageNumber, int pageSize)
+        public async Task<ProductListViewModel> GetPagedProductsAsync(int pageNumber = 1, int pageSize = 6)
         {
             var options = new QueryOptions<Product>
             {

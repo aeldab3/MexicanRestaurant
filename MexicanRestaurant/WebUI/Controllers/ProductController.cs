@@ -16,10 +16,9 @@ namespace MexicanRestaurant.WebUI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(int page =1)
+        public async Task<IActionResult> Index(int page = 1)
         {
-            int pageSize = 9;
-            var products = await _productService.GetPagedProductsAsync(page, pageSize);
+            var products = await _productService.GetPagedProductsAsync(page);
             return View(products);
         }
 

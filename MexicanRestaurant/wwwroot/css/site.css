@@ -56,3 +56,7 @@ body {
     bottom: 40%;
     opacity: 1;
 }
+
+.pagination-wrapper {
+    margin-top: auto;
+}

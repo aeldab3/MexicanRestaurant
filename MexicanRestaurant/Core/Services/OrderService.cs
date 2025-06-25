@@ -32,12 +32,23 @@ namespace MexicanRestaurant.Core.Services
             _httpContextAccessor.HttpContext.Session.Set("OrderViewModel", model);
         }
 
-        public async Task<OrderViewModel> InitializeOrderViewModelAsync()
+        public async Task<OrderViewModel> InitializeOrderViewModelAsync(int pageNumber = 1, int pageSize = 6)
         {
+            var options = new QueryOptions<Product>
+            {
+                OrderBy = p => p.Name,
+            };
+
+            var allProducts = await _products.GetAllAsync(options);
+            var totalProducts = allProducts.Count();
+            var products = allProducts.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
             return new OrderViewModel
             {
                 OrderItems = new List<OrderItemViewModel>(),
-                Products = await _products.GetAllAsync(),
+                Products = products.ToList(),
+                CurrentPage = pageNumber,
+                TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize),
             };
         }
 

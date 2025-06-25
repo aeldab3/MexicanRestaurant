@@ -4,7 +4,7 @@
     ViewData["Title"] = "Create Order";
 }
 
-<div class="container my-4">
+<div class="container my-4 d-flex flex-column justify-content-between" style="min-height: 80vh;">
     <h1 class="text-center text-success mb-4 fw-bold">@ViewData["Title"]</h1>
     <div class="row justify-content-center">
         @foreach (var product in Model.Products)
@@ -38,5 +38,20 @@
                 </form>
             </div>
         }
+    </div>
+    <div class="pagination-wrapper mt-4">
+        <nav class="d-flex justify-content-center">
+            <ul class="pagination pagination-sm">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                        <a class="page-link shadow-sm @(i == Model.CurrentPage ? "bg-success text-white border-success" : "")"
+                           asp-action="Create" asp-route-page="@i">
+                            @i
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
     </div>
 </div>
