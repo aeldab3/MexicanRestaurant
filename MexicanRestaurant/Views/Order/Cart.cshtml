@@ -16,54 +16,9 @@
                     @if (Model.OrderItems != null && Model.OrderItems.Any())
                     {
                         <form asp-action="PlaceOrder" method="post">
-                            <div class="table-responsive">
-                                <table class="table table-hover align-middle">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Product</th>
-                                            <th>Quantity</th>
-                                            <th>Price</th>
-                                            <th>Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach (var item in Model.OrderItems)
-                                        {
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-3">
-                                                        <img src="~/images/@item.ImageUrl" class="cart-img" />
-                                                        <span class="fw-semibold">@item.ProductName</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        @if (item.Quantity > 1)
-                                                        {
-                                                            <button type="submit" formaction="/Order/Decrease?productId=@item.ProductId" class="qty-btn">−</button>
-                                                        }
-                                                        else
-                                                        {
-                                                            <button type="submit" formaction="/Order/Remove?productId=@item.ProductId" class="qty-btn">
-                                                                <i class="bi bi-trash"></i>
-                                                            </button>
-                                                        }
-                                                        <span>@item.Quantity</span>
-                                                        <button type="submit" formaction="/Order/Increase?productId=@item.ProductId" class="qty-btn">+</button>
-                                                    </div>
-                                                </td>
-                                                <td>@item.Price.ToString("C")</td>
-                                                <td>@((item.Price* item.Quantity).ToString("C"))</td>
-                                            </tr>
-                                        }
-
-                                        <tr class="table-success fw-bold">
-                                            <td colspan="3" class="text-end">Total:</td>
-                                            <td class="text-end fw-bold">@Model.TotalAmount.ToString("C")</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                <div id="cart-container">
+                                    @Html.Partial("_CartPartial", Model)
+                                </div>
 
                             <div class="text-end mt-4 d-flex justify-content-between">
                                 <a asp-action="Create" class="btn btn-lg btn-secondary">
@@ -85,24 +40,43 @@
 
 <style>
     .cart-img {
-        width: 80px;
-        height: 80px;
+        width: 70px;
+        height: 70px;
         object-fit: cover;
         border-radius: 8px;
         border: 1px solid #ddd;
     }
-
-    .qty-btn {
-        border: none;
-        background-color: #eee;
-        width: 32px;
-        height: 32px;
-        font-weight: bold;
-        border-radius: 6px;
-        transition: 0.3s;
-    }
-
-        .qty-btn:hover {
-            background-color: #ccc;
-        }
 </style>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).on("click", ".btn-increase", function () {
+            const productId = $(this).data("product-id");
+            
+            $.post("/Order/Increase", { productId })
+                .done(function () {
+                    refreshCart();
+                });
+        });
+
+        $(document).on("click", ".btn-decrease", function () {
+            const productId = $(this).data("product-id");
+            const quantity = $(this).data("quantity");
+            const url = quantity > 1 ? "/Order/Decrease" : "/Order/Remove";
+
+            $.post(url, { productId })
+                .done(function () {
+                    refreshCart();
+                });
+        });
+
+        // updated cart contenat only after adding or removing items without reloading the page
+        function refreshCart() {
+            $.get("/Order/CartPartial", function (data) {
+                $("#cart-container").html(data);
+            });
+        }
+    </script>
+}
+

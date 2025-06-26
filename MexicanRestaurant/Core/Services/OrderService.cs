@@ -58,7 +58,8 @@ namespace MexicanRestaurant.Core.Services
             var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
             if (product == null || productQantity <= 0) return;
 
-            var model = GetCurrentOrderFromSession() ?? await InitializeOrderViewModelAsync();
+            var currentPage = GetCurrentOrderFromSession()?.CurrentPage ?? 1;
+            var model = GetCurrentOrderFromSession() ?? await InitializeOrderViewModelAsync(currentPage);
 
             var existingItem = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
 

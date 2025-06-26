@@ -23,17 +23,25 @@ namespace MexicanRestaurant.WebUI.Controllers
         [Authorize]
         public async Task<IActionResult> Create(int page = 1)
         {
-            var model = _orderService.GetCurrentOrderFromSession() ?? await _orderService.InitializeOrderViewModelAsync(page);
-            return View(model);
+            var sessionModel = _orderService.GetCurrentOrderFromSession();
+            var newModel = await _orderService.InitializeOrderViewModelAsync(page);
+
+            if (sessionModel != null)
+            {
+                newModel.OrderItems = sessionModel.OrderItems;
+                newModel.TotalAmount = sessionModel.TotalAmount;
+            }
+            _orderService.SaveCurrentOrderToSession(newModel);
+            return View(newModel);
         }
 
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddItem(int prodId, int prodQty)
+        public async Task<IActionResult> AddItem(int prodId, int prodQty, int page = 1)
         {
             await _orderService.AddItemToOrderAsync(prodId, prodQty);
-            return RedirectToAction("Create");
+            return RedirectToAction("Create", new { page });
         }
 
         [HttpGet]
@@ -44,6 +52,14 @@ namespace MexicanRestaurant.WebUI.Controllers
             if (model == null || model.OrderItems.Count == 0)
                 return RedirectToAction("Create");
             return View(model);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult CartPartial()
+        {
+            var model = _orderService.GetCurrentOrderFromSession();
+            return PartialView("_CartPartial", model);
         }
 
         [HttpPost]
