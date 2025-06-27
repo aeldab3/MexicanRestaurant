@@ -41,7 +41,9 @@ namespace MexicanRestaurant.WebUI.Controllers
         public async Task<IActionResult> AddItem(int prodId, int prodQty, int page = 1)
         {
             await _orderService.AddItemToOrderAsync(prodId, prodQty);
-            return RedirectToAction("Create", new { page });
+            var model = _orderService.GetCurrentOrderFromSession();
+            var totalQuantity = model.OrderItems.Sum(item => item.Quantity);
+            return Json(new { success = true, totalQuantity });
         }
 
         [HttpGet]
@@ -60,6 +62,14 @@ namespace MexicanRestaurant.WebUI.Controllers
         {
             var model = _orderService.GetCurrentOrderFromSession();
             return PartialView("_CartPartial", model);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult CartIconPartial()
+        {
+            var model = _orderService.GetCurrentOrderFromSession();
+            return PartialView("_CartIconPartial", model);
         }
 
         [HttpPost]

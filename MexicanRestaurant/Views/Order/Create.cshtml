@@ -2,6 +2,7 @@
 @model OrderViewModel
 @{
     ViewData["Title"] = "Create Order";
+    ViewData["MetaDescription"] = "Browse our delicious Mexican dishes and add them to your cart. Enjoy authentic flavors and fresh ingredients.";
 }
 
 <div class="container my-4 d-flex flex-column justify-content-between" style="min-height: 80vh;">
@@ -11,13 +12,13 @@
         {
             <div class="col-md-4 col-lg-3 mb-4">
                 <form asp-action="AddItem" asp-route-page="@Model.CurrentPage" method="post" class="h-100">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="prodId" value="@product.ProductId" />
                     <div class="card shadow-lg border-0 h-100" style="background-color: #f9f5d985">
                         <div class="product-wrapper">
                             <img src="@Url.Content("~/images/" + product?.ImageUrl)"
                                  class="card-img-top img-fluid"
                                  style="height: 220px; object-fit: cover;" alt="@product?.Name" />
-
                             <a asp-action="Details" asp-controller="Product" asp-route-id="@product.ProductId"
                                class="btn btn-lg btn-success details-btn">
                                 Details
@@ -31,7 +32,7 @@
                                 <input type="hidden" name="prodId" value="@product.ProductId" />
                                 <input type="number" name="prodQty" class="form-control" value="1" min="1" placeholder="Qty" />
                             </div>
-                            <button type="submit" class="btn btn-success w-100 mt-auto">
+                            <button type="button" class="btn btn-success w-100 mt-auto btn-add-to-cart" data-prod-id="@product.ProductId" data-prod-qty="1">
                                 <i class="bi bi-cart-plus"></i> Add to Cart
                             </button>
                         </div>
@@ -56,3 +57,42 @@
         </nav>
     </div>
 </div>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.btn-add-to-cart').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const productId = button.dataset.prodId;
+                    const quantity = button.dataset.prodQty;
+
+                    // Get the AntiForgeryToken
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                    // Send the POST request to add the item to the cart
+                    const response = await fetch('/Order/AddItem', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `prodId=${productId}&prodQty=${quantity}&__RequestVerificationToken=${token}`
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        alert("✅ Product added to cart!");
+                        await refreshCart();
+                    } else {
+                        alert("❌ Failed to add product.");
+                    }
+                });
+            });
+        });
+        async function refreshCart() {
+            const iconResponse = await fetch('/Order/CartIconPartial');
+            if (iconResponse.ok) {
+                const iconHtml = await iconResponse.text();
+                document.getElementById('cart-icon-container').innerHTML = iconHtml;
+            }
+        }
+    </script>
+}

@@ -3,6 +3,7 @@
 @{
     ViewData["MetaDescription"] = "View your cart with selected Mexican dishes. Adjust quantities or proceed to checkout.";
 }
+
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
@@ -16,6 +17,7 @@
                     @if (Model.OrderItems != null && Model.OrderItems.Any())
                     {
                         <form asp-action="PlaceOrder" method="post">
+                            @Html.AntiForgeryToken()
                                 <div id="cart-container">
                                     @Html.Partial("_CartPartial", Model)
                                 </div>
@@ -49,34 +51,60 @@
 </style>
 
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).on("click", ".btn-increase", function () {
-            const productId = $(this).data("product-id");
-            
-            $.post("/Order/Increase", { productId })
-                .done(function () {
-                    refreshCart();
+        document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("btn-increase")) {
+                const productId = e.target.dataset.productId;
+
+                fetch("/Order/Increase", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: `productId=${productId}`
+                })
+                .then(response => {
+                    if (response.ok) refreshCart();
+                    else alert("❌ Failed to increase item.");
                 });
+            }
         });
 
-        $(document).on("click", ".btn-decrease", function () {
-            const productId = $(this).data("product-id");
-            const quantity = $(this).data("quantity");
-            const url = quantity > 1 ? "/Order/Decrease" : "/Order/Remove";
+        document.addEventListener("click", function (e) {
+            if (e.target.classList.contains("btn-decrease")) {
+                const productId = e.target.dataset.productId;
+                const quantity = parseInt(e.target.dataset.quantity);
+                const url = quantity > 1 ? "/Order/Decrease" : "/Order/Remove";
 
-            $.post(url, { productId })
-                .done(function () {
-                    refreshCart();
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: `productId=${productId}`
+                })
+                .then(response => {
+                    if (response.ok) refreshCart();
+                    else alert("❌ Failed to update quantity.");
                 });
+            }
         });
 
-        // updated cart contenat only after adding or removing items without reloading the page
-        function refreshCart() {
-            $.get("/Order/CartPartial", function (data) {
-                $("#cart-container").html(data);
-            });
+        // 📌 Refresh cart content + cart icon after add/remove/update
+        async function refreshCart() {
+            // update cart content
+            const cartRes = await fetch("/Order/CartPartial");
+            if (cartRes.ok) {
+                const cartContentUpdate = await cartRes.text();
+                document.getElementById("cart-container").innerHTML = cartContentUpdate;
+            }
+
+            // update cart icon
+            const iconRes = await fetch("/Order/CartIconPartial");
+            if (iconRes.ok) {
+                const cartIconUpdate = await iconRes.text();
+                document.getElementById("cart-icon-container").innerHTML = cartIconUpdate;
+            }
         }
     </script>
 }
-

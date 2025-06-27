@@ -11,6 +11,7 @@
             <div class="card shadow-lg border-0" style="background-color: #f9f5d985">
                 <div class="card-body">
                     <form asp-action="Edit" method="post">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="IngredientId" />
                         <div class="mb-3">
                             <label asp-for="Name" class="form-label fw-bold"></label>
