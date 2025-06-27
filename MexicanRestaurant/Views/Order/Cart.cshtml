@@ -64,8 +64,11 @@
                     body: `productId=${productId}`
                 })
                 .then(response => {
-                    if (response.ok) refreshCart();
-                    else alert("❌ Failed to increase item.");
+                    if (response.ok) {
+                        refreshCart();
+                        showToast("✅ Quantity increased.");
+                    }
+                    else showToast("❌ Failed to increase item.", "error");
                 });
             }
         });
@@ -84,8 +87,16 @@
                     body: `productId=${productId}`
                 })
                 .then(response => {
-                    if (response.ok) refreshCart();
-                    else alert("❌ Failed to update quantity.");
+                   if (response.ok) {
+                        refreshCart();
+                        if (quantity > 1) {
+                            showToast("🔽 Quantity decreased.");
+                        } else {
+                            showToast("🗑️ Product removed from cart.");
+                        }
+                    } else {
+                        showToast("❌ Failed to update quantity.", "error");
+                    }
                 });
             }
         });

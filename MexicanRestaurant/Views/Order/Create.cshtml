@@ -79,10 +79,10 @@
 
                     if (response.ok) {
                         const result = await response.json();
-                        alert("✅ Product added to cart!");
+                        showToast("✅ Product added to cart!");
                         await refreshCart();
                     } else {
-                        alert("❌ Failed to add product.");
+                        showToast("❌ Failed to add product", "error");
                     }
                 });
             });
