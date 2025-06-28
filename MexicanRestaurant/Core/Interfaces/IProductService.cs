@@ -13,7 +13,7 @@ namespace MexicanRestaurant.Core.Interfaces
         Task DeleteProductAsync(int id);
         Task<List<SelectListItem>> GetCategorySelectListAsync();
         Task<IEnumerable<Ingredient>> GetAllIngredientsAsync();
-        Task<ProductListViewModel> GetPagedProductsAsync(int pageNumber =1, int pageSize = 8);
+        Task<ProductListViewModel> GetPagedProductsAsync(int pageNumber, int pageSize, string searchTerm, int? categoryId, string sortBy);
 
     }
 }

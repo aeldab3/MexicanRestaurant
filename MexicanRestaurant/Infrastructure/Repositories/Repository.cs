@@ -76,8 +76,13 @@ namespace MexicanRestaurant.Infrastructure.Repositories
             if (options.HasOrderBy)
                 query = query.OrderBy(options.OrderBy);
 
+            if (options.HasPaging)
+                query = query.Skip((options.PageNumber - 1) * options.PageSize)
+                             .Take(options.PageSize);
+
             foreach (var include in options.GetIncludes())
                 query = query.Include(include);
+
 
             return query;
         }

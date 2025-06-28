@@ -4,6 +4,34 @@
     ViewData["Title"] = "Menu Items";
     ViewData["MetaDescription"] = "Explore our delicious selection of authentic Mexican food items, freshly made with quality ingredients.";
 }
+<form method="get" asp-action="Index" class="row mb-4 g-3">
+    <div class="col-md-4">
+        <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search..." />
+    </div>
+
+    <div class="col-md-3">
+        <select name="categoryId" class="form-select">
+            <option value="">All Categories</option>
+            @foreach (var category in Model.Categories)
+            {
+                var selected = category.Value == Model.SelectedCategoryId?.ToString() ? "selected" : null;
+                <option value="@category.Value" selected="@selected">@category.Text</option>
+            }
+        </select>
+    </div>
+
+    <div class="col-md-3">
+        <select name="sortBy" class="form-select">
+            <option value="">Sort By Name</option>
+            <option value="price" selected="@(Model.SortBy == "price")">Sort By Price</option>
+            <option value="name_desc" selected="@(Model.SortBy == "name_desc")">Name Descending</option>
+        </select>
+    </div>
+
+    <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-success"><i class="bi bi-funnel-fill"></i> Filter</button>
+    </div>
+</form>
 
 <div class="container my-4 d-flex flex-column justify-content-between" style="min-height: 80vh;">
     <h1 class="text-center mb-3 text-success fw-bold">@ViewData["Title"]</h1>

@@ -1,8 +1,10 @@
-﻿using MexicanRestaurant.Core.Interfaces;
+﻿using MexicanRestaurant.Core.Extensions;
+using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Linq.Expressions;
 
 namespace MexicanRestaurant.Core.Services
 {
@@ -114,23 +116,63 @@ namespace MexicanRestaurant.Core.Services
             return await _ingredients.GetAllAsync();
         }
 
-        public async Task<ProductListViewModel> GetPagedProductsAsync(int pageNumber = 1, int pageSize = 6)
+        public async Task<ProductListViewModel> GetPagedProductsAsync(int pageNumber, int pageSize, string searchTerm, int? categoryId, string sortBy)
         {
             var options = new QueryOptions<Product>
             {
                 Includes = nameof(Product.Category),
-                OrderBy = p => p.ProductId,
+                PageNumber = pageNumber,
+                PageSize = pageSize
             };
+
+            // Combine Where expressions
+            Expression<Func<Product, bool>> filter = p => true;
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                filter = filter.AndAlso(p =>
+                    p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (categoryId.HasValue && categoryId.Value > 0)
+            {
+                filter = filter.AndAlso(p => p.CategoryId == categoryId.Value);
+            }
+
+            if (filter != null)
+            {
+                options.Where = filter;
+            }
+
+            if (!string.IsNullOrEmpty(sortBy))
+            {
+                options.OrderBy = sortBy switch
+                {
+                    "name_desc" => p => p.Name,
+                    "price" => p => p.Price,
+                    _ => p => p.Name
+                };
+            }
+            else
+            {
+                options.OrderBy = p => p.Name;
+            }
 
             var allProducts = await _products.GetAllAsync(options);
             var totalProducts = allProducts.Count();
             var products = allProducts.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            var categories = await GetCategorySelectListAsync();
 
             return new ProductListViewModel
             {
                 Products = products.ToList(),
                 CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize)
+                TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize),
+                SearchTerm = searchTerm,
+                SelectedCategoryId = categoryId,
+                SortBy = sortBy,
+                Categories = categories
             };
         }
     }
