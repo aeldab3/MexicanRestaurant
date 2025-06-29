@@ -61,7 +61,6 @@ namespace MexicanRestaurant.Core.Services
 
             if (product.ProductId == 0)
             {
-
                 product.ProductIngredients = ingredientIds.Select(id => new ProductIngredient { IngredientId = id }).ToList();
                 await _products.AddAsync(product);
             }
@@ -69,8 +68,11 @@ namespace MexicanRestaurant.Core.Services
             {
                 var existingProduct = await _products.GetByIdAsync(product.ProductId, new QueryOptions<Product>
                 {
-                    Includes = "ProductIngredients"
+                    Includes = "ProductIngredients",
+                    Where = p => p.ProductId == product.ProductId
                 });
+                if (existingProduct == null)
+                    throw new Exception("Product not found during update.");
 
                 if (existingProduct != null)
                 {
@@ -84,9 +86,10 @@ namespace MexicanRestaurant.Core.Services
                     existingProduct?.ProductIngredients?.Clear();
                     foreach (var id in ingredientIds)
                     {
-                        existingProduct?.ProductIngredients?.Add(new ProductIngredient { IngredientId = id });
+                        existingProduct.ProductIngredients.Add(new ProductIngredient { IngredientId = id  });
                     }
                     await _products.UpdateAsync(existingProduct);
+
                 }
             }
         }
@@ -131,8 +134,8 @@ namespace MexicanRestaurant.Core.Services
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 filter = filter.AndAlso(p =>
-                    p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                    p.Name.ToLower().Contains(searchTerm.ToLower()) ||
+                    p.Description.ToLower().Contains(searchTerm.ToLower()));
             }
 
             if (categoryId.HasValue && categoryId.Value > 0)
@@ -149,10 +152,17 @@ namespace MexicanRestaurant.Core.Services
             {
                 options.OrderBy = sortBy switch
                 {
+                    "name_asc" => p => p.Name,
                     "name_desc" => p => p.Name,
-                    "price" => p => p.Price,
+                    "price_asc" => p => p.Price,
+                    "price_desc" => p => p.Price,
                     _ => p => p.Name
                 };
+
+                if (sortBy == "name_desc" || sortBy == "price_desc")
+                {
+                    options.IsDescending = true;
+                }
             }
             else
             {
@@ -160,13 +170,21 @@ namespace MexicanRestaurant.Core.Services
             }
 
             var allProducts = await _products.GetAllAsync(options);
-            var totalProducts = allProducts.Count();
-            var products = allProducts.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+            var countOptions = new QueryOptions<Product>
+            {
+                Where = options.Where,
+                Includes = nameof(Product.Category),
+                PageNumber = 0,
+                PageSize = 0
+            };
+            var totalProducts = (await _products.GetAllAsync(countOptions)).Count();
+
             var categories = await GetCategorySelectListAsync();
 
             return new ProductListViewModel
             {
-                Products = products.ToList(),
+                Products = allProducts.ToList(),
                 CurrentPage = pageNumber,
                 TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize),
                 SearchTerm = searchTerm,

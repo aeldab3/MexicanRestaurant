@@ -74,7 +74,9 @@ namespace MexicanRestaurant.Infrastructure.Repositories
                 query = query.Where(options.Where);
 
             if (options.HasOrderBy)
-                query = query.OrderBy(options.OrderBy);
+                query = options.IsDescending
+                    ? query.OrderByDescending(options.OrderBy)
+                    : query.OrderBy(options.OrderBy);
 
             if (options.HasPaging)
                 query = query.Skip((options.PageNumber - 1) * options.PageSize)

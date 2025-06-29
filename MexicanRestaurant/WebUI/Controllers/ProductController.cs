@@ -18,7 +18,7 @@
             [HttpGet]
             public async Task<IActionResult> Index(int page = 1, string searchTerm = "", int? categoryId = null, string sortBy = "")
             {
-                var products = await _productService.GetPagedProductsAsync(page, 6, searchTerm, categoryId, sortBy);
+                var products = await _productService.GetPagedProductsAsync(page, 9, searchTerm, categoryId, sortBy);
                 return View(products);
             }
 

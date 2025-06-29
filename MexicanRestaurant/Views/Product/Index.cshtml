@@ -4,32 +4,45 @@
     ViewData["Title"] = "Menu Items";
     ViewData["MetaDescription"] = "Explore our delicious selection of authentic Mexican food items, freshly made with quality ingredients.";
 }
-<form method="get" asp-action="Index" class="row mb-4 g-3">
-    <div class="col-md-4">
-        <input type="text" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search..." />
-    </div>
+<form method="get" asp-action="Index" class="my-4">
+    <div class="row gy-3 align-items-end">
 
-    <div class="col-md-3">
-        <select name="categoryId" class="form-select">
-            <option value="">All Categories</option>
-            @foreach (var category in Model.Categories)
-            {
-                var selected = category.Value == Model.SelectedCategoryId?.ToString() ? "selected" : null;
-                <option value="@category.Value" selected="@selected">@category.Text</option>
-            }
-        </select>
-    </div>
+        <div class="col-md-4 col-sm-12">
+            <label for="searchTerm" class="form-label fw-bold text-success">Search</label>
+            <input type="text" id="searchTerm" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search products..." />
+        </div>
 
-    <div class="col-md-3">
-        <select name="sortBy" class="form-select">
-            <option value="">Sort By Name</option>
-            <option value="price" selected="@(Model.SortBy == "price")">Sort By Price</option>
-            <option value="name_desc" selected="@(Model.SortBy == "name_desc")">Name Descending</option>
-        </select>
-    </div>
+        <div class="col-md-3 col-sm-6">
+            <label for="categoryId" class="form-label fw-bold text-success">Category</label>
+            <select id="categoryId" name="categoryId" class="form-select">
+                <option value="">All Categories</option>
+                @foreach (var category in Model.Categories)
+                {
+                    var selected = category.Value == Model.SelectedCategoryId?.ToString() ? "selected" : null;
+                    <option value="@category.Value" selected="@selected">@category.Text</option>
+                }
+            </select>
+        </div>
 
-    <div class="col-md-2 d-grid">
-        <button type="submit" class="btn btn-success"><i class="bi bi-funnel-fill"></i> Filter</button>
+        <div class="col-md-3 col-sm-6">
+            <label for="sortBy" class="form-label fw-bold text-success">Sort By</label>
+            <select id="sortBy" name="sortBy" class="form-select">
+                <option value="">Sort by Name</option>
+                <option value="name_asc" selected="@(Model.SortBy == "name_asc")">Name ↑</option>
+                <option value="name_desc" selected="@(Model.SortBy == "name_desc")">Name ↓</option>
+                <option value="price_asc" selected="@(Model.SortBy == "price_asc")">Price ↑</option>
+                <option value="price_desc" selected="@(Model.SortBy == "price_desc")">Price ↓</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 col-sm-12 d-flex gap-2">
+            <button type="submit" class="btn btn-success w-100">
+                <i class="bi bi-funnel-fill"></i> Filter
+            </button>
+            <a href="@Url.Action("Index", "Product")" class="btn btn-secondary w-100">
+                <i class="bi bi-x-circle"></i> Reset
+            </a>
+        </div>
     </div>
 </form>
 
@@ -83,7 +96,12 @@
                 {
                     <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
                         <a class="page-link shadow-sm @(i == Model.CurrentPage ? "bg-success text-white border-success" : "")"
-                           href="?page=@i" style="margin: 0 2px;">
+                           href="@Url.Action("Index", "Product", new {
+                               page = i,
+                               searchTerm = Model.SearchTerm,
+                               categoryId = Model.SelectedCategoryId,
+                               sortBy = Model.SortBy
+                           })" style="margin: 0 2px;">
                             @i
                         </a>
                     </li>
