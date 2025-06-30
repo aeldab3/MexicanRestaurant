@@ -55,7 +55,7 @@ namespace MexicanRestaurant.Core.Services
         public async Task AddItemToOrderAsync(int productId, int productQantity)
         {
             
-            var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
+            var product = await _products.GetByIdAsync(productId, new QueryOptions<Product> { DisablePaging = true });
             if (product == null || productQantity <= 0) return;
 
             var currentPage = GetCurrentOrderFromSession()?.CurrentPage ?? 1;
