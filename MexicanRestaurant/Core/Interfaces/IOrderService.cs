@@ -1,4 +1,5 @@
 ﻿using MexicanRestaurant.Core.Models;
+using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Cryptography;
@@ -7,7 +8,7 @@ namespace MexicanRestaurant.Core.Interfaces
 {
    public interface IOrderService
     {
-        Task<OrderViewModel> InitializeOrderViewModelAsync(int pageNumber, int pageSize, string searchTerm, int? categoryId, string sortBy);
+        Task<OrderViewModel> InitializeOrderViewModelAsync(FilterOptionsViewModel filter, PaginationInfo pagination);
         Task AddItemToOrderAsync(int productId, int productQantity);
         OrderViewModel GetCurrentOrderFromSession();
         void SaveCurrentOrderToSession(OrderViewModel model);

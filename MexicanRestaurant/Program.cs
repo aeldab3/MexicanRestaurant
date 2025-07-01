@@ -1,3 +1,4 @@
+using MexicanRestaurant.Application.MappingProfiles;
 using MexicanRestaurant.Application.Services;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
@@ -17,6 +18,9 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddSingleton<ISessionService, SessionService>();
+builder.Services.AddAutoMapper(typeof(OrderProfile));
+builder.Services.AddAutoMapper(typeof(ProductProfile));
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)

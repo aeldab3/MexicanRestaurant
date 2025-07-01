@@ -4,7 +4,6 @@ namespace MexicanRestaurant.Core.Specifications
 {
     public class QueryOptions<T> where T : class
     {
-        public Expression<Func<T, object>> OrderBy { get; set; } = null!;
         public Expression<Func<T, bool>> Where { get; set; } = null!;
 
         private string[] includes = Array.Empty<string>();
@@ -15,12 +14,12 @@ namespace MexicanRestaurant.Core.Specifications
         public string[] GetIncludes() => includes;
 
         public bool HasWhere => Where != null;
-        public bool HasOrderBy => OrderBy != null;
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 9;
         public bool DisablePaging { get; set; } = false;
+        public bool HasOrderByWithFunc => OrderByWithFunc != null;
         public bool HasPaging => PageNumber > 0 && PageSize > 0;
-        public bool IsDescending { get; set; } = false;
+        public Func<IQueryable<T>, IOrderedQueryable<T>>? OrderByWithFunc { get; set; }
 
     }
 }

@@ -1,17 +1,18 @@
 ﻿@using MexicanRestaurant.Core.Extensions
+@using MexicanRestaurant.Core.Interfaces
 @using MexicanRestaurant.Core.Models
 @using MexicanRestaurant.WebUI.ViewModels
 @using Microsoft.AspNetCore.Identity
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
-
+@inject ISessionService _sessionService
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item mx-2">
         <a class="nav-link position-relative" asp-action="Cart" asp-controller="Order">
             <span id="cart-icon-container">
-                @await Html.PartialAsync("_CartIconPartial", Context.Session.Get<OrderViewModel>("OrderViewModel") ?? new OrderViewModel())
+                    @await Html.PartialAsync("_CartIconPartial", _sessionService.Get<OrderViewModel>("OrderViewModel") ?? new OrderViewModel())
             </span>
         </a>
     </li>

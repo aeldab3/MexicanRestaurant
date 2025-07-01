@@ -1,4 +1,4 @@
-﻿@model MexicanRestaurant.Core.Models.Product
+﻿@model MexicanRestaurant.WebUI.ViewModels.ProductFormViewModel
 @{
     ViewData["Title"] = $"{ViewBag.Operation} Menu Item";
 } 
@@ -8,9 +8,30 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <form asp-action="AddEdit" method="post" enctype="multipart/form-data" class="p-4 shadow-lg rounded">
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach (var state in ViewData.ModelState.Values)
+                            {
+                                foreach (var error in state.Errors)
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                }
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="ProductId" />
-                <input type="hidden" name="ExistingImageUrl" value="@Model.ImageUrl" />
+                <input type="hidden" asp-for="ExistingImageUrl" />
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="mt-2">
+                        <small class="text-muted">Current Image:</small>
+                        <img src="~/images/@Model.ImageUrl" class="img-thumbnail mt-1" style="max-height: 100px;" />
+                    </div>
+                }
 
                 <div class="mb-3">
                     <label asp-for="Name" class="form-label fw-bold"></label>
@@ -62,11 +83,11 @@
                     <div class="row">
                         @foreach (Ingredient ingredient in ViewBag.Ingredients)
                         {
-                            var isChecked = Model.ProductIngredients != null && Model.ProductIngredients.Any(i => i.IngredientId == ingredient.IngredientId);
+                            var isChecked = Model.SelectedIngredientIds != null && Model.SelectedIngredientIds.Contains(ingredient.IngredientId);
                             <div class="col-6 col-sm-4 col-lg-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="ingredient_@ingredient.IngredientId"
-                                           name="ingredientIds" value="@ingredient.IngredientId"
+                                           name="SelectedIngredientIds" value="@ingredient.IngredientId"
                                            @(isChecked ? "checked" : "") />
                                     <label class="form-check-label" for="ingredient_@ingredient.IngredientId">@ingredient.Name</label>
                                 </div>

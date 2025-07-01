@@ -1,25 +1,29 @@
-﻿    using MexicanRestaurant.Core.Interfaces;
-    using MexicanRestaurant.Core.Models;
-    using MexicanRestaurant.Application.Services;
-    using MexicanRestaurant.Core.Specifications;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using AutoMapper;
+using MexicanRestaurant.Core.Interfaces;
+using MexicanRestaurant.Core.Models;
+using MexicanRestaurant.Views.Shared;
+using MexicanRestaurant.WebUI.ViewModels;
+using Microsoft.AspNetCore.Mvc;
 
     namespace MexicanRestaurant.WebUI.Controllers
     {
         public class ProductController : Controller
         {
             private readonly IProductService _productService;
-            public ProductController(IProductService productService)
+            private readonly IMapper _mapper;
+            public ProductController(IProductService productService, IMapper mapper)
             {
                 _productService = productService;
+                _mapper = mapper;
             }
 
             [HttpGet]
             public async Task<IActionResult> Index(int page = 1, string searchTerm = "", int? categoryId = null, string sortBy = "")
             {
-                var products = await _productService.GetPagedProductsAsync(page, 9, searchTerm, categoryId, sortBy);
-                return View(products);
+                var products = await _productService.GetPagedProductsAsync(
+                new FilterOptionsViewModel { SearchTerm = searchTerm, SelectedCategoryId = categoryId, SortBy = sortBy },
+                new PaginationInfo { CurrentPage = page, PageSize = 8 });
+            return View(products);
             }
 
             [HttpGet]
@@ -31,49 +35,50 @@
                 if (id == 0)
                 {
                     ViewBag.Operation = "Add";
-                    return View(new Product());
+                    return View(new ProductFormViewModel());
                 }
-                else
-                {
-                    Product product = await _productService.GetExistingProductByIdAsync(id); 
-                    ViewBag.Operation = "Edit";
-                    return View(product);
-                }
+                Product product = await _productService.GetExistingProductByIdAsync(id);
+                var model = _mapper.Map<ProductFormViewModel>(product);
+                model.ExistingImageUrl = product.ImageUrl;
+                ViewBag.Operation = "Edit";
+                return View(model);
             }
 
             [HttpPost]
             [ValidateAntiForgeryToken]
-            public async Task<IActionResult> AddEdit(Product product, int[] ingredientIds, string ExistingImageUrl)
+            public async Task<IActionResult> AddEdit(ProductFormViewModel model)
             {
                 ViewBag.Categories = await _productService.GetCategorySelectListAsync();
-
                 ViewBag.Ingredients = await _productService.GetAllIngredientsAsync();
 
-                if (product.CategoryId == 0)
+                if (model.CategoryId == 0)
                     ModelState.AddModelError("CategoryId", "Please select a category.");
 
-                if (ModelState.IsValid)
+            if (ModelState.IsValid)
                 {
-                    await _productService.AddOrUpdateProductAsync(product, ingredientIds, ExistingImageUrl);
+                    var product = _mapper.Map<Product>(model);
+                    product.ImageFile = model.ImageFile;
+
+                    await _productService.AddOrUpdateProductAsync(product, model.SelectedIngredientIds, model.ExistingImageUrl);
                     return RedirectToAction("Index", "Product");
                 }
 
                 ViewBag.Categories = await _productService.GetCategorySelectListAsync();
                 ViewBag.Ingredients = await _productService.GetAllIngredientsAsync();
-                ViewBag.Operation = product.ProductId == 0 ? "Add" : "Edit";
+                ViewBag.Operation = model.ProductId == 0 ? "Add" : "Edit";
 
-                return View(product);
+                return View(model);
             }
 
             [HttpGet]
             public async Task<IActionResult> Details(int id)
             {
                 var product = await _productService.GetProductByIdAsync(id);
-
-                if (product == null)
+                var model = _mapper.Map<ProductFormViewModel>(product);
+                if (model == null)
                     return NotFound();
 
-                return View(product);
+                return View(model);
             }
 
             [HttpPost]

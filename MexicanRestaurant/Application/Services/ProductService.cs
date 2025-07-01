@@ -1,7 +1,9 @@
-﻿using MexicanRestaurant.Core.Extensions;
+﻿using MexicanRestaurant.Application.Helpers;
+using MexicanRestaurant.Core.Extensions;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
+using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq.Expressions;
@@ -57,7 +59,7 @@ namespace MexicanRestaurant.Application.Services
                 product.ImageUrl = await _imageService.UploadImageAsync(product.ImageFile, "images");
             }
             else
-                product.ImageUrl = existingImageUrl;
+                product.ImageUrl = existingImageUrl ?? product.ImageUrl;
 
             if (product.ProductId == 0)
             {
@@ -89,7 +91,6 @@ namespace MexicanRestaurant.Application.Services
                         existingProduct.ProductIngredients.Add(new ProductIngredient { IngredientId = id  });
                     }
                     await _products.UpdateAsync(existingProduct);
-
                 }
             }
         }
@@ -119,53 +120,22 @@ namespace MexicanRestaurant.Application.Services
             return await _ingredients.GetAllAsync();
         }
 
-        public async Task<ProductListViewModel> GetPagedProductsAsync(int pageNumber, int pageSize, string searchTerm, int? categoryId, string sortBy)
+        public async Task<ProductListViewModel> GetPagedProductsAsync(FilterOptionsViewModel filter, PaginationInfo pagination)
         {
             var options = new QueryOptions<Product>
             {
                 Includes = nameof(Product.Category),
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                PageNumber = pagination.CurrentPage,
+                PageSize = pagination.PageSize,
+                Where = ProductFilteringHelper.BuildFilter(filter.SearchTerm, filter.SelectedCategoryId),
+                OrderByWithFunc = ProductFilteringHelper.BuildOrderBy(filter.SortBy)
             };
-
-            // Combine Where expressions
-            Expression<Func<Product, bool>> filter = p => true;
-
-            if (!string.IsNullOrEmpty(searchTerm))
-                filter = filter.AndAlso(p =>
-                    p.Name.ToLower().Contains(searchTerm.ToLower()) ||
-                    p.Description.ToLower().Contains(searchTerm.ToLower()));
-
-            if (categoryId.HasValue && categoryId.Value > 0)
-                filter = filter.AndAlso(p => p.CategoryId == categoryId.Value);
-
-            if (filter != null)
-                options.Where = filter;
-
-            if (!string.IsNullOrEmpty(sortBy))
-            {
-                options.OrderBy = sortBy switch
-                {
-                    "name_asc" => p => p.Name,
-                    "name_desc" => p => p.Name,
-                    "price_asc" => p => p.Price,
-                    "price_desc" => p => p.Price,
-                    _ => p => p.Name
-                };
-
-                if (sortBy == "name_desc" || sortBy == "price_desc")
-                    options.IsDescending = true;
-            }
-            else
-                options.OrderBy = p => p.Name;
-
             var allProducts = await _products.GetAllAsync(options);
             var countOptions = new QueryOptions<Product>
             {
                 Where = options.Where,
                 Includes = nameof(Product.Category),
-                PageNumber = 0,
-                PageSize = 0
+                DisablePaging = true
             };
             var totalProducts = (await _products.GetAllAsync(countOptions)).Count();
             var categories = await GetCategorySelectListAsync();
@@ -173,12 +143,19 @@ namespace MexicanRestaurant.Application.Services
             return new ProductListViewModel
             {
                 Products = allProducts.ToList(),
-                CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize),
-                SearchTerm = searchTerm,
-                SelectedCategoryId = categoryId,
-                SortBy = sortBy,
-                Categories = categories
+                Filter = new FilterOptionsViewModel
+                {
+                    SearchTerm = filter.SearchTerm,
+                    SelectedCategoryId = filter.SelectedCategoryId,
+                    SortBy = filter.SortBy,
+                    Categories = categories
+                },
+                Pagination = new PaginationInfo
+                {
+                    CurrentPage = pagination.CurrentPage,
+                    PageSize = pagination.PageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalProducts / pagination.PageSize)
+                },
             };
         }
     }

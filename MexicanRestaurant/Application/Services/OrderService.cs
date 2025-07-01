@@ -1,7 +1,10 @@
-﻿using MexicanRestaurant.Core.Extensions;
+﻿using AutoMapper;
+using MexicanRestaurant.Application.Helpers;
+using MexicanRestaurant.Core.Extensions;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
+using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -12,85 +15,68 @@ namespace MexicanRestaurant.Application.Services
 {
     public class OrderService : IOrderService
     {
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ISessionService _sessionService;
         private readonly IRepository<Product> _products;
         private readonly IRepository<Order> _orders;
         private readonly IRepository<Category> _categories;
+        private readonly IMapper _mapper;
 
-        public OrderService(IHttpContextAccessor httpContextAccessor, IRepository<Product> products, IRepository<Order> orders, IRepository<Category> categories)
+        public OrderService(ISessionService sessionService, IRepository<Product> products, IRepository<Order> orders, IRepository<Category> categories, IMapper mapper)
         {
-            _httpContextAccessor = httpContextAccessor;
+            _sessionService = sessionService;
             _products = products;
             _orders = orders;
             _categories = categories;
+            _mapper = mapper;
         }
 
         public OrderViewModel GetCurrentOrderFromSession()
         {
-            return _httpContextAccessor.HttpContext.Session.Get<OrderViewModel>("OrderViewModel");
+            return _sessionService.Get<OrderViewModel>("OrderViewModel");
         }
 
         public void SaveCurrentOrderToSession(OrderViewModel model)
         {
             model.TotalAmount = model.OrderItems.Sum(i => i.Price * i.Quantity);
-            _httpContextAccessor.HttpContext.Session.Set("OrderViewModel", model);
+            _sessionService.Set("OrderViewModel", model);
         }
 
-        public async Task<OrderViewModel> InitializeOrderViewModelAsync(int pageNumber, int pageSize, string searchTerm, int? categoryId, string sortBy)
+        public async Task<OrderViewModel> InitializeOrderViewModelAsync(FilterOptionsViewModel filter, PaginationInfo pagination)
         {
             var options = new QueryOptions<Product>
             {
                 Includes = nameof(Product.Category),
-                PageNumber = pageNumber,
-                PageSize = pageSize
+                PageNumber = pagination.CurrentPage,
+                PageSize = pagination.PageSize,
+                Where = ProductFilteringHelper.BuildFilter(filter.SearchTerm, filter.SelectedCategoryId),
+                OrderByWithFunc = ProductFilteringHelper.BuildOrderBy(filter.SortBy)
             };
-
-            Expression<Func<Product, bool>> filter = p => true;
-
-            if (!string.IsNullOrEmpty(searchTerm))
-                filter = filter.AndAlso(p => p.Name.Contains(searchTerm.ToLower()) || p.Description.Contains(searchTerm.ToLower()));
-
-            if (categoryId.HasValue && categoryId.Value > 0)
-                filter = filter.AndAlso(p => p.CategoryId == categoryId.Value);
-
-            if (filter != null)
-                options.Where = filter;
-
-            if (!string.IsNullOrEmpty(sortBy))
-            {
-                options.OrderBy = sortBy switch
-                {
-                    "name_asc" => p => p.Name,
-                    "name_desc" => p => p.Name,
-                    "price_asc" => p => p.Price,
-                    "price_desc" => p => p.Price,
-                    _ => p => p.Name
-                };
-                if (sortBy == "name_desc" || sortBy == "price_desc")
-                    options.IsDescending = true;
-            }
-            else
-                options.OrderBy = p => p.Name;
-
             var allProducts = await _products.GetAllAsync(options);
+            var mappedProducts = _mapper.Map<List<ProductViewModel>>(allProducts.ToList());
             var countOptions = new QueryOptions<Product>
             {
                 Where = options.Where,
                 Includes = nameof(Product.Category),
-                PageNumber = 0,
-                PageSize = 0
+                DisablePaging = true
             };
             var totalProducts = (await _products.GetAllAsync(countOptions)).Count();
             var categories = await GetCategorySelectListAsync();
             return new OrderViewModel
             {
-                Products = allProducts.ToList(),
-                CurrentPage = pageNumber,
-                TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize),
-                SearchTerm = searchTerm,
-                SelectedCategoryId = categoryId,
-                SortBy = sortBy,
-                Categories = categories,
+                Products = mappedProducts,
+                Filter = new FilterOptionsViewModel
+                {
+                    SearchTerm = filter.SearchTerm,
+                    SelectedCategoryId = filter.SelectedCategoryId,
+                    SortBy = filter.SortBy,
+                    Categories = categories
+                },
+                Pagination = new PaginationInfo
+                {
+                    CurrentPage = pagination.CurrentPage,
+                    PageSize = pagination.PageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalProducts / pagination.PageSize)
+                },
                 OrderItems = GetCurrentOrderFromSession()?.OrderItems ?? new List<OrderItemViewModel>(),
             };
         }
@@ -100,8 +86,10 @@ namespace MexicanRestaurant.Application.Services
             var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
             if (product == null || productQantity <= 0 || product.Stock < productQantity) return;
 
-            var currentPage = GetCurrentOrderFromSession()?.CurrentPage ?? 1;
-            var model = GetCurrentOrderFromSession() ?? await InitializeOrderViewModelAsync(currentPage, 8, null, null, null);
+            var currentPage = GetCurrentOrderFromSession()?.Pagination.CurrentPage ?? 1;
+            var model = GetCurrentOrderFromSession() ?? await InitializeOrderViewModelAsync(
+                new FilterOptionsViewModel { SearchTerm = "", SelectedCategoryId = null, SortBy = ""}, 
+                new PaginationInfo { CurrentPage = currentPage, PageSize = 8 });
             var existingItem = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
 
             if (existingItem != null)
@@ -109,14 +97,9 @@ namespace MexicanRestaurant.Application.Services
 
             else
             {
-                model.OrderItems.Add(new OrderItemViewModel
-                {
-                    ProductId = productId,
-                    ProductName = product.Name,
-                    ImageUrl = product.ImageUrl,
-                    Quantity = productQantity,
-                    Price = product.Price
-                });
+                var orderItem = _mapper.Map<OrderItemViewModel>(product);
+                orderItem.Quantity = productQantity;
+                model.OrderItems.Add(orderItem);
             }
             product.Stock -= productQantity;
             await _products.UpdateAsync(product);
@@ -133,15 +116,10 @@ namespace MexicanRestaurant.Application.Services
                 UserId = userId,
                 TotalAmount = model.TotalAmount,
                 OrderDate = DateTime.Now,
-                OrderItems = model.OrderItems.Select(i => new OrderItem
-                {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    Price = i.Price
-                }).ToList()
+                OrderItems = _mapper.Map<List<OrderItem>>(model.OrderItems)
             };
             await _orders.AddAsync(order);
-            _httpContextAccessor.HttpContext.Session.Remove("OrderViewModel");
+            _sessionService.Remove("OrderViewModel");
         }
 
         public async Task<List<Order>> GetUserOrdersAsync(string userId)

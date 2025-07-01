@@ -1,7 +1,8 @@
-﻿using MexicanRestaurant.Core.Extensions;
+﻿using MexicanRestaurant.Application.Services;
+using MexicanRestaurant.Core.Extensions;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
-using MexicanRestaurant.Application.Services;
+using MexicanRestaurant.Views.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +25,9 @@ namespace MexicanRestaurant.WebUI.Controllers
         public async Task<IActionResult> Create(int page = 1, string searchTerm = "", int? categoryId = null, string sortBy = "")
         {
             var sessionModel = _orderService.GetCurrentOrderFromSession();
-            var newModel = await _orderService.InitializeOrderViewModelAsync(page, 8, searchTerm, categoryId, sortBy);
+            var newModel = await _orderService.InitializeOrderViewModelAsync(
+                new FilterOptionsViewModel { SearchTerm = searchTerm, SelectedCategoryId = categoryId, SortBy = sortBy },
+                new PaginationInfo { CurrentPage = page, PageSize = 8 });
 
             if (sessionModel != null)
             {

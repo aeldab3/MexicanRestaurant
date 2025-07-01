@@ -9,16 +9,16 @@
 
         <div class="col-md-4 col-sm-12">
             <label for="searchTerm" class="form-label fw-bold text-success">Search</label>
-            <input type="text" id="searchTerm" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search products..." />
+            <input type="text" id="searchTerm" name="searchTerm" value="@Model.Filter.SearchTerm" class="form-control" placeholder="Search products..." />
         </div>
 
         <div class="col-md-3 col-sm-6">
             <label for="categoryId" class="form-label fw-bold text-success">Category</label>
             <select id="categoryId" name="categoryId" class="form-select">
                 <option value="">All Categories</option>
-                @foreach (var category in Model.Categories)
+                @foreach (var category in Model.Filter.Categories)
                 {
-                    var selected = category.Value == Model.SelectedCategoryId?.ToString() ? "selected" : null;
+                    var selected = category.Value == Model.Filter.SelectedCategoryId?.ToString() ? "selected" : null;
                     <option value="@category.Value" selected="@selected">@category.Text</option>
                 }
             </select>
@@ -28,10 +28,10 @@
             <label for="sortBy" class="form-label fw-bold text-success">Sort By</label>
             <select id="sortBy" name="sortBy" class="form-select">
                 <option value="">Sort by</option>
-                <option value="name_asc" selected="@(Model.SortBy == "name_asc")">Name ↑</option>
-                <option value="name_desc" selected="@(Model.SortBy == "name_desc")">Name ↓</option>
-                <option value="price_asc" selected="@(Model.SortBy == "price_asc")">Price ↑</option>
-                <option value="price_desc" selected="@(Model.SortBy == "price_desc")">Price ↓</option>
+                <option value="name_asc" selected="@(Model.Filter.SortBy == "name_asc")">Name ↑</option>
+                <option value="name_desc" selected="@(Model.Filter.SortBy == "name_desc")">Name ↓</option>
+                <option value="price_asc" selected="@(Model.Filter.SortBy == "price_asc")">Price ↑</option>
+                <option value="price_desc" selected="@(Model.Filter.SortBy == "price_desc")">Price ↓</option>
             </select>
         </div>
 
@@ -92,15 +92,15 @@
     <div class="pagination-wrapper mt-4">
         <nav class="d-flex justify-content-center">
             <ul class="pagination pagination-sm">
-                @for (int i = 1; i <= Model.TotalPages; i++)
+                @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
                 {
-                    <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
-                        <a class="page-link shadow-sm @(i == Model.CurrentPage ? "bg-success text-white border-success" : "")"
+                    <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                        <a class="page-link shadow-sm @(i == Model.Pagination.CurrentPage ? "bg-success text-white border-success" : "")"
                            href="@Url.Action("Index", "Product", new {
                                page = i,
-                               searchTerm = Model.SearchTerm,
-                               categoryId = Model.SelectedCategoryId,
-                               sortBy = Model.SortBy
+                               searchTerm = Model.Filter.SearchTerm,
+                               categoryId = Model.Filter.SelectedCategoryId,
+                               sortBy = Model.Filter.SortBy
                            })" style="margin: 0 2px;">
                             @i
                         </a>
