@@ -51,6 +51,7 @@ namespace MexicanRestaurant.Infrastructure.Repositories
         }
         public async Task<T> GetByIdAsync(int id, QueryOptions<T> options)
         {
+            options.DisablePaging = true;
             var query = ApplyOptions(options);
 
             var key = _context.Model.FindEntityType(typeof(T)).FindPrimaryKey().Properties.FirstOrDefault();
@@ -78,7 +79,7 @@ namespace MexicanRestaurant.Infrastructure.Repositories
                     ? query.OrderByDescending(options.OrderBy)
                     : query.OrderBy(options.OrderBy);
 
-            if (options.HasPaging)
+            if (options.HasPaging && !options.DisablePaging)
                 query = query.Skip((options.PageNumber - 1) * options.PageSize)
                              .Take(options.PageSize);
 

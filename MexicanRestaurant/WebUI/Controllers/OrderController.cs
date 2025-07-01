@@ -1,7 +1,7 @@
 ﻿using MexicanRestaurant.Core.Extensions;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
-using MexicanRestaurant.Core.Services;
+using MexicanRestaurant.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -21,10 +21,10 @@ namespace MexicanRestaurant.WebUI.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Create(int page = 1)
+        public async Task<IActionResult> Create(int page = 1, string searchTerm = "", int? categoryId = null, string sortBy = "")
         {
             var sessionModel = _orderService.GetCurrentOrderFromSession();
-            var newModel = await _orderService.InitializeOrderViewModelAsync(page);
+            var newModel = await _orderService.InitializeOrderViewModelAsync(page, 8, searchTerm, categoryId, sortBy);
 
             if (sessionModel != null)
             {

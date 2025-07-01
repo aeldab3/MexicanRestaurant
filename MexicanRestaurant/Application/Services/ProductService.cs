@@ -6,7 +6,7 @@ using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Linq.Expressions;
 
-namespace MexicanRestaurant.Core.Services
+namespace MexicanRestaurant.Application.Services
 {
     public class ProductService : IProductService
     {
@@ -132,21 +132,15 @@ namespace MexicanRestaurant.Core.Services
             Expression<Func<Product, bool>> filter = p => true;
 
             if (!string.IsNullOrEmpty(searchTerm))
-            {
                 filter = filter.AndAlso(p =>
                     p.Name.ToLower().Contains(searchTerm.ToLower()) ||
                     p.Description.ToLower().Contains(searchTerm.ToLower()));
-            }
 
             if (categoryId.HasValue && categoryId.Value > 0)
-            {
                 filter = filter.AndAlso(p => p.CategoryId == categoryId.Value);
-            }
 
             if (filter != null)
-            {
                 options.Where = filter;
-            }
 
             if (!string.IsNullOrEmpty(sortBy))
             {
@@ -160,17 +154,12 @@ namespace MexicanRestaurant.Core.Services
                 };
 
                 if (sortBy == "name_desc" || sortBy == "price_desc")
-                {
                     options.IsDescending = true;
-                }
             }
             else
-            {
                 options.OrderBy = p => p.Name;
-            }
 
             var allProducts = await _products.GetAllAsync(options);
-
             var countOptions = new QueryOptions<Product>
             {
                 Where = options.Where,
@@ -179,7 +168,6 @@ namespace MexicanRestaurant.Core.Services
                 PageSize = 0
             };
             var totalProducts = (await _products.GetAllAsync(countOptions)).Count();
-
             var categories = await GetCategorySelectListAsync();
 
             return new ProductListViewModel

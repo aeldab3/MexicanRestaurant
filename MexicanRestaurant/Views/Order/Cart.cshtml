@@ -23,7 +23,7 @@
                                 </div>
 
                             <div class="text-end mt-4 d-flex justify-content-between">
-                                <a asp-action="Create" class="btn btn-lg btn-secondary">
+                                <a asp-action="Create" class="btn btn-lg btn-secondary px-5 shadow-sm">
                                     <i class="bi bi-arrow-left"></i> Back to Products
                                 </a>
                                 <input type="submit" value="Place Order" class="btn btn-lg btn-success px-5 shadow-sm" />
@@ -55,6 +55,14 @@
         document.addEventListener("click", function (e) {
             if (e.target.classList.contains("btn-increase")) {
                 const productId = e.target.dataset.productId;
+                const stock = parseInt(e.target.dataset.stock);
+                const quantitySpan = document.querySelector(`.item-qty[data-product-id='${productId}']`);
+                const currentQuantity = parseInt(quantitySpan?.textContent || 0);
+
+                 if (stock <= currentQuantity) {
+                    showToast("❌ Out of Stock.", "warning");
+                    return;
+                 }
 
                 fetch("/Order/Increase", {
                     method: "POST",

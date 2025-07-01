@@ -3,7 +3,7 @@ using MexicanRestaurant.Core.Models;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 
-namespace MexicanRestaurant.Core.Services
+namespace MexicanRestaurant.Application.Services
 {
     public class ImageService : IImageService
     {

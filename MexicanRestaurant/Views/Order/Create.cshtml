@@ -4,6 +4,47 @@
     ViewData["Title"] = "Create Order";
     ViewData["MetaDescription"] = "Browse our delicious Mexican dishes and add them to your cart. Enjoy authentic flavors and fresh ingredients.";
 }
+<form method="get" asp-action="Create" class="my-4">
+    <div class="row gy-3 align-items-end">
+
+        <div class="col-md-4 col-sm-12">
+            <label for="searchTerm" class="form-label fw-bold text-success">Search</label>
+            <input type="text" id="searchTerm" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search products..." />
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <label for="categoryId" class="form-label fw-bold text-success">Category</label>
+            <select id="categoryId" name="categoryId" class="form-select">
+                <option value="">All Categories</option>
+                @foreach (var category in Model.Categories)
+                {
+                    var selected = category.Value == Model.SelectedCategoryId?.ToString() ? "selected" : null;
+                    <option value="@category.Value" selected="@selected">@category.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <label for="sortBy" class="form-label fw-bold text-success">Sort By</label>
+            <select id="sortBy" name="sortBy" class="form-select">
+                <option value="">Sort by</option>
+                <option value="name_asc" selected="@(Model.SortBy == "name_asc")">Name ↑</option>
+                <option value="name_desc" selected="@(Model.SortBy == "name_desc")">Name ↓</option>
+                <option value="price_asc" selected="@(Model.SortBy == "price_asc")">Price ↑</option>
+                <option value="price_desc" selected="@(Model.SortBy == "price_desc")">Price ↓</option>
+            </select>
+        </div>
+
+        <div class="col-md-2 col-sm-12 d-flex gap-2">
+            <button type="submit" class="btn btn-success w-100">
+                <i class="bi bi-funnel-fill"></i> Filter
+            </button>
+            <a href="@Url.Action("Create", "Order")" class="btn btn-secondary w-100">
+                <i class="bi bi-x-circle"></i> Reset
+            </a>
+        </div>
+    </div>
+</form>
 
 <div class="container my-4 d-flex flex-column justify-content-between" style="min-height: 80vh;">
     <h1 class="text-center text-success mb-4 fw-bold">@ViewData["Title"]</h1>
@@ -32,9 +73,18 @@
                                 <input type="hidden" name="prodId" value="@product.ProductId" />
                                 <input type="number" name="prodQty" class="form-control" value="1" min="1" placeholder="Qty" />
                             </div>
+                            @if (product.Stock == 0)
+                            {
+                                <button type="button" class="btn btn-secondary w-100 mt-auto" disabled>
+                                    Out of Stock
+                                </button>
+                            }
+                            else 
+                            {
                             <button type="button" class="btn btn-success w-100 mt-auto btn-add-to-cart" data-prod-id="@product.ProductId" data-prod-qty="1">
                                 <i class="bi bi-cart-plus"></i> Add to Cart
                             </button>
+                            }
                         </div>
                     </div>
                 </form>
@@ -48,8 +98,13 @@
                 {
                     <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
                         <a class="page-link shadow-sm @(i == Model.CurrentPage ? "bg-success text-white border-success" : "")"
-                           asp-action="Create" asp-route-page="@i">
-                            @i
+                            href="@Url.Action("Create", "Order", new {
+                                page = i,
+                                searchTerm = Model.SearchTerm,
+                                categoryId = Model.SelectedCategoryId,
+                                sortBy = Model.SortBy,
+                            })" style="margin: 0 2px;">
+                             @i
                         </a>
                     </li>
                 }
