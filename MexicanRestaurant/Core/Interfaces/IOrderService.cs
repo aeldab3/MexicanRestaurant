@@ -14,9 +14,9 @@ namespace MexicanRestaurant.Core.Interfaces
         void SaveCurrentOrderToSession(OrderViewModel model);
         Task PlaceOrderAsync(string userId);
         Task<List<Order>> GetUserOrdersAsync(string userId);
-        void IncreaseItemQuantity(int productId);
-        void DecreaseItemQuantity(int productId);
-        void RemoveItemFromOrder(int productId);
+        Task IncreaseItemQuantity(int productId);
+        Task DecreaseItemQuantity(int productId);
+        Task RemoveItemFromOrder(int productId);
         Task<List<SelectListItem>> GetCategorySelectListAsync();
     }
 }

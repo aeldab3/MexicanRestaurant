@@ -71,17 +71,17 @@
 
                             <div class="input-group mb-2">
                                 <input type="hidden" name="prodId" value="@product.ProductId" />
-                                <input type="number" name="prodQty" class="form-control" value="1" min="1" placeholder="Qty" />
+                                <input type="number" name="prodQty" class="form-control" value="1" min="1" max="@product.Stock" placeholder="Qty" />
                             </div>
                             @if (product.Stock == 0)
                             {
-                                <button type="button" class="btn btn-secondary w-100 mt-auto" disabled>
+                                <button type="button" class="btn btn-secondary w-100 mt-auto btn-out-of-stock" data-prod-name="@product.Name" style="opacity: 0.7; cursor: not-allowed;">
                                     Out of Stock
                                 </button>
                             }
                             else 
                             {
-                            <button type="button" class="btn btn-success w-100 mt-auto btn-add-to-cart" data-prod-id="@product.ProductId" data-prod-qty="1">
+                            <button type="button" class="btn btn-success w-100 mt-auto btn-add-to-cart" data-prod-id="@product.ProductId" data-stock="@product.Stock">
                                 <i class="bi bi-cart-plus"></i> Add to Cart
                             </button>
                             }
@@ -118,8 +118,19 @@
             document.querySelectorAll('.btn-add-to-cart').forEach(button => {
                 button.addEventListener('click', async () => {
                     const productId = button.dataset.prodId;
-                    const quantity = button.dataset.prodQty;
+                    const stock = parseInt(button.dataset.stock);
 
+                    const qtyInput = button.closest("form").querySelector('input[name="prodQty"]');
+                    let quantity = parseInt(qtyInput.value) || 1;
+
+                    if (isNaN(quantity) || quantity <= 0) {
+                        showToast("❌ Please enter a valid quantity.", "warning");
+                        return;
+                    }
+                    if (quantity > stock) {
+                        showToast("❌ Quantity exceeds available stock.", "warning");
+                        return;
+                    }
                     // Get the AntiForgeryToken
                     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
 
@@ -149,5 +160,13 @@
                 document.getElementById('cart-icon-container').innerHTML = iconHtml;
             }
         }
+
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains("btn-out-of-stock")) {
+                const name = e.target.dataset.prodName || "This product";
+                showToast(`${name} is currently not available.`, "warning");
+                  return;
+            }
+        });
     </script>
 }

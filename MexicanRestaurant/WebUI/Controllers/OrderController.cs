@@ -93,23 +93,23 @@ namespace MexicanRestaurant.WebUI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Increase(int productId)
+        public async Task<IActionResult> Increase(int productId)
         {
-            _orderService.IncreaseItemQuantity(productId);
+            await _orderService.IncreaseItemQuantity(productId);
             return RedirectToAction("Cart");
         }
 
         [HttpPost]
-        public IActionResult Decrease(int productId)
+        public async Task<IActionResult> Decrease(int productId)
         {
-            _orderService.DecreaseItemQuantity(productId);
+            await _orderService.DecreaseItemQuantity(productId);
             return RedirectToAction("Cart");
         }
 
         [HttpPost]
-        public IActionResult Remove(int productId)
+        public async Task<IActionResult> Remove(int productId)
         {
-            _orderService.RemoveItemFromOrder(productId);
+            await _orderService.RemoveItemFromOrder(productId);
             return RedirectToAction("Cart");
         }
     }

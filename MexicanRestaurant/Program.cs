@@ -46,8 +46,16 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-
-app.UseHttpsRedirection();
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.Add("Content-Security-Policy",
+        "default-src 'self'; " +
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
+        "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; " +
+        "font-src 'self' https://cdn.jsdelivr.net; " +
+        "connect-src 'self' wss://localhost:44327;");
+    await next();
+}); app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthorization();

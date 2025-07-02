@@ -127,33 +127,34 @@ namespace MexicanRestaurant.Application.Services
             return (await _orders.GetAllByIdAsync(userId, "UserId", new QueryOptions<Order>
             {
                 Includes = "OrderItems.Product",
+                DisablePaging = true
             })).ToList();
         }
 
-        public void IncreaseItemQuantity(int productId)
+        public async Task IncreaseItemQuantity(int productId)
         {
-            var model = GetCurrentOrderFromSession();
+            var model =  GetCurrentOrderFromSession();
             if (model == null) return;
             var item = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
             if (item != null)
             {
-                var product = _products.GetByIdAsync(productId, new QueryOptions<Product>()).Result;
+                var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
                 if (product == null || product.Stock <= 0) return;
                 item.Quantity++;
                 product.Stock--;
-                _products.UpdateAsync(product).Wait();
+                await _products.UpdateAsync(product);
                 SaveCurrentOrderToSession(model);
             }
         }
 
-        public void DecreaseItemQuantity(int productId)
+        public async Task DecreaseItemQuantity(int productId)
         {
             var model = GetCurrentOrderFromSession();
             if (model == null) return;
             var item = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
             if (item != null)
             {
-                var product = _products.GetByIdAsync(productId, new QueryOptions<Product>()).Result;
+                var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
                 if (product == null) return;
 
                 product.Stock++;
@@ -161,33 +162,35 @@ namespace MexicanRestaurant.Application.Services
                 if (item.Quantity > 1)
                 {
                     item.Quantity--;
-                    _products.UpdateAsync(product).Wait();
+                    await _products.UpdateAsync(product);
                 }
                 else
                 {
                     model.OrderItems.Remove(item);
-                    _products.UpdateAsync(product).Wait();
+                    await _products.UpdateAsync(product);
                 }
                     SaveCurrentOrderToSession(model);
             }
         }
-        public void RemoveItemFromOrder(int productId)
+
+        public async Task RemoveItemFromOrder(int productId)
         {
             var model = GetCurrentOrderFromSession();
             if (model == null) return;
             var item = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
             if (item != null)
             {
-                var product = _products.GetByIdAsync(productId, new QueryOptions<Product>()).Result;
+                var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
                 if (product != null)
                 {
                     product.Stock += item.Quantity;
-                    _products.UpdateAsync(product).Wait();
+                    await _products.UpdateAsync(product);
                 }
                 model.OrderItems.Remove(item);
                 SaveCurrentOrderToSession(model);
             }
         }
+
         public async Task<List<SelectListItem>> GetCategorySelectListAsync()
         {
             var categories = await _categories.GetAllAsync();
