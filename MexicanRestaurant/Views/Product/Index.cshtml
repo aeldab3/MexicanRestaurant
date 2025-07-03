@@ -55,7 +55,7 @@
     </div>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-        @foreach (Product product in Model.Products)
+        @foreach (ProductViewModel product in Model.Products)
         {
             <div class="col">
                 <div class="card h-100 shadow-lg border-0" style="background-color: #f9f5d985">
@@ -72,7 +72,7 @@
                     <div class="card-body">
                         <h5 class="card-title text-success fw-bold">@product?.Name</h5>
                         <p class="card-text text-muted">@product?.Description</p>
-                        <p class="text-muted"><strong>Category:</strong> <span class="text-dark">@product.Category?.Name</span></p>
+                        <p class="text-muted"><strong>Category:</strong> <span class="text-dark">@product.CategoryName</span></p>
                         <div class="d-flex justify-content-around">
                         <p class="card-text"><strong>Price:</strong> @product?.Price.ToString("C")</p>
                         <p class="card-text"><strong>Stock:</strong> @product?.Stock</p>

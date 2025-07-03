@@ -1,12 +1,11 @@
-﻿using MexicanRestaurant.Application.Helpers;
-using MexicanRestaurant.Core.Extensions;
+﻿using AutoMapper;
+using MexicanRestaurant.Application.Helpers;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Linq.Expressions;
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -16,13 +15,15 @@ namespace MexicanRestaurant.Application.Services
         private readonly IRepository<Category> _categories;
         private readonly IRepository<Ingredient> _ingredients;
         private readonly IImageService _imageService;
+        private readonly IMapper _mapper;
 
-        public ProductService(IRepository<Product> products, IRepository<Category> categories, IRepository<Ingredient> ingredients, IWebHostEnvironment webHostEnvironment, IImageService imageService)
+        public ProductService(IRepository<Product> products, IRepository<Category> categories, IRepository<Ingredient> ingredients, IWebHostEnvironment webHostEnvironment, IImageService imageService, IMapper mapper)
         {
             _products = products;
             _categories = categories;
             _ingredients = ingredients;
             _imageService = imageService;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
@@ -131,6 +132,7 @@ namespace MexicanRestaurant.Application.Services
                 OrderByWithFunc = ProductFilteringHelper.BuildOrderBy(filter.SortBy)
             };
             var allProducts = await _products.GetAllAsync(options);
+            var mappedProducts = _mapper.Map<IEnumerable<ProductViewModel>>(allProducts);
             var countOptions = new QueryOptions<Product>
             {
                 Where = options.Where,
@@ -142,7 +144,7 @@ namespace MexicanRestaurant.Application.Services
 
             return new ProductListViewModel
             {
-                Products = allProducts.ToList(),
+                Products = mappedProducts,
                 Filter = new FilterOptionsViewModel
                 {
                     SearchTerm = filter.SearchTerm,

@@ -1,6 +1,5 @@
 ﻿using MexicanRestaurant.Core.Interfaces;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -11,6 +10,7 @@ namespace MexicanRestaurant.Application.Services
         {
             _httpContextAccessor = httpContextAccessor;
         }
+
         public void Set<T>(string key, T value)
         {
             var json = JsonSerializer.Serialize(value);
@@ -22,6 +22,7 @@ namespace MexicanRestaurant.Application.Services
             var json = _httpContextAccessor.HttpContext?.Session.GetString(key);
             return string.IsNullOrEmpty(json) ? default : JsonSerializer.Deserialize<T>(json);
         }
+
         public void Remove(string key)
         {
             _httpContextAccessor.HttpContext?.Session.Remove(key);

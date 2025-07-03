@@ -1,5 +1,4 @@
-﻿using MexicanRestaurant.Core.Models;
-using MexicanRestaurant.Views.Shared;
+﻿using MexicanRestaurant.Views.Shared;
 
 namespace MexicanRestaurant.WebUI.ViewModels
 {
@@ -10,6 +9,5 @@ namespace MexicanRestaurant.WebUI.ViewModels
         public List<ProductViewModel> Products { get; set; }
         public FilterOptionsViewModel Filter { get; set; }
         public PaginationInfo Pagination { get; set; }
-
     }
 }

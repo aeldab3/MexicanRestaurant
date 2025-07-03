@@ -1,15 +1,11 @@
 ﻿using AutoMapper;
 using MexicanRestaurant.Application.Helpers;
-using MexicanRestaurant.Core.Extensions;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -52,7 +48,7 @@ namespace MexicanRestaurant.Application.Services
                 OrderByWithFunc = ProductFilteringHelper.BuildOrderBy(filter.SortBy)
             };
             var allProducts = await _products.GetAllAsync(options);
-            var mappedProducts = _mapper.Map<List<ProductViewModel>>(allProducts.ToList());
+            var mappedProducts = _mapper.Map<List<ProductViewModel>>(allProducts);
             var countOptions = new QueryOptions<Product>
             {
                 Where = options.Where,
@@ -200,6 +196,5 @@ namespace MexicanRestaurant.Application.Services
                 Text = c.Name
             }).ToList();
         }
-
     }
 }
