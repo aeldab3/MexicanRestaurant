@@ -1,7 +1,5 @@
 ﻿using MexicanRestaurant.Core.Interfaces;
-using MexicanRestaurant.Core.Models;
-using Microsoft.AspNetCore.Hosting;
-using System.IO;
+
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -12,6 +10,7 @@ namespace MexicanRestaurant.Application.Services
         {
             _env = webHostEnvironment;
         }
+
         public async Task<string> UploadImageAsync(IFormFile imageFile, string folderName)
         {
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".avif" };
@@ -45,7 +44,7 @@ namespace MexicanRestaurant.Application.Services
             if (string.IsNullOrEmpty(imageName)) return;
             var imagePath = Path.Combine(_env.WebRootPath, folderName, imageName);
             if (File.Exists(imagePath))
-                File.Delete(imagePath);
+                await Task.Run(() => File.Delete(imagePath));
         }
     }
 }

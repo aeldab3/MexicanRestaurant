@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MexicanRestaurant.Application.Services;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Views.Shared;
@@ -10,10 +11,12 @@ using Microsoft.AspNetCore.Mvc;
         public class ProductController : Controller
         {
             private readonly IProductService _productService;
+            private readonly ISharedLookupService _sharedLookupService;
             private readonly IMapper _mapper;
-            public ProductController(IProductService productService, IMapper mapper)
+            public ProductController(IProductService productService, ISharedLookupService sharedLookupService, IMapper mapper)
             {
                 _productService = productService;
+                _sharedLookupService = sharedLookupService;
                 _mapper = mapper;
             }
 
@@ -29,8 +32,8 @@ using Microsoft.AspNetCore.Mvc;
             [HttpGet]
             public async Task<IActionResult> AddEdit(int id)
             {
-                ViewBag.Categories = await _productService.GetCategorySelectListAsync();
-                ViewBag.Ingredients = await _productService.GetAllIngredientsAsync();
+                ViewBag.Categories = await _sharedLookupService.GetCategorySelectListAsync();
+                ViewBag.Ingredients = await _sharedLookupService.GetAllIngredientsAsync();
 
                 if (id == 0)
                 {
@@ -48,8 +51,8 @@ using Microsoft.AspNetCore.Mvc;
             [ValidateAntiForgeryToken]
             public async Task<IActionResult> AddEdit(ProductFormViewModel model)
             {
-                ViewBag.Categories = await _productService.GetCategorySelectListAsync();
-                ViewBag.Ingredients = await _productService.GetAllIngredientsAsync();
+                ViewBag.Categories = await _sharedLookupService.GetCategorySelectListAsync();
+                ViewBag.Ingredients = await _sharedLookupService.GetAllIngredientsAsync();
 
                 if (model.CategoryId == 0)
                     ModelState.AddModelError("CategoryId", "Please select a category.");
@@ -58,13 +61,13 @@ using Microsoft.AspNetCore.Mvc;
                 {
                     var product = _mapper.Map<Product>(model);
                     product.ImageFile = model.ImageFile;
-
-                    await _productService.AddOrUpdateProductAsync(product, model.SelectedIngredientIds, model.ExistingImageUrl);
+                    var existingImageUrl = model.ExistingImageUrl ?? string.Empty;
+                    await _productService.AddOrUpdateProductAsync(product, model.SelectedIngredientIds, existingImageUrl);
                     return RedirectToAction("Index", "Product");
                 }
 
-                ViewBag.Categories = await _productService.GetCategorySelectListAsync();
-                ViewBag.Ingredients = await _productService.GetAllIngredientsAsync();
+                ViewBag.Categories = await _sharedLookupService.GetCategorySelectListAsync();
+                ViewBag.Ingredients = await _sharedLookupService.GetAllIngredientsAsync();
                 ViewBag.Operation = model.ProductId == 0 ? "Add" : "Edit";
 
                 return View(model);

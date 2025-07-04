@@ -17,8 +17,7 @@ namespace MexicanRestaurant.Application.MappingProfiles
                 .ForMember(dest => dest.OrderItems, opt => opt.Ignore());
 
             CreateMap<Product, ProductViewModel>()
-                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name))
-                .ReverseMap();
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
         }
     }
 }

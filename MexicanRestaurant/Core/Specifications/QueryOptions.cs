@@ -14,8 +14,8 @@ namespace MexicanRestaurant.Core.Specifications
         public string[] GetIncludes() => includes;
 
         public bool HasWhere => Where != null;
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; } = 9;
+        public int PageNumber { get; set; }
+        public int PageSize { get; set; }
         public bool DisablePaging { get; set; } = false;
         public bool HasOrderByWithFunc => OrderByWithFunc != null;
         public bool HasPaging => PageNumber > 0 && PageSize > 0;

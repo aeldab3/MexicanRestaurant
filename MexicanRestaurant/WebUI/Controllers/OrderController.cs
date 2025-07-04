@@ -1,6 +1,4 @@
-﻿using MexicanRestaurant.Application.Services;
-using MexicanRestaurant.Core.Extensions;
-using MexicanRestaurant.Core.Interfaces;
+﻿using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Views.Shared;
 using Microsoft.AspNetCore.Authorization;
@@ -12,29 +10,33 @@ namespace MexicanRestaurant.WebUI.Controllers
     public class OrderController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IOrderService _orderService;
+        private readonly IOrderCartService _orderCartService;
+        private readonly IOrderViewModelFactory _orderViewModelFactory;
+        private readonly IOrderProcessor _orderProcessor;
 
-        public OrderController(IOrderService orderService, UserManager<ApplicationUser> userManager)
+        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor)
         {
             _userManager = userManager;
-            _orderService = orderService;
+            _orderCartService = orderCartService;
+            _orderViewModelFactory = orderViewModelFactory;
+            _orderProcessor = orderProcessor;
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Create(int page = 1, string searchTerm = "", int? categoryId = null, string sortBy = "")
         {
-            var sessionModel = _orderService.GetCurrentOrderFromSession();
-            var newModel = await _orderService.InitializeOrderViewModelAsync(
+            var model = _orderCartService.GetCurrentOrderFromSession();
+            var newModel = await _orderViewModelFactory.InitializeOrderViewModelAsync(
                 new FilterOptionsViewModel { SearchTerm = searchTerm, SelectedCategoryId = categoryId, SortBy = sortBy },
                 new PaginationInfo { CurrentPage = page, PageSize = 8 });
 
-            if (sessionModel != null)
+            if (model != null)
             {
-                newModel.OrderItems = sessionModel.OrderItems;
-                newModel.TotalAmount = sessionModel.TotalAmount;
+                newModel.OrderItems = model.OrderItems;
+                newModel.TotalAmount = model.TotalAmount;
             }
-            _orderService.SaveCurrentOrderToSession(newModel);
+            _orderCartService.SaveCurrentOrderToSession(newModel);
             return View(newModel);
         }
 
@@ -43,17 +45,17 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddItem(int prodId, int prodQty, int page = 1)
         {
-            await _orderService.AddItemToOrderAsync(prodId, prodQty);
-            var model = _orderService.GetCurrentOrderFromSession();
+            await _orderCartService.AddToOrderAsync(prodId, prodQty);
+            var model = _orderCartService.GetCurrentOrderFromSession();
             var totalQuantity = model.OrderItems.Sum(item => item.Quantity);
             return Json(new { success = true, totalQuantity });
         }
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Cart()
+         public IActionResult Cart()
         {
-            var model = _orderService.GetCurrentOrderFromSession();
+            var model = _orderCartService.GetCurrentOrderFromSession();
             if (model == null || model.OrderItems.Count == 0)
                 return RedirectToAction("Create");
             return View(model);
@@ -63,7 +65,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         [Authorize]
         public IActionResult CartPartial()
         {
-            var model = _orderService.GetCurrentOrderFromSession();
+            var model = _orderCartService.GetCurrentOrderFromSession();
             return PartialView("_CartPartial", model);
         }
 
@@ -71,7 +73,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         [Authorize]
         public IActionResult CartIconPartial()
         {
-            var model = _orderService.GetCurrentOrderFromSession();
+            var model = _orderCartService.GetCurrentOrderFromSession();
             return PartialView("_CartIconPartial", model);
         }
 
@@ -80,7 +82,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder()
         {
-            await _orderService.PlaceOrderAsync(_userManager.GetUserId(User));
+            await _orderProcessor.PlaceOrderAsync(_userManager.GetUserId(User));
             return RedirectToAction("ViewOrders");
         }
 
@@ -88,28 +90,28 @@ namespace MexicanRestaurant.WebUI.Controllers
         [Authorize]
         public async Task<IActionResult> ViewOrders()
         {
-            var orders = await _orderService.GetUserOrdersAsync(_userManager.GetUserId(User));
+            var orders = await _orderProcessor.GetUserOrdersAsync(_userManager.GetUserId(User));
             return View(orders);
         }
 
         [HttpPost]
         public async Task<IActionResult> Increase(int productId)
         {
-            await _orderService.IncreaseItemQuantity(productId);
+            await _orderCartService.IncreaseQuantityAsync(productId);
             return RedirectToAction("Cart");
         }
 
         [HttpPost]
         public async Task<IActionResult> Decrease(int productId)
         {
-            await _orderService.DecreaseItemQuantity(productId);
+            await _orderCartService.DecreaseQuantityAsync(productId);
             return RedirectToAction("Cart");
         }
 
         [HttpPost]
         public async Task<IActionResult> Remove(int productId)
         {
-            await _orderService.RemoveItemFromOrder(productId);
+            await _orderCartService.RemoveFromOrderAsync(productId);
             return RedirectToAction("Cart");
         }
     }

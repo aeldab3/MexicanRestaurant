@@ -5,23 +5,20 @@ using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MexicanRestaurant.Application.Services
 {
     public class ProductService : IProductService
     {
         private readonly IRepository<Product> _products;
-        private readonly IRepository<Category> _categories;
-        private readonly IRepository<Ingredient> _ingredients;
+        private readonly ISharedLookupService _sharedLookupService;
         private readonly IImageService _imageService;
         private readonly IMapper _mapper;
 
-        public ProductService(IRepository<Product> products, IRepository<Category> categories, IRepository<Ingredient> ingredients, IWebHostEnvironment webHostEnvironment, IImageService imageService, IMapper mapper)
+        public ProductService(IRepository<Product> products, ISharedLookupService sharedLookupService, IWebHostEnvironment webHostEnvironment, IImageService imageService, IMapper mapper)
         {
             _products = products;
-            _categories = categories;
-            _ingredients = ingredients;
+            _sharedLookupService = sharedLookupService;
             _imageService = imageService;
             _mapper = mapper;
         }
@@ -50,6 +47,7 @@ namespace MexicanRestaurant.Application.Services
                 Where = p => p.ProductId == id
             });
         }
+
         public async Task AddOrUpdateProductAsync(Product product, int[] ingredientIds, string existingImageUrl)
         {
             if (product.ImageFile != null)
@@ -106,21 +104,6 @@ namespace MexicanRestaurant.Application.Services
             await _products.DeleteAsync(id);
         }
 
-        public async Task<List<SelectListItem>> GetCategorySelectListAsync()
-        {
-            var categories = await _categories.GetAllAsync();
-            return categories.Select(c => new SelectListItem
-            {
-                Value = c.CategoryId.ToString(),
-                Text = c.Name
-            }).ToList();
-        }
-
-        public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync()
-        {
-            return await _ingredients.GetAllAsync();
-        }
-
         public async Task<ProductListViewModel> GetPagedProductsAsync(FilterOptionsViewModel filter, PaginationInfo pagination)
         {
             var options = new QueryOptions<Product>
@@ -140,7 +123,7 @@ namespace MexicanRestaurant.Application.Services
                 DisablePaging = true
             };
             var totalProducts = (await _products.GetAllAsync(countOptions)).Count();
-            var categories = await GetCategorySelectListAsync();
+            var categories = await _sharedLookupService.GetCategorySelectListAsync();
 
             return new ProductListViewModel
             {

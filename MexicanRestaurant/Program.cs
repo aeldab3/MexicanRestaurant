@@ -15,9 +15,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IOrderCartService, OrderCartService>();
+builder.Services.AddScoped<IOrderViewModelFactory, OrderViewModelFactory>();
+builder.Services.AddScoped<IOrderProcessor, OrderProcessor>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+builder.Services.AddScoped<ISharedLookupService, SharedLookupService>();
 builder.Services.AddSingleton<ISessionService, SessionService>();
 builder.Services.AddAutoMapper(typeof(OrderProfile));
 builder.Services.AddAutoMapper(typeof(ProductProfile));

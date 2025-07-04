@@ -102,9 +102,12 @@
                         } else {
                             showToast("🗑️ Product removed from cart.");
                         }
-                    } else {
-                        showToast("❌ Failed to update quantity.", "error");
-                    }
+                   } 
+                   else 
+                   {
+                       showToast("❌ Failed to update quantity.", "error");
+                       return;
+                   }
                 });
             }
         });
@@ -117,7 +120,6 @@
                 const cartContentUpdate = await cartRes.text();
                 document.getElementById("cart-container").innerHTML = cartContentUpdate;
             }
-
             // update cart icon
             const iconRes = await fetch("/Order/CartIconPartial");
             if (iconRes.ok) {

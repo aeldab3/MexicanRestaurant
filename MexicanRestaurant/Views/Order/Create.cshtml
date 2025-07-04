@@ -29,7 +29,7 @@
             <select id="sortBy" name="sortBy" class="form-select">
                 <option value="">Sort by</option>
                 <option value="name_asc" selected="@(Model.Filter.SortBy == "name_asc")">Name ↑</option>
-                <option value="name_desc" selected="@Model.Filter.SortBy == "name_desc")">Name ↓</option>
+                <option value="name_desc" selected="@(Model.Filter.SortBy == "name_desc")">Name ↓</option>
                 <option value="price_asc" selected="@(Model.Filter.SortBy == "price_asc")">Price ↑</option>
                 <option value="price_desc" selected="@(Model.Filter.SortBy == "price_desc")">Price ↓</option>
             </select>
@@ -147,9 +147,12 @@
                         const result = await response.json();
                         showToast("✅ Product added to cart!");
                         await refreshCart();
-                    } else {
+                    } 
+                    else 
+                    {
                         showToast("❌ Failed to add product", "error");
-                    }
+                        return;
+                     }
                 });
             });
         });
@@ -165,7 +168,7 @@
             if (e.target.classList.contains("btn-out-of-stock")) {
                 const name = e.target.dataset.prodName || "This product";
                 showToast(`${name} is currently not available.`, "warning");
-                  return;
+                    return;
             }
         });
     </script>
