@@ -7,12 +7,10 @@ namespace MexicanRestaurant.Core.Interfaces
 {
     public interface IProductService
     {
-        Task<IEnumerable<Product>> GetAllProductsAsync();
         Task<Product> GetProductByIdAsync(int id);
         Task<Product> GetExistingProductByIdAsync(int id);
         Task AddOrUpdateProductAsync(Product product, int[] ingredientIds, string existingImageUrl);
         Task DeleteProductAsync(int id);
         Task<ProductListViewModel> GetPagedProductsAsync(FilterOptionsViewModel filter, PaginationInfo pagination);
-
     }
 }

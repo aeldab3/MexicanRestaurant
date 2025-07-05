@@ -25,7 +25,7 @@ using Microsoft.AspNetCore.Mvc;
             {
                 var products = await _productService.GetPagedProductsAsync(
                 new FilterOptionsViewModel { SearchTerm = searchTerm, SelectedCategoryId = categoryId, SortBy = sortBy },
-                new PaginationInfo { CurrentPage = page, PageSize = 8 });
+                new PaginationInfo { CurrentPage = page, PageSize = 9 });
             return View(products);
             }
 

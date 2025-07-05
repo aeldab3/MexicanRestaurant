@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MexicanRestaurant.Application.Helpers;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
@@ -13,22 +12,14 @@ namespace MexicanRestaurant.Application.Services
         private readonly IRepository<Product> _products;
         private readonly ISharedLookupService _sharedLookupService;
         private readonly IImageService _imageService;
-        private readonly IMapper _mapper;
+        private readonly IPaginatedProductFetcher _paginatedProductFetcher;
 
-        public ProductService(IRepository<Product> products, ISharedLookupService sharedLookupService, IWebHostEnvironment webHostEnvironment, IImageService imageService, IMapper mapper)
+        public ProductService(IRepository<Product> products, ISharedLookupService sharedLookupService, IWebHostEnvironment webHostEnvironment, IImageService imageService, IPaginatedProductFetcher paginatedProductFetcher)
         {
             _products = products;
             _sharedLookupService = sharedLookupService;
             _imageService = imageService;
-            _mapper = mapper;
-        }
-
-        public async Task<IEnumerable<Product>> GetAllProductsAsync()
-        {
-            return await _products.GetAllAsync(new QueryOptions<Product>
-            {
-                Includes = nameof(Product.Category)
-            });
+            _paginatedProductFetcher = paginatedProductFetcher;
         }
 
         public async Task<Product> GetProductByIdAsync(int id)
@@ -75,22 +66,19 @@ namespace MexicanRestaurant.Application.Services
                 if (existingProduct == null)
                     throw new Exception("Product not found during update.");
 
-                if (existingProduct != null)
-                {
-                    existingProduct.Name = product.Name;
-                    existingProduct.Description = product.Description;
-                    existingProduct.Price = product.Price;
-                    existingProduct.Stock = product.Stock;
-                    existingProduct.CategoryId = product.CategoryId;
-                    existingProduct.ImageUrl = product.ImageUrl;
+                existingProduct.Name = product.Name;
+                existingProduct.Description = product.Description;
+                existingProduct.Price = product.Price;
+                existingProduct.Stock = product.Stock;
+                existingProduct.CategoryId = product.CategoryId;
+                existingProduct.ImageUrl = product.ImageUrl;
 
-                    existingProduct?.ProductIngredients?.Clear();
-                    foreach (var id in ingredientIds)
-                    {
-                        existingProduct.ProductIngredients.Add(new ProductIngredient { IngredientId = id  });
-                    }
-                    await _products.UpdateAsync(existingProduct);
+                existingProduct?.ProductIngredients?.Clear();
+                foreach (var id in ingredientIds)
+                {
+                    existingProduct.ProductIngredients.Add(new ProductIngredient { IngredientId = id  });
                 }
+                await _products.UpdateAsync(existingProduct);
             }
         }
 
@@ -106,23 +94,8 @@ namespace MexicanRestaurant.Application.Services
 
         public async Task<ProductListViewModel> GetPagedProductsAsync(FilterOptionsViewModel filter, PaginationInfo pagination)
         {
-            var options = new QueryOptions<Product>
-            {
-                Includes = nameof(Product.Category),
-                PageNumber = pagination.CurrentPage,
-                PageSize = pagination.PageSize,
-                Where = ProductFilteringHelper.BuildFilter(filter.SearchTerm, filter.SelectedCategoryId),
-                OrderByWithFunc = ProductFilteringHelper.BuildOrderBy(filter.SortBy)
-            };
-            var allProducts = await _products.GetAllAsync(options);
-            var mappedProducts = _mapper.Map<IEnumerable<ProductViewModel>>(allProducts);
-            var countOptions = new QueryOptions<Product>
-            {
-                Where = options.Where,
-                Includes = nameof(Product.Category),
-                DisablePaging = true
-            };
-            var totalProducts = (await _products.GetAllAsync(countOptions)).Count();
+            var (mappedProducts, totalProducts) = await _paginatedProductFetcher.GetPagedProductsAsync(filter, pagination);
+
             var categories = await _sharedLookupService.GetCategorySelectListAsync();
 
             return new ProductListViewModel

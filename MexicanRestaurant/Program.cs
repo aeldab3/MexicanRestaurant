@@ -21,6 +21,7 @@ builder.Services.AddScoped<IOrderProcessor, OrderProcessor>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ISharedLookupService, SharedLookupService>();
+builder.Services.AddScoped<IPaginatedProductFetcher, PaginatedProductFetcher>();
 builder.Services.AddSingleton<ISessionService, SessionService>();
 builder.Services.AddAutoMapper(typeof(OrderProfile));
 builder.Services.AddAutoMapper(typeof(ProductProfile));
