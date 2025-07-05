@@ -4,7 +4,9 @@ using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Infrastructure.Data;
 using MexicanRestaurant.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -46,10 +48,36 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseExceptionHandler(errorApp =>
+    {
+        errorApp.Run(async context =>
+        {
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "application/json";
+
+            var error = context.Features.Get<IExceptionHandlerFeature>();
+            if (error != null)
+            {
+                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                logger.LogError(error.Error, "Unhandled Exception");
+
+                await context.Response.WriteAsJsonAsync(new ProblemDetails
+                {
+                    Status = 500,
+                    Title = "Unexpected error",
+                    Detail = "An error occurred while processing your request."
+                });
+            }
+            else
+            {
+                context.Response.Redirect("/Home/Error");
+            }
+        });
+    });
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Add("Content-Security-Policy",

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MexicanRestaurant.Application.Helpers;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
@@ -13,14 +14,16 @@ namespace MexicanRestaurant.Application.Services
         private readonly IOrderViewModelFactory _orderViewModelFactory;
         private readonly IRepository<Product> _products;
         private readonly IMapper _mapper;
+        private readonly ILogger<OrderCartService> _logger;
 
         private const string OrderSessionCartKey = "OrderViewModel";
-        public OrderCartService(ISessionService sessionService, IOrderViewModelFactory orderViewModelFactory, IRepository<Product> products, IMapper mapper)
+        public OrderCartService(ISessionService sessionService, IOrderViewModelFactory orderViewModelFactory, IRepository<Product> products, IMapper mapper, ILogger<OrderCartService> logger)
         {
             _sessionService = sessionService;
             _orderViewModelFactory = orderViewModelFactory;
             _products = products;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public OrderViewModel GetCurrentOrderFromSession() =>
@@ -35,26 +38,34 @@ namespace MexicanRestaurant.Application.Services
 
         public async Task AddToOrderAsync(int productId, int productQantity)
         {
-            var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
-            if (product == null || productQantity <= 0 || product.Stock < productQantity) return;
-
-            var currentPage = GetCurrentOrderFromSession()?.Pagination.CurrentPage ?? 1;
-            var model = GetCurrentOrderFromSession() ?? await _orderViewModelFactory.InitializeOrderViewModelAsync(
-                new FilterOptionsViewModel { SearchTerm = "", SelectedCategoryId = null, SortBy = ""}, 
-                new PaginationInfo { CurrentPage = currentPage, PageSize = 8 }
-            );
-            var existingItem = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
-            if (existingItem != null)
-                existingItem.Quantity += productQantity;
-            else
+            try
             {
-                var orderItem = _mapper.Map<OrderItemViewModel>(product);
-                orderItem.Quantity = productQantity;
-                model.OrderItems.Add(orderItem);
+                var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
+                if (product == null || productQantity <= 0 || product.Stock < productQantity) return;
+
+                var currentPage = GetCurrentOrderFromSession()?.Pagination.CurrentPage ?? 1;
+                var model = GetCurrentOrderFromSession() ?? await _orderViewModelFactory.InitializeOrderViewModelAsync(
+                    new FilterOptionsViewModel { SearchTerm = "", SelectedCategoryId = null, SortBy = "" },
+                    new PaginationInfo { CurrentPage = currentPage, PageSize = 8 }
+                );
+                var existingItem = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
+                if (existingItem != null)
+                    existingItem.Quantity += productQantity;
+                else
+                {
+                    var orderItem = _mapper.Map<OrderItemViewModel>(product);
+                    orderItem.Quantity = productQantity;
+                    model.OrderItems.Add(orderItem);
+                }
+                product.Stock -= productQantity;
+                await _products.UpdateAsync(product);
+                SaveCurrentOrderToSession(model);
             }
-            product.Stock -= productQantity;
-            await _products.UpdateAsync(product);
-            SaveCurrentOrderToSession(model);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding product to order");
+                throw new ProductNotFoundException("An error occurred while adding the product to the order");
+            }
         }
 
         public async Task IncreaseQuantityAsync(int productId)
@@ -97,21 +108,27 @@ namespace MexicanRestaurant.Application.Services
 
         public async Task RemoveFromOrderAsync(int productId)
         {
-            var model = GetCurrentOrderFromSession();
-            if (model == null) return;
-            var item = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
-            if (item != null)
-            {
-                var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
-                if (product == null) return;
+            try 
+            { 
+                var model = GetCurrentOrderFromSession();
+                if (model == null) return;
+                var item = model.OrderItems.FirstOrDefault(i => i.ProductId == productId);
+                if (item != null)
+                {
+                    var product = await _products.GetByIdAsync(productId, new QueryOptions<Product>());
+                    if (product == null) return;
 
-                product.Stock += item.Quantity;
-                await _products.UpdateAsync(product);
-                model.OrderItems.Remove(item);
-                SaveCurrentOrderToSession(model);
+                    product.Stock += item.Quantity;
+                    await _products.UpdateAsync(product);
+                    model.OrderItems.Remove(item);
+                    SaveCurrentOrderToSession(model);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error removing product from order");
+                throw new ProductNotFoundException("An error occurred while removing the product from the order");
             }
         }
-
- 
     }
 }

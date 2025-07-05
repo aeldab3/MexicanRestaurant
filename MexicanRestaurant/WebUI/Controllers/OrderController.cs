@@ -1,4 +1,5 @@
-﻿using MexicanRestaurant.Core.Interfaces;
+﻿using MexicanRestaurant.Application.Helpers;
+using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Views.Shared;
 using Microsoft.AspNetCore.Authorization;
@@ -13,31 +14,42 @@ namespace MexicanRestaurant.WebUI.Controllers
         private readonly IOrderCartService _orderCartService;
         private readonly IOrderViewModelFactory _orderViewModelFactory;
         private readonly IOrderProcessor _orderProcessor;
+        private readonly ILogger<OrderController> _logger;
 
-        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor)
+        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ILogger<OrderController> logger)
         {
             _userManager = userManager;
             _orderCartService = orderCartService;
             _orderViewModelFactory = orderViewModelFactory;
             _orderProcessor = orderProcessor;
+            _logger = logger;
         }
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Create(int page = 1, string searchTerm = "", int? categoryId = null, string sortBy = "")
         {
-            var model = _orderCartService.GetCurrentOrderFromSession();
-            var newModel = await _orderViewModelFactory.InitializeOrderViewModelAsync(
-                new FilterOptionsViewModel { SearchTerm = searchTerm, SelectedCategoryId = categoryId, SortBy = sortBy },
-                new PaginationInfo { CurrentPage = page, PageSize = 8 });
-
-            if (model != null)
+            try
             {
-                newModel.OrderItems = model.OrderItems;
-                newModel.TotalAmount = model.TotalAmount;
+                var model = _orderCartService.GetCurrentOrderFromSession();
+                var newModel = await _orderViewModelFactory.InitializeOrderViewModelAsync(
+                    new FilterOptionsViewModel { SearchTerm = searchTerm, SelectedCategoryId = categoryId, SortBy = sortBy },
+                    new PaginationInfo { CurrentPage = page, PageSize = 8 });
+
+                if (model != null)
+                {
+                    newModel.OrderItems = model.OrderItems;
+                    newModel.TotalAmount = model.TotalAmount;
+                }
+                _orderCartService.SaveCurrentOrderToSession(newModel);
+                return View(newModel);
             }
-            _orderCartService.SaveCurrentOrderToSession(newModel);
-            return View(newModel);
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating order view model");
+                TempData["ErrorMessage"] = "An error occurred while creating the order view model.";
+                return RedirectToAction("Create", "Order");
+            }
         }
 
         [HttpPost]
@@ -45,10 +57,17 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddItem(int prodId, int prodQty, int page = 1)
         {
-            await _orderCartService.AddToOrderAsync(prodId, prodQty);
-            var model = _orderCartService.GetCurrentOrderFromSession();
-            var totalQuantity = model.OrderItems.Sum(item => item.Quantity);
-            return Json(new { success = true, totalQuantity });
+            try { 
+                await _orderCartService.AddToOrderAsync(prodId, prodQty);
+                var model = _orderCartService.GetCurrentOrderFromSession();
+                var totalQuantity = model.OrderItems.Sum(item => item.Quantity);
+                return Json(new { success = true, totalQuantity });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error adding item to order");
+                return Json(new { success = false, message = "An error occurred while adding the item to the order." });
+            }
         }
 
         [HttpGet]
@@ -82,8 +101,17 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PlaceOrder()
         {
-            await _orderProcessor.PlaceOrderAsync(_userManager.GetUserId(User));
-            return RedirectToAction("ViewOrders");
+            try 
+            { 
+                await _orderProcessor.PlaceOrderAsync(_userManager.GetUserId(User));
+                return RedirectToAction("ViewOrders");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error placing order");
+                TempData["ErrorMessage"] = "An error occurred while placing the order.";
+                return RedirectToAction("Cart");
+            }
         }
 
         [HttpGet]
