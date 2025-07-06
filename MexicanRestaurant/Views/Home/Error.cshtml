@@ -1,0 +1,17 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Oops! Something went wrong";
+    Layout = "_Layout";
+}
+
+<div class="container mt-5 text-center">
+    <h1 class="display-4 text-danger">😕 Oops!</h1>
+    <p class="lead">An unexpected error occurred while processing your request.</p>
+
+    @if (!string.IsNullOrEmpty(Model?.RequestId))
+    {
+        <p><strong>Request ID:</strong> <code>@Model.RequestId</code></p>
+    }
+
+    <a class="btn btn-primary mt-3" href="/">Return to Home Page</a>
+</div>
