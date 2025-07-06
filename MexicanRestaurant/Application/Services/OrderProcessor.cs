@@ -25,7 +25,8 @@ namespace MexicanRestaurant.Application.Services
 
         public async Task PlaceOrderAsync(string userId)
         {
-            try { 
+            try 
+            { 
                 var model = _sessionService.Get<OrderViewModel>(OrderSessionCartKey);
                 if (model == null || model.OrderItems.Count == 0) return;
 
@@ -38,8 +39,8 @@ namespace MexicanRestaurant.Application.Services
                 };
                 await _orders.AddAsync(order);
                 _sessionService.Remove(OrderSessionCartKey);
-                }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error placing order");
                 throw new ProductNotFoundException("An error occurred while placing the order");

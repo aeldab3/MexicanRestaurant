@@ -28,6 +28,7 @@ builder.Services.AddAutoMapper(typeof(ProductProfile));
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
@@ -63,11 +64,17 @@ app.Use(async (context, next) =>
 }); app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
 
 app.UseSession();
+
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{areas:exists}/{controller=Home}/{action=Index}/{id?}")
+    .WithStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
