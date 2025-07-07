@@ -81,4 +81,12 @@
             timerProgressBar: true
         });
     };
+     @if (TempData["Success"] != null)
+     {
+        <text>
+            window.addEventListener('DOMContentLoaded', () => {
+                showToast('@TempData["Success"]');
+            });
+        </text>
+     }
 </script>
