@@ -56,3 +56,10 @@ body {
     bottom: 40%;
     opacity: 1;
 }
+ul li a{
+    color: #198754 !important;
+}
+ul li .active {
+    color: white !important;
+    background-color: #198754 !important;
+}
