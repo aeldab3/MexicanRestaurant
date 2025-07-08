@@ -3,10 +3,12 @@ using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Infrastructure.Data;
 using MexicanRestaurant.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MexicanRestaurant.WebUI.Controllers
 {
+    [Authorize(Roles = "Admin, Manager")]
     public class IngredientController : Controller
     {
         private readonly IRepository<Ingredient> _ingredients;

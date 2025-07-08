@@ -4,10 +4,12 @@ using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MexicanRestaurant.WebUI.Controllers
 {
+    [Authorize(Roles = "Admin, Manager")]
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
@@ -110,14 +112,14 @@ namespace MexicanRestaurant.WebUI.Controllers
             try
             {
                 await _productService.DeleteProductAsync(id);
-                return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error deleting product with ID {id}.");
                 TempData["ErrorMessage"] = "An error occurred while deleting the product.";
-                return RedirectToAction("Index");
             }
+            return RedirectToAction("Index");
+
         }
     }
 }

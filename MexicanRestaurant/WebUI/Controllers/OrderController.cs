@@ -26,7 +26,6 @@ namespace MexicanRestaurant.WebUI.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> Create(int page = 1, string searchTerm = "", int? categoryId = null, string sortBy = "")
         {
             try
@@ -73,12 +72,12 @@ namespace MexicanRestaurant.WebUI.Controllers
         [HttpGet]
         [Authorize]
          public IActionResult Cart()
-        {
+         {
             var model = _orderCartService.GetCurrentOrderFromSession();
             if (model == null || model.OrderItems.Count == 0)
                 return RedirectToAction("Create");
             return View(model);
-        }
+         }
 
         [HttpGet]
         [Authorize]

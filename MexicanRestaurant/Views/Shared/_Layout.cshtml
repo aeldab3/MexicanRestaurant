@@ -36,11 +36,20 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">  
                     <ul class="navbar-nav flex-grow-1">  
                         <li class="nav-item">  
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Explore Menu</a>  
-                        </li>  
-                        <li class="nav-item">  
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Ingredient" asp-action="Index">Ingredients</a>  
-                        </li>  
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        @if (User.IsInRole("Manager") || User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">  
+                                <a class="nav-link text-dark" asp-area="Admin" asp-controller="User" asp-action="Index">Manage Users</a>  
+                            </li>  
+                            <li class="nav-item">  
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Manage Products</a>  
+                            </li>  
+                            <li class="nav-item">  
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Ingredient" asp-action="Index">Manage Ingredients</a>  
+                            </li>  
+                        }
                         <li class="nav-item">  
                             <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Create">Create Order</a>  
                         </li>  
@@ -88,5 +97,13 @@
                 showToast('@TempData["Success"]');
             });
         </text>
+     }
+     @if (TempData["ErrorMessage"] != null)
+     {
+            <text>
+                window.addEventListener('DOMContentLoaded', () => {
+                        showToast('@TempData["ErrorMessage"]', 'error');
+                });
+            </text>
      }
 </script>

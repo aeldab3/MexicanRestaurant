@@ -7,6 +7,7 @@ using MexicanRestaurant.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -67,13 +68,19 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
+using (var scope = scopeFactory.CreateScope())
+{
+    await IdentityConfig.CreateAdminUserAsync(scope.ServiceProvider);
+}
+
 app.MapStaticAssets();
 
 app.UseSession();
 
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{areas:exists}/{controller=Home}/{action=Index}/{id?}")
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 app.MapControllerRoute(
