@@ -5,6 +5,7 @@ using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -14,14 +15,18 @@ namespace MexicanRestaurant.Application.Services
         private readonly ISharedLookupService _sharedLookupService;
         private readonly IImageService _imageService;
         private readonly IPaginatedProductFetcher _paginatedProductFetcher;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IAuditLogHelper _auditLogHelper;
         private readonly ILogger<ProductService> _logger;
 
-        public ProductService(IRepository<Product> products, ISharedLookupService sharedLookupService, IWebHostEnvironment webHostEnvironment, IImageService imageService, IPaginatedProductFetcher paginatedProductFetcher, ILogger<ProductService> logger)
+        public ProductService(IRepository<Product> products, ISharedLookupService sharedLookupService, IWebHostEnvironment webHostEnvironment, IImageService imageService, IPaginatedProductFetcher paginatedProductFetcher, IHttpContextAccessor httpContextAccessor, IAuditLogHelper auditLogHelper, ILogger<ProductService> logger)
         {
             _products = products;
             _sharedLookupService = sharedLookupService;
             _imageService = imageService;
             _paginatedProductFetcher = paginatedProductFetcher;
+            _httpContextAccessor = httpContextAccessor;
+            _auditLogHelper = auditLogHelper;
             _logger = logger;
         }
 
@@ -99,16 +104,24 @@ namespace MexicanRestaurant.Application.Services
                 _logger.LogError(ex, $"Error adding/updating product with id: {product.ProductId}");
                 throw new ProductNotFoundException($"Error processing product with ID {product.ProductId}: {ex.Message}");
             }
+            await _auditLogHelper.LogActionAsync(_httpContextAccessor.HttpContext, product.ProductId == 0 ? "Create" : "Update", "Product", product.ProductId.ToString(), $"Product: {product.Name}, Price: {product.Price}");
         }
 
         public async Task DeleteProductAsync(int id)
         {
-            var product = await GetProductByIdAsync(id);
-
-            if (product == null) return;
-
-            await _imageService.DeleteImageAsync(product.ImageUrl, "images");
-            await _products.DeleteAsync(id);
+            try
+            {
+                var product = await GetProductByIdAsync(id);
+                if (product == null) return;
+                await _imageService.DeleteImageAsync(product.ImageUrl, "images");
+                await _products.DeleteAsync(id);
+                await _auditLogHelper.LogActionAsync(_httpContextAccessor.HttpContext, "Delete", "Product", id.ToString(), $"Deleted product: {product.Name}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting product with id: {id}");
+                throw new ProductNotFoundException($"Error deleting product with ID {id}: {ex.Message}");
+            }
         }
 
         public async Task<ProductListViewModel> GetPagedProductsAsync(FilterOptionsViewModel filter, PaginationInfo pagination)

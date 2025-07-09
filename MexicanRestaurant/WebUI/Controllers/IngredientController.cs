@@ -1,8 +1,6 @@
 ﻿using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
-using MexicanRestaurant.Infrastructure.Data;
-using MexicanRestaurant.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -80,7 +78,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             if (ingredient == null) return NotFound();
             return View(ingredient);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

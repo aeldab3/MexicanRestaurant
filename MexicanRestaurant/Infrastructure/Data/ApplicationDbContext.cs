@@ -16,6 +16,7 @@ namespace MexicanRestaurant.Infrastructure.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<ProductIngredient> ProductIngredients { get; set; }
+        public DbSet<AuditLog> AuditLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

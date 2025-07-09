@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using MexicanRestaurant.Application.Services;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Views.Shared;
@@ -106,6 +105,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {

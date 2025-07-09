@@ -1,3 +1,4 @@
+using MexicanRestaurant.Application.Helpers;
 using MexicanRestaurant.Application.MappingProfiles;
 using MexicanRestaurant.Application.Services;
 using MexicanRestaurant.Core.Interfaces;
@@ -23,6 +24,8 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ISharedLookupService, SharedLookupService>();
 builder.Services.AddScoped<IPaginatedProductFetcher, PaginatedProductFetcher>();
+builder.Services.AddScoped<IAuditLogService, AuditLogService>();
+builder.Services.AddScoped<IAuditLogHelper, AuditLogHelper>();
 builder.Services.AddSingleton<ISessionService, SessionService>();
 builder.Services.AddAutoMapper(typeof(OrderProfile));
 builder.Services.AddAutoMapper(typeof(ProductProfile));
