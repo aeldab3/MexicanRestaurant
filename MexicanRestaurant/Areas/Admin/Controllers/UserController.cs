@@ -50,6 +50,7 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
             {
                 ApplicationUser user = await _userManager.FindByIdAsync(id);
                 if (user == null) return NotFound("Can't find this User");
+
                 IdentityRole adminRole = await _roleManager.FindByNameAsync("Admin");
                 if (adminRole != null && await _userManager.IsInRoleAsync(user, adminRole.Name))
                 {
@@ -83,6 +84,7 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
             {
                 ApplicationUser user = await _userManager.FindByIdAsync(userId);
                 if (user == null) return NotFound("Can't find this User");
+
                 IdentityRole role = await _roleManager.FindByNameAsync(roleName);
                 if (role == null) return NotFound("Can't find this Role");
                 
@@ -112,8 +114,16 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
             {
                 ApplicationUser user = await _userManager.FindByIdAsync(userId);
                 if (user == null) return NotFound("Can't find this User");
+
                 IdentityRole role = await _roleManager.FindByNameAsync(roleName);
                 if (role == null) return NotFound("Can't find this Role");
+
+                if (role.Name.Equals("Admin", StringComparison.OrdinalIgnoreCase) && await _userManager.IsInRoleAsync(user, roleName))
+                {
+                    TempData["ErrorMessage"] = "Cannot remove user from the Admin role.";
+                    return RedirectToAction("Index");
+                }
+
                 IdentityResult result = await _userManager.RemoveFromRoleAsync(user, roleName);
                 if (result.Succeeded)
                 {
@@ -148,6 +158,7 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                 }
 
                 IdentityRole role = new IdentityRole(roleName);
+
                 IdentityResult result = await _roleManager.CreateAsync(role);
                 if (result.Succeeded)
                 {

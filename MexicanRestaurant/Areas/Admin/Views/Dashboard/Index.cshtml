@@ -1,0 +1,148 @@
+﻿@using MexicanRestaurant.WebUI.ViewModels
+@model AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    ViewData["MetaDescription"] = "Admin dashboard for the Mexican Restaurant application, providing an overview of key metrics and system status.";
+}
+
+<form method="get" class="row g-2 my-4">
+    <div class="col-md-4">
+        <label for="startDate" class="form-label text-success fw-bold">From Date</label>
+        <input type="date" name="startDate" class="form-control" value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-md-4">
+        <label for="endDate" class="form-label text-success fw-bold">To Date</label>
+        <input type="date" name="endDate" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+        <button type="submit" class="btn btn-success w-100">🔍 Filter by Date</button>
+    </div>
+</form>
+
+<div class="container">
+    <h2 class="mb-4 text-center text-success">📊 Admin Dashboard</h2>
+
+    <div class="row g-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white bg-primary h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h5>Total Users</h5>
+                    <h2>@Model.TotalUsers</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white bg-success h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h5>Total Orders</h5>
+                    <h2>@Model.TotalOrders</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white bg-info h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h5>Total Products</h5>
+                    <h2>@Model.TotalProducts</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white bg-warning h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <h5>Total Revenue</h5>
+                    <h2>$@Model.TotalRevenue.ToString("N2")</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-5" />
+
+    <div class="row">
+        <div class="col-lg-6">
+            <h4 class="text-center mb-3">Top Selling Products</h4>
+            @if (Model.TopProductNames != null && Model.TopProductSales != null)
+            {
+                <canvas id="topProductsChart" height="300"></canvas>
+            }
+            else
+            {
+                <p class="text-muted text-center">No data available for top products.</p>
+            }
+        </div>
+
+        <div class="col-lg-6">
+            <h4 class="text-center mb-3">Revenue Timeline</h4>
+            @if (Model.RevenueByDate != null && Model.RevenueByDate.Any())
+            {   
+                <canvas id="revenueChart" height="300"></canvas>
+            }
+            else
+            {
+                <p class="text-muted text-center">No revenue data to display.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const topNames = @Html.Raw(Json.Serialize(Model.TopProductNames ?? new List<string>()));
+        const topSales = @Html.Raw(Json.Serialize(Model.TopProductSales ?? new List<int>()));
+        const revenueLabels = @Html.Raw(Json.Serialize(Model.RevenueByDate != null && Model.RevenueByDate.Any() ? Model.RevenueByDate.Keys.ToList() : new List<string>()));
+        const revenueValues = @Html.Raw(Json.Serialize(Model.RevenueByDate != null && Model.RevenueByDate.Any() ? Model.RevenueByDate.Values.ToList() : new List<decimal>()));
+
+        if (topNames.length > 0 && topSales.length > 0) {
+            new Chart(document.getElementById("topProductsChart"), {
+                type: 'doughnut',
+                data: {
+                    labels: topNames,
+                    datasets: [{
+                        label: 'Sales Count',
+                        data: topSales,
+                        backgroundColor: ['#198754', '#36A2EB', '#FFCE56', '#FF6384', '#FF9F40'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: 'Top Products' }
+                    }
+                }
+            });
+        }
+
+        if (revenueLabels.length > 0 && revenueValues.length > 0) {
+            new Chart(document.getElementById("revenueChart"), {
+                type: 'line',
+                data: {
+                    labels: revenueLabels,
+                    datasets: [{
+                        label: 'Revenue ($)',
+                        data: revenueValues,
+                        fill: true,
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0,123,255,0.2)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: 'Revenue Over Time' }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Date' } },
+                        y: { title: { display: true, text: 'Amount ($)' } }
+                    }
+                }
+            });
+        }
+    </script>
+}

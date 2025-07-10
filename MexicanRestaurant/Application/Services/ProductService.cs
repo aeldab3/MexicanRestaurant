@@ -6,6 +6,7 @@ using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -28,6 +29,19 @@ namespace MexicanRestaurant.Application.Services
             _httpContextAccessor = httpContextAccessor;
             _auditLogHelper = auditLogHelper;
             _logger = logger;
+        }
+
+        public async Task<int> GetTotalProductsAsync()
+        {
+            try 
+            {
+                return await _products.Table.CountAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching all products");
+                throw new ProductNotFoundException($"Error retrieving products: {ex.Message}");
+            }
         }
 
         public async Task<Product> GetProductByIdAsync(int id)

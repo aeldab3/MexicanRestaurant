@@ -67,6 +67,8 @@ namespace MexicanRestaurant.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public IQueryable<T> Table => _context.Set<T>();
+
         private IQueryable<T> ApplyOptions(QueryOptions<T> options)
         {
             IQueryable<T> query = _dbSet;
