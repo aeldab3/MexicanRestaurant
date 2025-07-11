@@ -38,6 +38,7 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                     TopProductNames = await _statistics.GetTopProductNamesAsync(5, startDate, endDate),
                     TopProductSales = await _statistics.GetTopProductSalesAsync(5, startDate, endDate),
                     RevenueByDate = await _statistics.GetRevenueByDateAsync(startDate, endDate),
+                    CategorySales = await _statistics.GetCategorySalesAsync(startDate, endDate),
                     StartDate = startDate,
                     EndDate = endDate
                 };

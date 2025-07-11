@@ -25,47 +25,47 @@
 
     <div class="row g-4">
         <div class="col-md-3 col-sm-6">
-            <div class="card text-white bg-primary h-100 shadow-sm">
+            <div class="card text-white bg-success h-100 shadow-sm">
                 <div class="card-body text-center">
-                    <h5>Total Users</h5>
-                    <h2>@Model.TotalUsers</h2>
+                    <h6 class="mb-1">Total Users</h6>
+                    <h4 class="mb-0">@Model.TotalUsers</h4>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card text-white bg-success h-100 shadow-sm">
+            <div class="card text-white bg-primary h-100 shadow-sm">
                 <div class="card-body text-center">
-                    <h5>Total Orders</h5>
-                    <h2>@Model.TotalOrders</h2>
+                    <h6 class="mb-1">Total Orders</h6>
+                    <h4 class="mb-0">@Model.TotalOrders</h4>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
             <div class="card text-white bg-info h-100 shadow-sm">
                 <div class="card-body text-center">
-                    <h5>Total Products</h5>
-                    <h2>@Model.TotalProducts</h2>
+                    <h6 class="mb-1">Total Products</h6>
+                    <h4 class="mb-0">@Model.TotalProducts</h4>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
             <div class="card text-white bg-warning h-100 shadow-sm">
                 <div class="card-body text-center">
-                    <h5>Total Revenue</h5>
-                    <h2>$@Model.TotalRevenue.ToString("N2")</h2>
+                    <h6 class="mb-1">Total Revenue</h6>
+                    <h4 class="mb-0">$@Model.TotalRevenue.ToString("N2")</h4>
                 </div>
             </div>
         </div>
     </div>
 
-    <hr class="my-5" />
+    <hr class="my-3" />
 
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <h4 class="text-center mb-3">Top Selling Products</h4>
             @if (Model.TopProductNames != null && Model.TopProductSales != null)
             {
-                <canvas id="topProductsChart" height="300"></canvas>
+                <canvas id="topProductsChart" height="200"></canvas>
             }
             else
             {
@@ -73,7 +73,15 @@
             }
         </div>
 
-        <div class="col-lg-6">
+        <div class="col-lg-4">
+            <h4 class="text-center mb-3">Sales by Category</h4>
+            @if (Model.CategorySales != null && Model.CategorySales.Any())
+            {
+                <canvas id="categoryChart" height="300"></canvas>
+            }
+        </div>
+
+        <div class="col-lg-4">
             <h4 class="text-center mb-3">Revenue Timeline</h4>
             @if (Model.RevenueByDate != null && Model.RevenueByDate.Any())
             {   
@@ -94,6 +102,8 @@
         const topSales = @Html.Raw(Json.Serialize(Model.TopProductSales ?? new List<int>()));
         const revenueLabels = @Html.Raw(Json.Serialize(Model.RevenueByDate != null && Model.RevenueByDate.Any() ? Model.RevenueByDate.Keys.ToList() : new List<string>()));
         const revenueValues = @Html.Raw(Json.Serialize(Model.RevenueByDate != null && Model.RevenueByDate.Any() ? Model.RevenueByDate.Values.ToList() : new List<decimal>()));
+        const categoryLabels = @Html.Raw(Json.Serialize(Model.CategorySales != null && Model.CategorySales.Any() ? Model.CategorySales.Keys.ToList() : new List<string>()));
+        const categoryValues = @Html.Raw(Json.Serialize(Model.CategorySales != null && Model.CategorySales.Any() ? Model.CategorySales.Values.ToList() : new List<int>()));
 
         if (topNames.length > 0 && topSales.length > 0) {
             new Chart(document.getElementById("topProductsChart"), {
@@ -117,6 +127,26 @@
             });
         }
 
+        if (categoryLabels.length > 0 && categoryValues.length > 0) {
+            new Chart(document.getElementById("categoryChart"), {
+                type: 'pie',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        data: categoryValues,
+                        backgroundColor: ['#FFCE56', '#36A2EB', '#198754', '#FF6384', '#FF9F40'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        title: { display: true, text: 'Sales by Category' }
+                    }
+                }
+            });
+        }
+
         if (revenueLabels.length > 0 && revenueValues.length > 0) {
             new Chart(document.getElementById("revenueChart"), {
                 type: 'line',
@@ -126,8 +156,8 @@
                         label: 'Revenue ($)',
                         data: revenueValues,
                         fill: true,
-                        borderColor: '#007bff',
-                        backgroundColor: 'rgba(0,123,255,0.2)',
+                        borderColor: '#198754',
+                        backgroundColor: 'rgba(25,135,84,0.2)',
                         tension: 0.4
                     }]
                 },

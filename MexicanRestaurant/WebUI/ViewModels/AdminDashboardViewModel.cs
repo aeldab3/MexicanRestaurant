@@ -9,6 +9,7 @@
         public List<string> TopProductNames { get; set; }
         public List<int> TopProductSales { get; set; }
         public Dictionary<string, decimal> RevenueByDate { get; set; }
+        public Dictionary<string, int> CategorySales { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }

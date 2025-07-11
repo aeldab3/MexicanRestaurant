@@ -55,6 +55,16 @@ namespace MexicanRestaurant.Application.Services
                     g => g.Sum(o => o.TotalAmount)
                 );
         }
+        public async Task<Dictionary<string, int>> GetCategorySalesAsync(DateTime? startDate = null, DateTime? endDate = null)
+        {
+            return await FilterOrders(startDate, endDate)
+                .SelectMany(o => o.OrderItems)
+                .GroupBy(c => c.Product.Category.Name) 
+                .ToDictionaryAsync(
+                    g => g.Key,
+                    g => g.Sum(oi => oi.Quantity)
+                );
+        }
 
         private IQueryable<Order> FilterOrders(DateTime? startDate, DateTime? endDate)
         {
