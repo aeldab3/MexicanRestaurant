@@ -78,6 +78,7 @@
                                     <input type="hidden" name="prodId" value="@product.ProductId" />
                                     <input type="number" name="prodQty" class="form-control" value="1" min="1" max="@product.Stock" />
                                 </div>
+
                                 @if (product.Stock == 0)
                                 {
                                     <button type="button" class="btn btn-secondary w-100 mt-auto btn-out-of-stock" data-prod-name="@product.Name" style="opacity: 0.7; cursor: not-allowed;">
@@ -86,9 +87,9 @@
                                 }
                                 else 
                                 {
-                                <button type="button" class="btn btn-success w-100 mt-auto btn-add-to-cart" data-prod-id="@product.ProductId" data-stock="@product.Stock">
-                                    <i class="bi bi-cart-plus"></i> Add to Cart
-                                </button>
+                                    <button type="button" class="btn btn-success w-100 mt-auto btn-add-to-cart" data-prod-id="@product.ProductId" data-stock="@product.Stock">
+                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                    </button>
                                 }
                             </div>
                         </div>
@@ -96,7 +97,7 @@
                 </div>
             }
         </div>
-        <div class="pagination-wrapper mt-4">
+        <div class="pagination-wrapper m-4">
             <nav class="d-flex justify-content-center">
                 <ul class="pagination pagination-sm">
                     @for (int i = 1; i <= Model.Pagination.TotalPages; i++)

@@ -41,6 +41,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSession(op =>
 {
     op.IdleTimeout = TimeSpan.FromDays(10);
+    op.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
 var app = builder.Build();
@@ -57,16 +58,20 @@ else
     app.UseHsts();
 }
 
+app.UseHttpsRedirection();
+
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Add("Content-Security-Policy",
         "default-src 'self'; " +
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-        "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
         "font-src 'self' https://cdn.jsdelivr.net; " +
-        "connect-src 'self' wss://localhost:44327;");
+        "img-src 'self' data:; " +
+        "connect-src 'self' http://localhost:* https://localhost:* ws://localhost:* wss://localhost:*;");
     await next();
-}); app.UseHttpsRedirection();
+});
+
 app.UseRouting();
 
 app.UseAuthentication();

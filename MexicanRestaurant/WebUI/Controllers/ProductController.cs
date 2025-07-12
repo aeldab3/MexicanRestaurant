@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MexicanRestaurant.WebUI.Controllers
 {
-    [Authorize(Roles = "Admin, Manager")]
+    [Authorize]
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
@@ -23,6 +23,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             _logger = logger;
         }
 
+        [Authorize(Roles = "Admin, Manager")]
         [HttpGet]
         public async Task<IActionResult> Index(int page = 1, string searchTerm = "", int? categoryId = null, string sortBy = "")
         {
@@ -32,6 +33,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             return View(products);
         }
 
+        [Authorize(Roles = "Admin, Manager")]
         [HttpGet]
         public async Task<IActionResult> AddEdit(int id)
         {
@@ -51,7 +53,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             return View(model);
         }
 
-        [HttpPost]
+        [Authorize(Roles = "Admin, Manager")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEdit(ProductFormViewModel model)
         {
@@ -85,6 +87,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {

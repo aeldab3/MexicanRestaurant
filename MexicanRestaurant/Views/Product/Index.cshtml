@@ -8,12 +8,12 @@
     <div class="row gy-3 align-items-end">
 
         <div class="col-md-4 col-sm-12">
-            <label for="searchTerm" class="form-label fw-bold text-success">Search</label>
+            <label for="searchTerm" class="form-label fw-bold text-dark">Search</label>
             <input type="text" id="searchTerm" name="searchTerm" value="@Model.Filter.SearchTerm" class="form-control" placeholder="Search products..." />
         </div>
 
         <div class="col-md-3 col-sm-6">
-            <label for="categoryId" class="form-label fw-bold text-success">Category</label>
+            <label for="categoryId" class="form-label fw-bold text-dark">Category</label>
             <select id="categoryId" name="categoryId" class="form-select">
                 <option value="">All Categories</option>
                 @foreach (var category in Model.Filter.Categories)
@@ -25,7 +25,7 @@
         </div>
 
         <div class="col-md-3 col-sm-6">
-            <label for="sortBy" class="form-label fw-bold text-success">Sort By</label>
+            <label for="sortBy" class="form-label fw-bold text-dark">Sort By</label>
             <select id="sortBy" name="sortBy" class="form-select">
                 <option value="">Sort by</option>
                 <option value="name_asc" selected="@(Model.Filter.SortBy == "name_asc")">Name ↑</option>
@@ -61,8 +61,8 @@
                 <div class="card h-100 shadow-lg border-0" style="background-color: #f9f5d985">
                     <div class="product-wrapper">
                         <img src="@Url.Content("~/images/" + product?.ImageUrl)"
-                             class="card-img-top img-fluid"
-                             style="height: 220px; object-fit: cover;" alt="@product?.Name" />
+                             class="card-img-top img-fluid" width="336" height="220"
+                             style="height: 220px; object-fit: cover;" alt="@product?.Name" loading="lazy" />
 
                         <a asp-action="Details" asp-controller="Product" asp-route-id="@product.ProductId"
                            class="btn btn-lg btn-success details-btn">
@@ -70,7 +70,7 @@
                         </a>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title text-success fw-bold">@product?.Name</h5>
+                        <h2 class="card-title fw-bolder text-success">@product?.Name</h2>
                         <p class="card-text text-muted">@product?.Description</p>
                         <p class="text-muted"><strong>Category:</strong> <span class="text-dark">@product.CategoryName</span></p>
                         <div class="d-flex justify-content-around">

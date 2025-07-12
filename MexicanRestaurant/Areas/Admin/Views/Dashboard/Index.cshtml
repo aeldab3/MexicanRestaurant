@@ -8,12 +8,12 @@
 
 <form method="get" class="row g-2 my-4">
     <div class="col-md-4">
-        <label for="startDate" class="form-label text-success fw-bold">From Date</label>
-        <input type="date" name="startDate" class="form-control" value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
+        <label for="startDate" class="form-label text-dark fw-bold">From Date</label>
+        <input type="date" name="startDate" id="startDate" class="form-control" value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
     </div>
     <div class="col-md-4">
-        <label for="endDate" class="form-label text-success fw-bold">To Date</label>
-        <input type="date" name="endDate" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
+        <label for="endDate" class="form-label text-dark fw-bold">To Date</label>
+        <input type="date" name="endDate" id="endDate" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
     </div>
     <div class="col-md-4 d-flex align-items-end">
         <button type="submit" class="btn btn-success w-100">🔍 Filter by Date</button>
@@ -25,33 +25,33 @@
 
     <div class="row g-4">
         <div class="col-md-3 col-sm-6">
-            <div class="card text-white bg-success h-100 shadow-sm">
+            <div class="card text-dark bg-success h-100 shadow-sm">
                 <div class="card-body text-center">
-                    <h6 class="mb-1">Total Users</h6>
+                    <h3 class="mb-1">Total Users</h3>
                     <h4 class="mb-0">@Model.TotalUsers</h4>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card text-white bg-primary h-100 shadow-sm">
+            <div class="card text-dark bg-primary h-100 shadow-sm">
                 <div class="card-body text-center">
-                    <h6 class="mb-1">Total Orders</h6>
+                    <h3 class="mb-1">Total Orders</h3>
                     <h4 class="mb-0">@Model.TotalOrders</h4>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card text-white bg-info h-100 shadow-sm">
+            <div class="card text-dark bg-info h-100 shadow-sm">
                 <div class="card-body text-center">
-                    <h6 class="mb-1">Total Products</h6>
+                    <h3 class="mb-1">Total Products</h3>
                     <h4 class="mb-0">@Model.TotalProducts</h4>
                 </div>
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card text-white bg-warning h-100 shadow-sm">
+            <div class="card text-dark bg-warning h-100 shadow-sm">
                 <div class="card-body text-center">
-                    <h6 class="mb-1">Total Revenue</h6>
+                    <h3 class="mb-1">Total Revenue</h3>
                     <h4 class="mb-0">$@Model.TotalRevenue.ToString("N2")</h4>
                 </div>
             </div>
@@ -65,7 +65,7 @@
             <h4 class="text-center mb-3">Top Selling Products</h4>
             @if (Model.TopProductNames != null && Model.TopProductSales != null)
             {
-                <canvas id="topProductsChart" height="200"></canvas>
+                <canvas id="topProductsChart" aria-label="Top selling products chart" role="img" height="200"></canvas>
             }
             else
             {
@@ -77,15 +77,15 @@
             <h4 class="text-center mb-3">Sales by Category</h4>
             @if (Model.CategorySales != null && Model.CategorySales.Any())
             {
-                <canvas id="categoryChart" height="300"></canvas>
+                <canvas id="categoryChart" aria-label="Top selling Category chart" role="img" height="300"></canvas>
             }
         </div>
 
         <div class="col-lg-4">
             <h4 class="text-center mb-3">Revenue Timeline</h4>
             @if (Model.RevenueByDate != null && Model.RevenueByDate.Any())
-            {   
-                <canvas id="revenueChart" height="300"></canvas>
+            {
+                <canvas id="revenueChart" aria-label="Revenue timeline chart" role="img" height="300"></canvas>
             }
             else
             {

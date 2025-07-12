@@ -4,14 +4,17 @@
 
 }
 
-<style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        overflow-x: hidden;
-    }
+<main>
+    <section class="full-width-home">
+        <div class="home-content">
+            <h1>Authentic Mexican Taste</h1>
+            <p>Order your favorite tacos, burritos, and more!</p>
+            <a asp-controller="Order" asp-action="Create" class="btn btn-lg btn-warning">Explore Menu</a>
+        </div>
+    </section>
+</main>
 
-    /* حل لتوسيع الصورة خارج container */
+<style>
     .full-width-home {
         position: relative;
         left: 50%;
@@ -23,7 +26,7 @@
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        height: 88vh;
+        min-height: 88vh;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -54,11 +57,3 @@
         text-align: center;
     }
 </style>
-
-<div class="full-width-home">
-    <div class="home-content">
-        <h1>Authentic Mexican Taste</h1>
-        <p>Order your favorite tacos, burritos, and more!</p>
-        <a asp-controller="Order" asp-action="Create" class="btn btn-lg btn-warning">Explore Menu</a>
-    </div>
-</div>
