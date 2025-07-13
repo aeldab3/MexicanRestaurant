@@ -7,7 +7,8 @@
 <main>
     <section class="full-width-home">
         <div class="home-content">
-            <h1>Authentic Mexican Taste</h1>
+            <h1 style="color:#627241">Mexican Restaurant</h1>
+            <h2>Authentic Mexican Taste</h2>
             <p>Order your favorite tacos, burritos, and more!</p>
             <a asp-controller="Order" asp-action="Create" class="btn btn-lg btn-warning">Explore Menu</a>
         </div>
@@ -26,7 +27,7 @@
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
-        min-height: 88vh;
+        min-height: 85vh;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -37,11 +38,15 @@
         z-index: 2;
         color: white;
         text-align: center;
-        text-shadow: 1px 1px 10px #000;
+        text-shadow: 1px 1px 5px #000;
     }
 
     .full-width-home h1 {
         font-size: 4rem;
+    }
+
+    .full-width-home h2 {
+        font-size: 2rem;
     }
 
     .full-width-home p {
@@ -49,11 +54,11 @@
     }
 
     .full-width-home .btn {
-        margin-top: 5rem;
+        margin-top: 2rem;
     }
 
     .section {
-        padding: 4rem 2rem;
+        padding: 3rem 1rem;
         text-align: center;
     }
 </style>

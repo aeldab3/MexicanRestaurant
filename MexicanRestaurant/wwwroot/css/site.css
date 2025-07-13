@@ -79,6 +79,10 @@ ul li .active {
         font-size: 2.5rem !important;
     }
 
+    .full-width-home h2 {
+        font-size: 1.5rem !important;
+    }
+
     .full-width-home p {
         font-size: 1.1rem !important;
     }

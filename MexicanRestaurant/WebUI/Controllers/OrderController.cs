@@ -2,6 +2,7 @@
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Views.Shared;
+using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -113,12 +114,15 @@ namespace MexicanRestaurant.WebUI.Controllers
             }
         }
 
+
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> ViewOrders()
+        public async Task<IActionResult> ViewOrders(int page = 1)
         {
-            var orders = await _orderProcessor.GetUserOrdersAsync(_userManager.GetUserId(User));
-            return View(orders);
+            var userId = _userManager.GetUserId(User);
+            var pagination = new PaginationInfo { CurrentPage = page, PageSize = 15 };
+            var model = await _orderProcessor.GetPagedUserOrdersAsync(userId, pagination);
+            return View(model);
         }
 
         [HttpPost]

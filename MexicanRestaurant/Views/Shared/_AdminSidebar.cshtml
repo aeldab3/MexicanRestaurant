@@ -2,10 +2,12 @@
 {
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     <aside class="admin-sidebar d-none d-lg-block">
+        <img class="text-center mx-0" width="60" height="60" src="~/images/Logo-AE.png" alt="icon image" />
         <h2 class="text-white text-center mb-4">Admin Panel</h2>
         <nav class="nav flex-column px-3 text-center" aria-label="Admin Sidebar Navigation">
             <a class="nav-link admin-link @(currentController == "Dashboard" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a>
             <a class="nav-link admin-link @(currentController == "User" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="User" asp-action="Index">👥 User Management</a>
+            <a class="nav-link admin-link @(currentController == "OrderManagement" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="OrderManagement" asp-action="Index">🧾 Order Management</a>
             <a class="nav-link admin-link @(currentController == "AuditLog" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="AuditLog" asp-action="Index">📋 Audit Logs</a>
             <a class="nav-link admin-link @(currentController == "Product" ? "active-admin-link" : "")" asp-area="" asp-controller="Product" asp-action="Index">🌮 Products</a>
             <a class="nav-link admin-link @(currentController == "Ingredient" ? "active-admin-link" : "")" asp-area="" asp-controller="Ingredient" asp-action="Index">🌶️ Ingredients</a>
