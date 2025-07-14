@@ -8,10 +8,12 @@ namespace MexicanRestaurant.Application.Services
     {
         private readonly IRepository<Category> _categories;
         private readonly IRepository<Ingredient> _ingredients;
-        public SharedLookupService(IRepository<Category> categories, IRepository<Ingredient> ingredients)
+        private readonly IRepository<DeliveryMethod> _deliveryMethods;
+        public SharedLookupService(IRepository<Category> categories, IRepository<Ingredient> ingredients, IRepository<DeliveryMethod> deliveryMethods)
         {
             _categories = categories;
             _ingredients = ingredients;
+            _deliveryMethods = deliveryMethods;
         }
 
         public async Task<List<SelectListItem>> GetCategorySelectListAsync()
@@ -27,6 +29,11 @@ namespace MexicanRestaurant.Application.Services
         public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync()
         {
             return await _ingredients.GetAllAsync();
+        }
+
+        public async Task<List<DeliveryMethod>> GetAllDeliveryMethodsAsync()
+        {
+            return (await _deliveryMethods.GetAllAsync()).ToList();
         }
     }
 }

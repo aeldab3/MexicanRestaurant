@@ -17,6 +17,7 @@ namespace MexicanRestaurant.Infrastructure.Data
         public DbSet<Ingredient> Ingredients { get; set; }
         public DbSet<ProductIngredient> ProductIngredients { get; set; }
         public DbSet<AuditLog> AuditLogs { get; set; }
+        public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -71,6 +72,9 @@ namespace MexicanRestaurant.Infrastructure.Data
                 new ProductIngredient { ProductId = 3, IngredientId = 5 },
                 new ProductIngredient { ProductId = 3, IngredientId = 6 }
             );
+
+            modelBuilder.Entity<Order>()
+                .OwnsOne(o => o.ShippingAddress);
         }
     }
 }

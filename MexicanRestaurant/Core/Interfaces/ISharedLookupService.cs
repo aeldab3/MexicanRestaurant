@@ -7,5 +7,6 @@ namespace MexicanRestaurant.Core.Interfaces
     {
         Task<List<SelectListItem>> GetCategorySelectListAsync();
         Task<IEnumerable<Ingredient>> GetAllIngredientsAsync();
+        Task<List<DeliveryMethod>> GetAllDeliveryMethodsAsync();
     }
 }

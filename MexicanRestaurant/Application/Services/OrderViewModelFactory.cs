@@ -27,6 +27,7 @@ namespace MexicanRestaurant.Application.Services
             { 
                 var (mappedProducts, totalProducts) = await _paginatedProductFetcher.GetPagedProductsAsync(filter, pagination);
                 var categories = await _sharedLookupService.GetCategorySelectListAsync();
+                var deliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
                 return new OrderViewModel
                 {
                     Products = mappedProducts,
@@ -43,6 +44,7 @@ namespace MexicanRestaurant.Application.Services
                         PageSize = pagination.PageSize,
                         TotalPages = (int)Math.Ceiling((double)totalProducts / pagination.PageSize)
                     },
+                    AvailableDeliveryMethods = deliveryMethods,
                     OrderItems = _sessionService.Get<OrderViewModel>(OrderSessionCartKey)?.OrderItems ?? new List<OrderItemViewModel>(),
                 };
             }
