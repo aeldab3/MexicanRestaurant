@@ -1,0 +1,205 @@
+﻿@using MexicanRestaurant.WebUI.ViewModels
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+    ViewData["MetaDescription"] = "This is the process for checkout your order";
+}
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-xl-10 col-lg-11 col-md-12">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center py-4">
+                    <h2 class="fw-bold mb-0">🚚 Checkout</h2>
+                    <p class="fw-light mb-0">Enter your shipping info and choose delivery method</p>
+                </div>
+
+                <div class="card-body p-4">
+                    <form asp-action="Checkout" method="post" id="checkoutForm">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Step 1: Shipping Address -->
+                        <div id="step1" class="checkout-step">
+                            <h4 class="mb-3">📍 Shipping Address</h4>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label asp-for="ShippingAddress.FirstName" class="form-label"></label>
+                                    <input asp-for="ShippingAddress.FirstName" class="form-control" />
+                                    <span asp-validation-for="ShippingAddress.FirstName" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6">
+                                    <label asp-for="ShippingAddress.LastName" class="form-label"></label>
+                                    <input asp-for="ShippingAddress.LastName" class="form-control" />
+                                    <span asp-validation-for="ShippingAddress.LastName" class="text-danger"></span>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="ShippingAddress.Street" class="form-label"></label>
+                                    <input asp-for="ShippingAddress.Street" class="form-control" />
+                                    <span asp-validation-for="ShippingAddress.Street" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="ShippingAddress.City" class="form-label"></label>
+                                    <input asp-for="ShippingAddress.City" class="form-control" />
+                                    <span asp-validation-for="ShippingAddress.City" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="ShippingAddress.State" class="form-label"></label>
+                                    <input asp-for="ShippingAddress.State" class="form-control" />
+                                    <span asp-validation-for="ShippingAddress.State" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="ShippingAddress.Zipcode" class="form-label"></label>
+                                    <input asp-for="ShippingAddress.Zipcode" class="form-control" />
+                                    <span asp-validation-for="ShippingAddress.Zipcode" class="text-danger"></span>
+                                </div>
+                                <div class="col-12">
+                                    <label asp-for="ShippingAddress.PhoneNumber" class="form-label"></label>
+                                    <input asp-for="ShippingAddress.PhoneNumber" class="form-control" />
+                                    <span asp-validation-for="ShippingAddress.PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-4">
+                                <a asp-action="Cart" asp-controller="Order" class="btn btn-secondary shadow-sm">Back</a>
+                                <button type="button" class="btn btn-success shadow-sm next-step">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Delivery Method -->
+                        <div id="step2" class="checkout-step" style="display:none;">
+                            <h4 class="mb-3">🚛 Delivery Method</h4>
+                            @if (Model.AvailableDeliveryMethods != null && Model.AvailableDeliveryMethods.Any())
+                            {
+                                foreach (var method in Model.AvailableDeliveryMethods)
+                                {
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" asp-for="SelectedDeliveryMethodId" value="@method.Id" data-price="@method.Price" required />
+                                        <label class="form-check-label">
+                                            <strong>@method.ShortName</strong> - @method.Description (@method.Price.ToString("C"))
+                                        </label>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <p class="text-danger">⚠️ No delivery methods available.</p>
+                            }
+                            <span asp-validation-for="SelectedDeliveryMethodId" class="text-danger"></span>
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-secondary shadow-sm prev-step">Back</button>
+                                <button type="button" class="btn btn-success shadow-sm next-step">Next</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Review -->
+                        <div id="step3" class="checkout-step" style="display:none;">
+                            <h4 class="mb-3">🧾 Review Your Order</h4>
+                            <p><strong>Name:</strong> <span id="reviewName"></span></p>
+                            <p><strong>Phone:</strong> <span id="reviewPhone"></span></p>
+                            <p><strong>Address:</strong> <span id="reviewAddress"></span></p>
+                            <p><strong>Delivery:</strong> <span id="reviewDelivery"></span></p>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <thead class="table-light">
+                                        <tr><th>Product</th><th>Qty</th><th>Price</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in Model.OrderItems)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex flex-column flex-md-row align-items-md-center gap-2">
+                                                        <img src="@Url.Content("~/images/" + item.Product.ImageUrl)" class="img-fluid" style="max-width: 80px; height: auto; border-radius: 8px;" />
+                                                        <span class="fw-semibold text-dark">@item.Product.Name</span>
+                                                    </div>
+                                                </td>
+                                                <td>@item.Quantity</td>
+                                                <td>@((item.Price * item.Quantity).ToString("C"))</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <p class="mt-3 fs-5"><strong>Total:</strong> <span id="reviewTotal">@Model.TotalAmount.ToString("C")</span></p>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-secondary shadow-sm prev-step">Back</button>
+                                <button type="submit" class="btn btn-success shadow-sm">Place Order</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const steps = document.querySelectorAll(".checkout-step");
+            let currentStep = 0;
+
+            const showStep = (index) => {
+                steps.forEach((step, i) => {
+                    step.style.display = i === index ? "block" : "none";
+                });
+            };
+
+            document.querySelectorAll(".next-step").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        showStep(currentStep);
+                        if (currentStep === 2) updateReviewStep();
+                    }
+                });
+            });
+
+            document.querySelectorAll(".prev-step").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    if (currentStep > 0) {
+                        currentStep--;
+                        showStep(currentStep);
+                    }
+                });
+            });
+
+            showStep(currentStep);
+        });
+        function updateReviewStep() {
+            const firstName = document.querySelector('[name="ShippingAddress.FirstName"]').value;
+            const lastName = document.querySelector('[name="ShippingAddress.LastName"]').value;
+            const phone = document.querySelector('[name="ShippingAddress.PhoneNumber"]').value;
+            const street = document.querySelector('[name="ShippingAddress.Street"]').value;
+            const city = document.querySelector('[name="ShippingAddress.City"]').value;
+            const zipCode = document.querySelector('[name="ShippingAddress.Zipcode"]').value;
+
+            const deliveryInputs = document.querySelectorAll('input[name="SelectedDeliveryMethodId"]');
+            let selectedDeliveryText = 'Not selected';
+            let deliveryPrice = 0;
+            deliveryInputs.forEach(input => {
+                if (input.checked) {
+                    const label = input.closest('.form-check').querySelector('label');
+                    selectedDeliveryText = label.innerText;
+                    deliveryPrice = parseFloat(input.dataset.price || "0");
+                }
+            });
+            const productsTotal = parseFloat("@Model.TotalAmount");
+            const grandTotal = productsTotal + deliveryPrice;
+
+            document.getElementById("reviewName").innerText = `${firstName} ${lastName}`;
+            document.getElementById("reviewPhone").innerText = `${phone}`;
+            document.getElementById("reviewAddress").innerText = `${street}, ${city}, and Zipcode is: ${zipCode}`;
+            document.getElementById("reviewDelivery").innerText = selectedDeliveryText;
+            document.getElementById("reviewTotal").innerText = grandTotal.toLocaleString('en-US', {
+                style: 'currency',
+                currency: 'USD'
+            });
+        }
+
+    </script>
+}

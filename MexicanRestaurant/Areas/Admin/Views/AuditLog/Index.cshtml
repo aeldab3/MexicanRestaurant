@@ -1,4 +1,5 @@
-﻿@model IEnumerable<AuditLog>
+﻿@using MexicanRestaurant.WebUI.ViewModels
+@model AuditLogViewModel
 @{
     ViewData["Title"] = "Audit Log";
     ViewData["MetaDescription"] = "View the audit log for the Mexican Restaurant application, tracking changes and actions performed by users.";
@@ -6,7 +7,7 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-lg-12">
-            <div class="card shadow-sm rounded">
+            <div class="card shadow-sm rounded" style="min-height: 75vh;">
                 <div class="card-header text-center bg-success text-white">
                     <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> Audit Log</h5>
                 </div>
@@ -25,7 +26,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (!Model.Any())
+                            @if (!Model.Logs.Any())
                             {
                                 <tr>
                                     <td colspan="8" class="text-center text-muted">No audit logs available.</td>
@@ -33,7 +34,7 @@
                             }
                             else
                             {
-                                foreach (var log in Model)
+                                foreach (var log in Model.Logs)
                                 {
                                     <tr>
                                         <td>@log.UserId</td>
@@ -52,5 +53,20 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="pagination-wrapper m-4">
+        <nav class="d-flex justify-content-center">
+            <ul class="pagination pagination-sm">
+                @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.Pagination.CurrentPage ? "active" : "")">
+                        <a class="page-link shadow-sm @(i == Model.Pagination.CurrentPage ? "bg-success text-white border-success" : "")"
+                           href="@Url.Action("Index", "AuditLog", new { page = i })" style="margin: 0 2px;">
+                            @i
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
     </div>
 </div>

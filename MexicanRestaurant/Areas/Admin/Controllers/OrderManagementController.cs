@@ -29,9 +29,10 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                 var pagination = new PaginationInfo { CurrentPage = page, PageSize = 15 };
                 var options = new QueryOptions<Order>
                 {
-                    Includes = "OrderItems.Product,User",
+                    Includes = "OrderItems.Product, User, DeliveryMethod",
                     PageNumber = pagination.CurrentPage,
                     PageSize = pagination.PageSize,
+                    OrderByWithFunc = o => o.OrderByDescending(o => o.OrderDate)
                 };
                 var totalOrders = await _orderRepository.Table.CountAsync();
                 var orders = await _orderRepository.GetAllAsync(options);

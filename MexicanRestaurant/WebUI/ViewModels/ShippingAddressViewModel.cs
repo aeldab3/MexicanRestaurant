@@ -21,5 +21,9 @@ namespace MexicanRestaurant.WebUI.ViewModels
 
         [Required, StringLength(10)]
         public string Zipcode { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string PhoneNumber { get; set; }
     }
 }

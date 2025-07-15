@@ -25,13 +25,14 @@
                             <table class="table table-hover align-middle text-center">
                                 <thead class="table-light">
                                     <tr>
-                                        <th>Order ID</th>
-                                        <th>First Name</th>
-                                        <th>Last Name</th>
-                                        <th>Email</th>
-                                        <th>Total</th>
-                                        <th>Status</th>
-                                        <th>Change Status</th>
+                                        <th scope="col">Order ID</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Shipping Address</th>
+                                        <th scope="col">Delivery</th>
+                                        <th scope="col">Total</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Change</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -39,9 +40,15 @@
                                     {
                                         <tr>
                                             <td>#@order.OrderId</td>
-                                            <td>@order.User?.FirstName</td>
-                                            <td>@order.User?.LastName</td>
+                                            <td>@order.User?.FirstName @order.User?.LastName</td>
                                             <td>@order.User?.Email</td>
+                                            <td>
+                                                <address class="small text-muted">
+                                                    @order.ShippingAddress?.Street<br />
+                                                    @order.ShippingAddress?.City, @order.ShippingAddress?.State<br />
+                                                </address>
+                                            </td>
+                                            <td>@order.DeliveryMethod?.ShortName</td>>
                                             <td class="text-success fw-semibold">@order.TotalAmount.ToString("C")</td>
                                             <td>
                                                 @switch (order.Status)
@@ -109,5 +116,4 @@
             </ul>
         </nav>
     </div>
-
 </div>

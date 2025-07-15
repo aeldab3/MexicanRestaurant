@@ -21,6 +21,7 @@ builder.Services.AddScoped<IOrderCartService, OrderCartService>();
 builder.Services.AddScoped<IOrderViewModelFactory, OrderViewModelFactory>();
 builder.Services.AddScoped<IOrderProcessor, OrderProcessor>();
 builder.Services.AddScoped<IOrderStatisticsService, OrderStatisticsService>();
+builder.Services.AddScoped<ICheckoutService, CheckoutService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddScoped<ISharedLookupService, SharedLookupService>();

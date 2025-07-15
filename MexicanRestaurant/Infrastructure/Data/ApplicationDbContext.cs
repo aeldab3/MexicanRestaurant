@@ -75,6 +75,12 @@ namespace MexicanRestaurant.Infrastructure.Data
 
             modelBuilder.Entity<Order>()
                 .OwnsOne(o => o.ShippingAddress);
+
+            modelBuilder.Entity<DeliveryMethod>().HasData(
+                new DeliveryMethod { Id = 1, ShortName = "Express", DeliveryTime = "30-45 mins", Description = "Fast delivery within 30-45 minutes", Price = 15m},
+                new DeliveryMethod { Id = 2, ShortName = "Standard", DeliveryTime = "1 hour", Description = "Standard delivery in one hour", Price = 10m},
+                new DeliveryMethod { Id = 3, ShortName = "Pickup", DeliveryTime = "30mins", Description = "Pickup from restaurant", Price = 0m}
+            );
         }
     }
 }

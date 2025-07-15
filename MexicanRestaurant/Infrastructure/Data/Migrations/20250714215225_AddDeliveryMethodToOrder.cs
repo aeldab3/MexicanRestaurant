@@ -2,6 +2,8 @@
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace MexicanRestaurant.Data.Migrations
 {
     /// <inheritdoc />
@@ -14,8 +16,7 @@ namespace MexicanRestaurant.Data.Migrations
                 name: "DeliveryMethodId",
                 table: "Orders",
                 type: "int",
-                nullable: false,
-                defaultValue: 0);
+                nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "ShippingAddress_City",
@@ -33,6 +34,13 @@ namespace MexicanRestaurant.Data.Migrations
 
             migrationBuilder.AddColumn<string>(
                 name: "ShippingAddress_LastName",
+                table: "Orders",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+
+            migrationBuilder.AddColumn<string>(
+                name: "ShippingAddress_PhoneNumber",
                 table: "Orders",
                 type: "nvarchar(max)",
                 nullable: false,
@@ -75,6 +83,16 @@ namespace MexicanRestaurant.Data.Migrations
                     table.PrimaryKey("PK_DeliveryMethods", x => x.Id);
                 });
 
+            migrationBuilder.InsertData(
+                table: "DeliveryMethods",
+                columns: new[] { "Id", "DeliveryTime", "Description", "Price", "ShortName" },
+                values: new object[,]
+                {
+                    { 1, "30-45 mins", "Fast delivery within 30-45 minutes", 15m, "Express" },
+                    { 2, "1 hour", "Standard delivery in one hour", 10m, "Standard" },
+                    { 3, "30mins", "Pickup from restaurant", 0m, "Pickup" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_DeliveryMethodId",
                 table: "Orders",
@@ -85,8 +103,7 @@ namespace MexicanRestaurant.Data.Migrations
                 table: "Orders",
                 column: "DeliveryMethodId",
                 principalTable: "DeliveryMethods",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
@@ -117,6 +134,10 @@ namespace MexicanRestaurant.Data.Migrations
 
             migrationBuilder.DropColumn(
                 name: "ShippingAddress_LastName",
+                table: "Orders");
+
+            migrationBuilder.DropColumn(
+                name: "ShippingAddress_PhoneNumber",
                 table: "Orders");
 
             migrationBuilder.DropColumn(

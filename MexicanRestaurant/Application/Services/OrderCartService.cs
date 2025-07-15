@@ -31,7 +31,11 @@ namespace MexicanRestaurant.Application.Services
 
         public void SaveCurrentOrderToSession(OrderViewModel model)
         {
-            if (model == null) return;
+            if (model == null)
+            {
+                _sessionService.Remove(OrderSessionCartKey);
+                return;
+            }
             model.TotalAmount = model.OrderItems.Sum(i => i.Price * i.Quantity);
             _sessionService.Set(OrderSessionCartKey, model);
         }

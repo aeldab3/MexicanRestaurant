@@ -9,9 +9,15 @@ namespace MexicanRestaurant.Application.MappingProfiles
         public OrderProfile()
         {
             CreateMap<OrderItem, OrderItemViewModel>()
-                .ForPath(dest => dest.Product.Name, opt => opt.MapFrom(src => src.Product.Name))
-                .ForPath(dest => dest.Product.ImageUrl, opt => opt.MapFrom(src => src.Product.ImageUrl))
-                .ReverseMap()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
+                .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product));
+
+            CreateMap<OrderItemViewModel, OrderItem>()
+                .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
+                .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
                 .ForMember(dest => dest.Product, opt => opt.Ignore())
                 .ForMember(dest => dest.Order, opt => opt.Ignore())
                 .ForMember(dest => dest.OrderId, opt => opt.Ignore());
@@ -19,6 +25,7 @@ namespace MexicanRestaurant.Application.MappingProfiles
             CreateMap<Product, OrderItemViewModel>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
                 .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src))
+                .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
                 .ForMember(dest => dest.Quantity, opt => opt.Ignore());
         }
     }

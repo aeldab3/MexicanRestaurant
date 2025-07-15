@@ -16,19 +16,18 @@
                 <div class="card-body">
                     @if (Model.OrderItems != null && Model.OrderItems.Any())
                     {
-                        <form asp-action="PlaceOrder" method="post">
-                            @Html.AntiForgeryToken()
-                                <div id="cart-container">
-                                    @Html.Partial("_CartPartial", Model)
-                                </div>
+                        <div id="cart-container">
+                            @Html.Partial("_CartPartial", Model)
+                        </div>
 
-                            <div class="text-end mt-4 d-flex justify-content-between">
-                                <a asp-action="Create" class="btn btn-lg btn-secondary px-5 shadow-sm">
-                                    <i class="bi bi-arrow-left"></i> Back to Products
-                                </a>
-                                <input type="submit" value="Place Order" class="btn btn-lg btn-success px-5 shadow-sm" />
-                            </div>
-                        </form>
+                        <div class="text-end mt-4 d-flex justify-content-between">
+                            <a asp-action="Create" class="btn btn-secondary px-5 mx-2 shadow-sm">
+                                <i class="bi bi-arrow-left"></i> Back to Products
+                            </a>
+                            <a asp-action="Checkout" class="btn btn-success px-5 mx-2 shadow-sm">
+                                <i class="bi bi-credit-card"></i> Proceed to Checkout
+                            </a>
+                        </div>
                     }
                     else
                     {

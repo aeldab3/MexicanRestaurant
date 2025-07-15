@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MexicanRestaurant.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250714170828_AddDeliveryMethodToOrder")]
+    [Migration("20250714215225_AddDeliveryMethodToOrder")]
     partial class AddDeliveryMethodToOrder
     {
         /// <inheritdoc />
@@ -219,6 +219,32 @@ namespace MexicanRestaurant.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("DeliveryMethods");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DeliveryTime = "30-45 mins",
+                            Description = "Fast delivery within 30-45 minutes",
+                            Price = 15m,
+                            ShortName = "Express"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DeliveryTime = "1 hour",
+                            Description = "Standard delivery in one hour",
+                            Price = 10m,
+                            ShortName = "Standard"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DeliveryTime = "30mins",
+                            Description = "Pickup from restaurant",
+                            Price = 0m,
+                            ShortName = "Pickup"
+                        });
                 });
 
             modelBuilder.Entity("MexicanRestaurant.Core.Models.Ingredient", b =>
@@ -278,7 +304,7 @@ namespace MexicanRestaurant.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
-                    b.Property<int>("DeliveryMethodId")
+                    b.Property<int?>("DeliveryMethodId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("OrderDate")
@@ -615,9 +641,7 @@ namespace MexicanRestaurant.Data.Migrations
                 {
                     b.HasOne("MexicanRestaurant.Core.Models.DeliveryMethod", "DeliveryMethod")
                         .WithMany()
-                        .HasForeignKey("DeliveryMethodId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DeliveryMethodId");
 
                     b.HasOne("MexicanRestaurant.Core.Models.ApplicationUser", "User")
                         .WithMany("Orders")
@@ -637,6 +661,10 @@ namespace MexicanRestaurant.Data.Migrations
                                 .HasColumnType("nvarchar(max)");
 
                             b1.Property<string>("LastName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("PhoneNumber")
                                 .IsRequired()
                                 .HasColumnType("nvarchar(max)");
 

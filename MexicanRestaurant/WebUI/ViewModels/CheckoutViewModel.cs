@@ -1,0 +1,18 @@
+﻿using MexicanRestaurant.Core.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace MexicanRestaurant.WebUI.ViewModels
+{
+    public class CheckoutViewModel
+    {
+        [Required]
+        public ShippingAddressViewModel ShippingAddress { get; set; } = new ShippingAddressViewModel();
+
+        [Required]
+        [Display(Name = "Delivery Method")]
+        public int SelectedDeliveryMethodId { get; set; }
+        public List<DeliveryMethod> AvailableDeliveryMethods { get; set; } = new();
+        public decimal TotalAmount { get; set; }
+        public List<OrderItemViewModel> OrderItems { get; set; } = new();
+    }
+}

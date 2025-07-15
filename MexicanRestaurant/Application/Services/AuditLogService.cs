@@ -1,5 +1,9 @@
 ﻿using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
+using MexicanRestaurant.Core.Specifications;
+using MexicanRestaurant.Views.Shared;
+using MexicanRestaurant.WebUI.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -38,9 +42,29 @@ namespace MexicanRestaurant.Application.Services
             }
         }
 
-        public async Task<IEnumerable<AuditLog>> GetAllLogsAsync()
+        public async Task<AuditLogViewModel> GetPagedLogsAsync(PaginationInfo pagination)
         {
-            return await _auditRepo.GetAllAsync();
+            var options = new QueryOptions<AuditLog>
+            {
+                PageNumber = pagination.CurrentPage,
+                PageSize = pagination.PageSize,
+                OrderByWithFunc = q => q.OrderByDescending(t => t.Timestamp)
+            };
+
+            var totalLogs = await _auditRepo.Table.CountAsync();
+            var logs = await _auditRepo.GetAllAsync(options);
+
+            return new AuditLogViewModel
+            {
+                Logs = logs.ToList(),
+                Pagination = new PaginationInfo
+                {
+                    CurrentPage = pagination.CurrentPage,
+                    PageSize = pagination.PageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalLogs / pagination.PageSize)
+                }
+            };
+
         }
     }
 }
