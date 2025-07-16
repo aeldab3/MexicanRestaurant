@@ -93,9 +93,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         {
             try 
             { 
-                var product = await _productService.GetProductByIdAsync(id);
-                if (product == null) return NotFound("Product not found");
-                var model = _mapper.Map<ProductViewModel>(product);
+                var model = await _productService.GetProductViewModelByIdAsync(id);
                 if (model == null) return NotFound();
                 return View(model);
             }

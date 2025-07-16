@@ -1,4 +1,5 @@
-﻿using MexicanRestaurant.Core.Interfaces;
+﻿using MexicanRestaurant.Application.Services;
+using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
@@ -15,17 +16,17 @@ namespace MexicanRestaurant.WebUI.Controllers
         private readonly IOrderViewModelFactory _orderViewModelFactory;
         private readonly IOrderProcessor _orderProcessor;
         private readonly ICheckoutService _checkoutService;
-        private readonly IRepository<DeliveryMethod> _deliveryRepo;
+        private readonly ISharedLookupService _sharedLookupService;
         private readonly ILogger<OrderController> _logger;
 
-        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, IRepository<DeliveryMethod> deliveryRepo, ILogger<OrderController> logger)
+        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, ISharedLookupService sharedLookupService, ILogger<OrderController> logger)
         {
             _userManager = userManager;
             _orderCartService = orderCartService;
             _orderViewModelFactory = orderViewModelFactory;
             _orderProcessor = orderProcessor;
             _checkoutService = checkoutService;
-            _deliveryRepo = deliveryRepo;
+            _sharedLookupService = sharedLookupService;
             _logger = logger;
         }
 
@@ -125,10 +126,8 @@ namespace MexicanRestaurant.WebUI.Controllers
             {
                 if (!ModelState.IsValid)
                 {
-
-
                     var cart = _orderCartService.GetCurrentOrderFromSession();
-                    checkoutVM.AvailableDeliveryMethods = (await _deliveryRepo.GetAllAsync()).ToList();
+                    checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
                     checkoutVM.OrderItems = cart?.OrderItems ?? new List<OrderItemViewModel>();
                     checkoutVM.TotalAmount = cart?.TotalAmount ?? 0;
 
@@ -145,7 +144,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             {
                 _logger.LogError(ex, "Error in do this porccess");
                 TempData["ErrorMessage"] = "An error occurred while checkout the order.";
-                checkoutVM.AvailableDeliveryMethods = (await _deliveryRepo.GetAllAsync()).ToList();
+                checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
                 return View(checkoutVM);
             }
         }

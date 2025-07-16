@@ -36,6 +36,14 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddMiniProfiler(options =>
+{
+    options.RouteBasePath = "/profiler";
+    options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
+    options.TrackConnectionOpenClose = true;
+}).AddEntityFramework();
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddMemoryCache();
@@ -74,6 +82,8 @@ app.Use(async (context, next) =>
 });
 
 app.UseRouting();
+
+app.UseMiniProfiler();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -31,5 +31,11 @@ namespace MexicanRestaurant.Application.Helpers
                 _ => p => p.OrderBy(p => p.ProductId),
             };
         }
+
+        public static IQueryable<Product> ApplyOrdering(IQueryable<Product> query, string? sortBy)
+        {
+            var orderBy = BuildOrderBy(sortBy);
+            return orderBy(query);
+        }
     }
 }

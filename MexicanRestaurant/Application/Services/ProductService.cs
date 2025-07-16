@@ -1,11 +1,9 @@
-﻿using AutoMapper;
-using MexicanRestaurant.Application.Helpers;
+﻿using MexicanRestaurant.Application.Helpers;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace MexicanRestaurant.Application.Services
@@ -44,22 +42,6 @@ namespace MexicanRestaurant.Application.Services
             }
         }
 
-        public async Task<Product> GetProductByIdAsync(int id)
-        {
-            try 
-            { 
-                return await _products.GetByIdAsync(id, new QueryOptions<Product>
-                {
-                    Includes = "ProductIngredients.Ingredient, Category"
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error fetching product with id: {id}");
-                throw new ProductNotFoundException($"Error retrieving product with ID {id}: {ex.Message}");
-            }
-        }
-
         public async Task<Product> GetExistingProductByIdAsync(int id)
         {
             return await _products.GetByIdAsync(id, new QueryOptions<Product>
@@ -67,6 +49,33 @@ namespace MexicanRestaurant.Application.Services
                 Includes = "ProductIngredients.Ingredient, Category",
                 Where = p => p.ProductId == id
             });
+        }
+
+        public async Task<ProductViewModel?> GetProductViewModelByIdAsync(int id)
+        {
+            try
+            {
+                return await _products.Table
+                    .Where(p => p.ProductId == id)
+                    .Select(p => new ProductViewModel
+                    {
+                        ProductId = p.ProductId,
+                        Name = p.Name ?? string.Empty,
+                        Description = p.Description ?? string.Empty,
+                        Price = p.Price,
+                        Stock = p.Stock,
+                        CategoryId = p.CategoryId,
+                        CategoryName = p.Category != null ? p.Category.Name : string.Empty,
+                        ImageUrl = p.ImageUrl,
+                    })
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error fetching product details for id: {id}");
+                throw new ProductNotFoundException($"Error retrieving product details with ID {id}: {ex.Message}");
+            }
         }
 
         public async Task AddOrUpdateProductAsync(Product product, int[] ingredientIds, string existingImageUrl)
@@ -112,20 +121,22 @@ namespace MexicanRestaurant.Application.Services
                     }
                     await _products.UpdateAsync(existingProduct);
                 }
+                await _auditLogHelper.LogActionAsync(_httpContextAccessor.HttpContext, product.ProductId == 0 ? "Create" : "Update", "Product", product.ProductId.ToString(), $"Product: {product.Name}, Price: {product.Price}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error adding/updating product with id: {product.ProductId}");
                 throw new ProductNotFoundException($"Error processing product with ID {product.ProductId}: {ex.Message}");
             }
-            await _auditLogHelper.LogActionAsync(_httpContextAccessor.HttpContext, product.ProductId == 0 ? "Create" : "Update", "Product", product.ProductId.ToString(), $"Product: {product.Name}, Price: {product.Price}");
         }
 
         public async Task DeleteProductAsync(int id)
         {
             try
             {
-                var product = await GetProductByIdAsync(id);
+                var product = await _products.Table
+                    .Where(p => p.ProductId == id)
+                    .Select(p => new { p.ProductId, p.Name, p.ImageUrl }).FirstOrDefaultAsync();
                 if (product == null) return;
                 await _imageService.DeleteImageAsync(product.ImageUrl, "images");
                 await _products.DeleteAsync(id);
@@ -142,12 +153,12 @@ namespace MexicanRestaurant.Application.Services
         {
             try
             { 
-                var (mappedProducts, totalProducts) = await _paginatedProductFetcher.GetPagedProductsAsync(filter, pagination);
+                var (allProducts, totalProducts) = await _paginatedProductFetcher.GetPagedProductsAsync(filter, pagination);
                 var categories = await _sharedLookupService.GetCategorySelectListAsync();
 
                 return new ProductListViewModel
                 {
-                    Products = mappedProducts,
+                    Products = allProducts,
                     Filter = new FilterOptionsViewModel
                     {
                         SearchTerm = filter.SearchTerm,

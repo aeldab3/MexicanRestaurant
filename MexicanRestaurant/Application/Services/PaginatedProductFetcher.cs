@@ -2,9 +2,9 @@
 using MexicanRestaurant.Application.Helpers;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
-using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -24,24 +24,28 @@ namespace MexicanRestaurant.Application.Services
         {
             try
             {
-                var options = new QueryOptions<Product>
-                {
-                    Includes = nameof(Product.Category),
-                    PageNumber = pagination.CurrentPage,
-                    PageSize = pagination.PageSize,
-                    Where = ProductFilteringHelper.BuildFilter(filter.SearchTerm, filter.SelectedCategoryId),
-                    OrderByWithFunc = ProductFilteringHelper.BuildOrderBy(filter.SortBy)
-                };
-                var allProducts = await _products.GetAllAsync(options);
-                var mappedProducts = _mapper.Map<List<ProductViewModel>>(allProducts);
-                var countOptions = new QueryOptions<Product>
-                {
-                    Where = options.Where,
-                    Includes = nameof(Product.Category),
-                    DisablePaging = true
-                };
-                var totalProducts = (await _products.GetAllAsync(countOptions)).Count();
-                return (mappedProducts, totalProducts);
+                var query = _products.Table.Where(ProductFilteringHelper.BuildFilter(filter.SearchTerm, filter.SelectedCategoryId));
+                query = ProductFilteringHelper.ApplyOrdering(query, filter.SortBy);
+
+                var totalProducts = await query.CountAsync();
+
+                var allProducts = await query
+                    .Skip((pagination.CurrentPage - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
+                    .Select(p => new ProductViewModel
+                    {
+                        ProductId = p.ProductId,
+                        Name = p.Name ?? string.Empty,
+                        Description = p.Description ?? string.Empty,
+                        Price = p.Price,
+                        Stock = p.Stock,
+                        CategoryId = p.CategoryId,
+                        CategoryName = p.Category !=null ? p.Category.Name : string.Empty,
+                        ImageUrl = p.ImageUrl
+                    })
+                    .AsNoTracking()
+                    .ToListAsync();
+                return (allProducts, totalProducts);
             }
             catch (Exception ex)
             {
