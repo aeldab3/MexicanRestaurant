@@ -12,7 +12,10 @@ namespace MexicanRestaurant.Application.MappingProfiles
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
                 .ForMember(dest => dest.Quantity, opt => opt.MapFrom(src => src.Quantity))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
-                .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src.Product));
+                .ForMember(dest => dest.Product, opt => opt.MapFrom(src => new ProductViewModel
+                {
+                    Name = src.Product!.Name!,
+                }));
 
             CreateMap<OrderItemViewModel, OrderItem>()
                 .ForMember(dest => dest.ProductId, opt => opt.MapFrom(src => src.ProductId))
@@ -27,6 +30,13 @@ namespace MexicanRestaurant.Application.MappingProfiles
                 .ForMember(dest => dest.Product, opt => opt.MapFrom(src => src))
                 .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price))
                 .ForMember(dest => dest.Quantity, opt => opt.Ignore());
+
+            CreateMap<Order, OrderListItemViewModel>()
+                .ForMember(dest => dest.DeliveryShortName, opt => opt.MapFrom(src => src.DeliveryMethod.ShortName))
+                .ForMember(dest => dest.UserFullName, opt => opt.MapFrom(src => src.User.FirstName + " " + src.User.LastName))
+                .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email));
+
+            CreateMap<Address, ShippingAddressViewModel>();
         }
     }
 }

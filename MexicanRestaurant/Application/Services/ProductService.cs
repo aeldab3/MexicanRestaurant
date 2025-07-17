@@ -1,4 +1,6 @@
-﻿using MexicanRestaurant.Application.Helpers;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using MexicanRestaurant.Application.Helpers;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
@@ -16,9 +18,10 @@ namespace MexicanRestaurant.Application.Services
         private readonly IPaginatedProductFetcher _paginatedProductFetcher;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IAuditLogHelper _auditLogHelper;
+        private readonly IMapper _mapper;
         private readonly ILogger<ProductService> _logger;
 
-        public ProductService(IRepository<Product> products, ISharedLookupService sharedLookupService, IWebHostEnvironment webHostEnvironment, IImageService imageService, IPaginatedProductFetcher paginatedProductFetcher, IHttpContextAccessor httpContextAccessor, IAuditLogHelper auditLogHelper, ILogger<ProductService> logger)
+        public ProductService(IRepository<Product> products, ISharedLookupService sharedLookupService, IWebHostEnvironment webHostEnvironment, IImageService imageService, IPaginatedProductFetcher paginatedProductFetcher, IHttpContextAccessor httpContextAccessor, IAuditLogHelper auditLogHelper, IMapper mapper, ILogger<ProductService> logger)
         {
             _products = products;
             _sharedLookupService = sharedLookupService;
@@ -26,6 +29,7 @@ namespace MexicanRestaurant.Application.Services
             _paginatedProductFetcher = paginatedProductFetcher;
             _httpContextAccessor = httpContextAccessor;
             _auditLogHelper = auditLogHelper;
+            _mapper = mapper;
             _logger = logger;
         }
 
@@ -55,21 +59,12 @@ namespace MexicanRestaurant.Application.Services
         {
             try
             {
-                return await _products.Table
+                var query = _products.Table
                     .AsNoTracking()
-                    .Where(p => p.ProductId == id)
-                    .Select(p => new ProductViewModel
-                    {
-                        ProductId = p.ProductId,
-                        Name = p.Name ?? string.Empty,
-                        Description = p.Description ?? string.Empty,
-                        Price = p.Price,
-                        Stock = p.Stock,
-                        CategoryId = p.CategoryId,
-                        CategoryName = p.Category != null ? p.Category.Name : string.Empty,
-                        ImageUrl = p.ImageUrl,
-                    })
-                    .FirstOrDefaultAsync();
+                    .Where(p => p.ProductId == id);
+
+                var product = await query.ProjectTo<ProductViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
+                return product;
             }
             catch (Exception ex)
             {

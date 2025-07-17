@@ -1,6 +1,7 @@
-﻿using MexicanRestaurant.Core.Interfaces;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
-using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Views.Shared;
 using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,12 @@ namespace MexicanRestaurant.Application.Services
     public class OrderProcessor : IOrderProcessor
     {
         private readonly IRepository<Order> _orderRepository;
+        private readonly IMapper _mapper;
 
-        public OrderProcessor(IRepository<Order> orderRepository)
+        public OrderProcessor(IRepository<Order> orderRepository, IMapper mapper)
         {
             _orderRepository = orderRepository;
+            _mapper = mapper;
         }
 
         public async Task<UserOrdersViewModel> GetPagedUserOrdersAsync(string userId, PaginationInfo pagination)
@@ -22,34 +25,11 @@ namespace MexicanRestaurant.Application.Services
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .Skip((pagination.CurrentPage - 1) * pagination.PageSize)
-                .Take(pagination.PageSize)
-                .Select(o => new OrderListItemViewModel
-                {
-                    OrderId = o.OrderId,
-                    OrderDate = o.OrderDate,
-                    TotalAmount = o.TotalAmount,
-                    Status = o.Status,
-                    DeliveryShortName = o.DeliveryMethod.ShortName,
-                    ShippingAddress = new ShippingAddressViewModel
-                    {
-                        Street = o.ShippingAddress.Street,
-                        City = o.ShippingAddress.City,
-                        State = o.ShippingAddress.State
-                    },
-                    OrderItems = o.OrderItems.Select(oi => new OrderItemViewModel
-                    {
-                        Product = new ProductViewModel
-                        {
-                            Name = oi.Product!.Name!,
-                        },
-                        Quantity = oi.Quantity,
-                        Price = oi.Price
-                    }).ToList()
-                });
+                .Take(pagination.PageSize);
 
             var totalOrders = await _orderRepository.Table.CountAsync(o => o.UserId == userId);
 
-            var orders = await query.ToListAsync();
+            var orders = await query.ProjectTo<OrderListItemViewModel>(_mapper.ConfigurationProvider).ToListAsync();
 
             return new UserOrdersViewModel
             {

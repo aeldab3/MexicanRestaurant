@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using MexicanRestaurant.Application.Helpers;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
@@ -29,22 +30,13 @@ namespace MexicanRestaurant.Application.Services
 
                 var totalProducts = await query.CountAsync();
 
-                var allProducts = await query
+                var products = query
                     .AsNoTracking()
                     .Skip((pagination.CurrentPage - 1) * pagination.PageSize)
-                    .Take(pagination.PageSize)
-                    .Select(p => new ProductViewModel
-                    {
-                        ProductId = p.ProductId,
-                        Name = p.Name ?? string.Empty,
-                        Description = p.Description ?? string.Empty,
-                        Price = p.Price,
-                        Stock = p.Stock,
-                        CategoryId = p.CategoryId,
-                        CategoryName = p.Category !=null ? p.Category.Name : string.Empty,
-                        ImageUrl = p.ImageUrl
-                    })
-                    .ToListAsync();
+                    .Take(pagination.PageSize);
+                
+                var allProducts = await products.ProjectTo<ProductViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+
                 return (allProducts, totalProducts);
             }
             catch (Exception ex)

@@ -1,4 +1,6 @@
-﻿using MexicanRestaurant.Core.Enums;
+﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
+using MexicanRestaurant.Core.Enums;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
@@ -15,10 +17,12 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
     public class OrderManagementController : Controller
     {
         private readonly IRepository<Order> _orderRepository;
+        private readonly IMapper _mapper;
         private readonly ILogger<OrderManagementController> _logger;
-        public OrderManagementController(IRepository<Order> orderRepository, ILogger<OrderManagementController> logger)
+        public OrderManagementController(IRepository<Order> orderRepository, IMapper mapper, ILogger<OrderManagementController> logger)
         {
             _orderRepository = orderRepository;
+            _mapper = mapper;
             _logger = logger;
         }
 
@@ -27,42 +31,17 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
             try
             {
                 var pagination = new PaginationInfo { CurrentPage = page, PageSize = 15 };
-                var orders = await _orderRepository.Table
+                var orders = _orderRepository.Table
                     .AsNoTracking()
                     .OrderByDescending(o => o.OrderDate)
                     .Skip((pagination.CurrentPage - 1) * pagination.PageSize)
-                    .Take(pagination.PageSize)
-                    .Select(o => new OrderListItemViewModel
-                    {
-                        OrderId = o.OrderId,
-                        OrderDate = o.OrderDate,
-                        TotalAmount = o.TotalAmount,
-                        Status = o.Status,
-                        DeliveryShortName = o.DeliveryMethod.ShortName ?? string.Empty,
-                        ShippingAddress = new ShippingAddressViewModel
-                        {
-                            Street = o.ShippingAddress.Street,
-                            City = o.ShippingAddress.City,
-                            State = o.ShippingAddress.State
-                        },
-                        OrderItems = o.OrderItems.Select(oi => new OrderItemViewModel
-                        {
-                            Product = new ProductViewModel
-                            {
-                                Name = oi.Product!.Name!,
-                            },
-                            Quantity = oi.Quantity,
-                            Price = oi.Price
-                        }).ToList(),
-                        UserFullName = o.User.FirstName + " " + o.User.LastName,
-                        UserEmail = o.User.Email
-                    }).ToListAsync();
-
+                    .Take(pagination.PageSize);
+                    
                 var totalOrders = await _orderRepository.Table.CountAsync();
 
                 var viewModel = new UserOrdersViewModel
                 {
-                    Orders = orders.ToList(),
+                    Orders = await orders.ProjectTo<OrderListItemViewModel>(_mapper.ConfigurationProvider).ToListAsync(),
                     Pagination = new PaginationInfo
                     {
                         CurrentPage = pagination.CurrentPage,
