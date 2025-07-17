@@ -56,6 +56,7 @@ namespace MexicanRestaurant.Application.Services
             try
             {
                 return await _products.Table
+                    .AsNoTracking()
                     .Where(p => p.ProductId == id)
                     .Select(p => new ProductViewModel
                     {
@@ -68,7 +69,6 @@ namespace MexicanRestaurant.Application.Services
                         CategoryName = p.Category != null ? p.Category.Name : string.Empty,
                         ImageUrl = p.ImageUrl,
                     })
-                    .AsNoTracking()
                     .FirstOrDefaultAsync();
             }
             catch (Exception ex)

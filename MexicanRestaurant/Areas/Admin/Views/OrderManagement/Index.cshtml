@@ -40,15 +40,15 @@
                                     {
                                         <tr>
                                             <td>#@order.OrderId</td>
-                                            <td>@order.User?.FirstName @order.User?.LastName</td>
-                                            <td>@order.User?.Email</td>
+                                            <td>@order.UserFullName</td>
+                                            <td>@order.UserEmail</td>
                                             <td>
                                                 <address class="small text-muted">
                                                     @order.ShippingAddress?.Street<br />
                                                     @order.ShippingAddress?.City, @order.ShippingAddress?.State<br />
                                                 </address>
                                             </td>
-                                            <td>@order.DeliveryMethod?.ShortName</td>>
+                                            <td>@order.DeliveryShortName</td>>
                                             <td class="text-success fw-semibold">@order.TotalAmount.ToString("C")</td>
                                             <td>
                                                 @switch (order.Status)

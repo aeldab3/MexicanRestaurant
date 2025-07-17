@@ -18,22 +18,42 @@ namespace MexicanRestaurant.Application.Services
 
         public async Task<UserOrdersViewModel> GetPagedUserOrdersAsync(string userId, PaginationInfo pagination)
         {
-            var options = new QueryOptions<Order>
-            {
-                Includes = "OrderItems.Product, DeliveryMethod",
-                PageNumber = pagination.CurrentPage,
-                PageSize = pagination.PageSize,
-                Where = o => o.UserId == userId,
-                OrderByWithFunc = o => o.OrderByDescending(o => o.OrderDate)
-            };
+            var query = _orderRepository.Table
+                .Where(o => o.UserId == userId)
+                .OrderByDescending(o => o.OrderDate)
+                .Skip((pagination.CurrentPage - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .Select(o => new OrderListItemViewModel
+                {
+                    OrderId = o.OrderId,
+                    OrderDate = o.OrderDate,
+                    TotalAmount = o.TotalAmount,
+                    Status = o.Status,
+                    DeliveryShortName = o.DeliveryMethod.ShortName,
+                    ShippingAddress = new ShippingAddressViewModel
+                    {
+                        Street = o.ShippingAddress.Street,
+                        City = o.ShippingAddress.City,
+                        State = o.ShippingAddress.State
+                    },
+                    OrderItems = o.OrderItems.Select(oi => new OrderItemViewModel
+                    {
+                        Product = new ProductViewModel
+                        {
+                            Name = oi.Product!.Name!,
+                        },
+                        Quantity = oi.Quantity,
+                        Price = oi.Price
+                    }).ToList()
+                });
 
             var totalOrders = await _orderRepository.Table.CountAsync(o => o.UserId == userId);
 
-            var orders = await _orderRepository.GetAllAsync(options);
+            var orders = await query.ToListAsync();
 
             return new UserOrdersViewModel
             {
-                Orders = orders.ToList(),
+                Orders = orders,
                 Pagination = new PaginationInfo
                 {
                     CurrentPage = pagination.CurrentPage,

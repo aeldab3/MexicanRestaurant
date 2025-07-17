@@ -25,8 +25,8 @@ namespace MexicanRestaurant.Application.Services
         public async Task<List<string>> GetTopProductNamesAsync(int top = 5, DateTime? startDate = null, DateTime? endDate = null)
         {
             return await FilterOrders(startDate, endDate)
-                .SelectMany(o => o.OrderItems)
-                .GroupBy(i => i.Product.Name) 
+                .SelectMany(o => o.OrderItems.Select(oi => new { ProductName = oi.Product!.Name!, oi.Quantity}))
+                .GroupBy(i => i.ProductName) 
                 .OrderByDescending(g => g.Sum(i => i.Quantity))
                 .Take(top)
                 .Select(g => g.Key)
@@ -36,8 +36,8 @@ namespace MexicanRestaurant.Application.Services
         public async Task<List<int>> GetTopProductSalesAsync(int top = 5, DateTime? startDate = null, DateTime? endDate = null)
         {
             return await FilterOrders(startDate, endDate)
-                .SelectMany(o => o.OrderItems) 
-                .GroupBy(i => i.Product.Name) 
+                .SelectMany(o => o.OrderItems.Select(oi => new { ProductName = oi.Product!.Name!, oi.Quantity }))
+                .GroupBy(i => i.ProductName) 
                 .OrderByDescending(g => g.Sum(i => i.Quantity))
                 .Take(top)
                 .Select(g => g.Sum(i => i.Quantity))
@@ -58,8 +58,8 @@ namespace MexicanRestaurant.Application.Services
         public async Task<Dictionary<string, int>> GetCategorySalesAsync(DateTime? startDate = null, DateTime? endDate = null)
         {
             return await FilterOrders(startDate, endDate)
-                .SelectMany(o => o.OrderItems)
-                .GroupBy(c => c.Product.Category.Name) 
+                .SelectMany(o => o.OrderItems.Select(oi => new {Category = oi.Product!.Category!.Name, oi.Quantity}))
+                .GroupBy(c => c.Category) 
                 .ToDictionaryAsync(
                     g => g.Key,
                     g => g.Sum(oi => oi.Quantity)

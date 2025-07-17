@@ -27,16 +27,40 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
             try
             {
                 var pagination = new PaginationInfo { CurrentPage = page, PageSize = 15 };
-                var options = new QueryOptions<Order>
-                {
-                    Includes = "OrderItems.Product, User, DeliveryMethod",
-                    PageNumber = pagination.CurrentPage,
-                    PageSize = pagination.PageSize,
-                    OrderByWithFunc = o => o.OrderByDescending(o => o.OrderDate)
-                };
+                var orders = await _orderRepository.Table
+                    .AsNoTracking()
+                    .OrderByDescending(o => o.OrderDate)
+                    .Skip((pagination.CurrentPage - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
+                    .Select(o => new OrderListItemViewModel
+                    {
+                        OrderId = o.OrderId,
+                        OrderDate = o.OrderDate,
+                        TotalAmount = o.TotalAmount,
+                        Status = o.Status,
+                        DeliveryShortName = o.DeliveryMethod.ShortName ?? string.Empty,
+                        ShippingAddress = new ShippingAddressViewModel
+                        {
+                            Street = o.ShippingAddress.Street,
+                            City = o.ShippingAddress.City,
+                            State = o.ShippingAddress.State
+                        },
+                        OrderItems = o.OrderItems.Select(oi => new OrderItemViewModel
+                        {
+                            Product = new ProductViewModel
+                            {
+                                Name = oi.Product!.Name!,
+                            },
+                            Quantity = oi.Quantity,
+                            Price = oi.Price
+                        }).ToList(),
+                        UserFullName = o.User.FirstName + " " + o.User.LastName,
+                        UserEmail = o.User.Email
+                    }).ToListAsync();
+
                 var totalOrders = await _orderRepository.Table.CountAsync();
-                var orders = await _orderRepository.GetAllAsync(options);
-                var model = new UserOrdersViewModel
+
+                var viewModel = new UserOrdersViewModel
                 {
                     Orders = orders.ToList(),
                     Pagination = new PaginationInfo
@@ -46,12 +70,12 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                         TotalPages = (int)Math.Ceiling((double)totalOrders / pagination.PageSize)
                     }
                 };
-                return View(model);
+                return View(viewModel);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving orders");
-                return View("Error", new { message = "An error occurred while retrieving orders." });
+                return View("Error", new ErrorViewModel { Message = "An error occurred while retrieving orders." });
             }
         }
 

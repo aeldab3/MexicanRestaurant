@@ -30,6 +30,7 @@ namespace MexicanRestaurant.Application.Services
                 var totalProducts = await query.CountAsync();
 
                 var allProducts = await query
+                    .AsNoTracking()
                     .Skip((pagination.CurrentPage - 1) * pagination.PageSize)
                     .Take(pagination.PageSize)
                     .Select(p => new ProductViewModel
@@ -43,7 +44,6 @@ namespace MexicanRestaurant.Application.Services
                         CategoryName = p.Category !=null ? p.Category.Name : string.Empty,
                         ImageUrl = p.ImageUrl
                     })
-                    .AsNoTracking()
                     .ToListAsync();
                 return (allProducts, totalProducts);
             }
