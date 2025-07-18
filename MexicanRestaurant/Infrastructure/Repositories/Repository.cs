@@ -14,6 +14,7 @@ namespace MexicanRestaurant.Infrastructure.Repositories
             _context = context;
             _dbSet = context.Set<T>();
         }
+
         public async Task AddAsync(T entity)
         {
             if (entity == null)
@@ -22,6 +23,7 @@ namespace MexicanRestaurant.Infrastructure.Repositories
             await _dbSet.AddAsync(entity);
             await _context.SaveChangesAsync();
         }
+
         public async Task DeleteAsync(int id)
         {
             var entity = await _dbSet.FindAsync(id);
@@ -31,16 +33,19 @@ namespace MexicanRestaurant.Infrastructure.Repositories
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<T>> GetAllAsync()
         {
             return await _dbSet.ToListAsync();
         }
+
         public async Task<IEnumerable<T>> GetAllAsync(QueryOptions<T> options)
         {
             var query = ApplyOptions(options);
 
             return await query.ToListAsync();
         }
+
         public async Task<IEnumerable<T>> GetAllByIdAsync<TKey>(TKey id, string propertyName, QueryOptions<T> options)
         {
             var query = ApplyOptions(options);
@@ -49,6 +54,7 @@ namespace MexicanRestaurant.Infrastructure.Repositories
             query = query.Where(e => EF.Property<TKey>(e, propertyName).Equals(id));
             return await query.ToListAsync();
         }
+
         public async Task<T> GetByIdAsync(int id, QueryOptions<T> options)
         {
             options.DisablePaging = true;
@@ -58,6 +64,7 @@ namespace MexicanRestaurant.Infrastructure.Repositories
             string primaryKeyName = key?.Name;
             return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, primaryKeyName) == id);
         }
+
         public async Task UpdateAsync(T entity)
         {
             if (entity == null)
@@ -86,9 +93,7 @@ namespace MexicanRestaurant.Infrastructure.Repositories
             foreach (var include in options.GetIncludes())
                 query = query.Include(include);
 
-
             return query;
         }
-
     }
 }

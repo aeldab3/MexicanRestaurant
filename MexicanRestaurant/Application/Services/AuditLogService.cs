@@ -64,7 +64,6 @@ namespace MexicanRestaurant.Application.Services
                     TotalPages = (int)Math.Ceiling((double)totalLogs / pagination.PageSize)
                 }
             };
-
         }
     }
 }

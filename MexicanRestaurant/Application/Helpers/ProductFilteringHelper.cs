@@ -1,6 +1,5 @@
 ﻿using MexicanRestaurant.Core.Extensions;
 using MexicanRestaurant.Core.Models;
-using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
 
 namespace MexicanRestaurant.Application.Helpers

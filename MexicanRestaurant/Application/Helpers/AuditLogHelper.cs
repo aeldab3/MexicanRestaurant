@@ -25,12 +25,14 @@ namespace MexicanRestaurant.Application.Helpers
                     _logger.LogWarning("HttpContext or User is null. Cannot log audit action.");
                     return;
                 }
+
                 var user = await _userManager.GetUserAsync(context.User);
                 if (user == null)
                 {
                     _logger.LogWarning("User not found during audit logging.");
                     return;
                 }
+
                 var role = (await _userManager.GetRolesAsync(user)).FirstOrDefault() ?? "Unknown";
                 await _auditLogService.LogAsync(
                     userId: user.Id,
