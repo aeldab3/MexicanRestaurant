@@ -76,7 +76,9 @@ namespace MexicanRestaurant.Application.Services
         public async Task AddOrUpdateProductAsync(Product product, int[] ingredientIds, string existingImageUrl)
         {
             try 
-            { 
+            {
+                var isCreate = product.ProductId == 0;
+
                 if (product.ImageFile != null)
                 {
                     if (!string.IsNullOrEmpty(existingImageUrl))
@@ -87,7 +89,7 @@ namespace MexicanRestaurant.Application.Services
                 else
                     product.ImageUrl = existingImageUrl ?? product.ImageUrl;
 
-                if (product.ProductId == 0)
+                if (isCreate)
                 {
                     product.ProductIngredients = ingredientIds.Select(id => new ProductIngredient { IngredientId = id }).ToList();
                     await _products.AddAsync(product);
@@ -97,9 +99,9 @@ namespace MexicanRestaurant.Application.Services
                     var existingProduct = await _products.GetByIdAsync(product.ProductId, new QueryOptions<Product>
                     {
                         Includes = "ProductIngredients",
-                        Where = p => p.ProductId == product.ProductId
                     });
-                    if (existingProduct == null)
+
+                    if (existingProduct is null)
                         throw new ProductNotFoundException("Product not found during update.");
 
                     existingProduct.Name = product.Name;
@@ -112,11 +114,17 @@ namespace MexicanRestaurant.Application.Services
                     existingProduct?.ProductIngredients?.Clear();
                     foreach (var id in ingredientIds)
                     {
-                        existingProduct.ProductIngredients.Add(new ProductIngredient { IngredientId = id  });
+                        existingProduct?.ProductIngredients?.Add(new ProductIngredient { IngredientId = id });
                     }
+
+                    if (existingProduct?.ProductIngredients == null)
+                        throw new ProductNotFoundException("Product ingredients not found during update.");
+
                     await _products.UpdateAsync(existingProduct);
                 }
-                await _auditLogHelper.LogActionAsync(_httpContextAccessor.HttpContext, product.ProductId == 0 ? "Create" : "Update", "Product", product.ProductId.ToString(), $"Product: {product.Name}, Price: {product.Price}");
+
+                var httpContext = _httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HTTP context is not available for logging.");
+                await _auditLogHelper.LogActionAsync(httpContext, isCreate ? "Create" : "Update", "Product", product.ProductId.ToString(), $"Product: {product.Name}, Price: {product.Price}");
             }
             catch (Exception ex)
             {
@@ -133,9 +141,13 @@ namespace MexicanRestaurant.Application.Services
                     .Where(p => p.ProductId == id)
                     .Select(p => new { p.ProductId, p.Name, p.ImageUrl }).FirstOrDefaultAsync();
                 if (product == null) return;
+
+                var httpContext = _httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HTTP context is not available for logging.");
+
+
                 await _imageService.DeleteImageAsync(product.ImageUrl, "images");
                 await _products.DeleteAsync(id);
-                await _auditLogHelper.LogActionAsync(_httpContextAccessor.HttpContext, "Delete", "Product", id.ToString(), $"Deleted product: {product.Name}");
+                await _auditLogHelper.LogActionAsync(httpContext, "Delete", "Product", id.ToString(), $"Deleted product: {product.Name}");
             }
             catch (Exception ex)
             {
@@ -171,7 +183,7 @@ namespace MexicanRestaurant.Application.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching paginated products");
+                _logger.LogError(ex, "Error fetching paginated products. Filter: {@Filter}, Pagination: {@Pagination}", filter, pagination);
                 throw new ProductNotFoundException($"Error fetching paginated products: {ex.Message}");
             }
         }

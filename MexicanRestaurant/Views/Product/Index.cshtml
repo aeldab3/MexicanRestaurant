@@ -4,17 +4,18 @@
     ViewData["Title"] = "Menu Items";
     ViewData["MetaDescription"] = "Explore our delicious selection of authentic Mexican food items, freshly made with quality ingredients.";
 }
-<form method="get" asp-action="Index" class="my-4">
+<form method="get" asp-action="Index" class="my-4" aria-describedby="formDescription">
+    <div id="formDescription" class="visually-hidden">Use the following form to filter, search and sort through the available Mexican food menu items.</div>
     <div class="row gy-3 align-items-end">
 
         <div class="col-md-4 col-sm-12">
             <label for="searchTerm" class="form-label fw-bold text-dark">Search</label>
-            <input type="text" id="searchTerm" name="searchTerm" value="@Model.Filter.SearchTerm" class="form-control" placeholder="Search products..." />
+            <input type="text" id="searchTerm" name="searchTerm" value="@Model.Filter.SearchTerm" class="form-control" placeholder="Search products..." aria-label="Search term" />
         </div>
 
         <div class="col-md-3 col-sm-6">
             <label for="categoryId" class="form-label fw-bold text-dark">Category</label>
-            <select id="categoryId" name="categoryId" class="form-select">
+            <select id="categoryId" name="categoryId" class="form-select" aria-label="Select category">
                 <option value="">All Categories</option>
                 @foreach (var category in Model.Filter.Categories)
                 {
@@ -26,7 +27,7 @@
 
         <div class="col-md-3 col-sm-6">
             <label for="sortBy" class="form-label fw-bold text-dark">Sort By</label>
-            <select id="sortBy" name="sortBy" class="form-select">
+            <select id="sortBy" name="sortBy" class="form-select" aria-label="Sort products by">
                 <option value="">Sort by</option>
                 <option value="name_asc" selected="@(Model.Filter.SortBy == "name_asc")">Name ↑</option>
                 <option value="name_desc" selected="@(Model.Filter.SortBy == "name_desc")">Name ↓</option>
@@ -36,10 +37,10 @@
         </div>
 
         <div class="col-md-2 col-sm-12 d-flex gap-2">
-            <button type="submit" class="btn btn-success w-100">
+            <button type="submit" class="btn btn-success w-100" aria-label="Apply filters">
                 <i class="bi bi-funnel-fill"></i> Filter
             </button>
-            <a href="@Url.Action("Index", "Product")" class="btn btn-secondary w-100">
+            <a href="@Url.Action("Index", "Product")" class="btn btn-secondary w-100" aria-label="Reset filters">
                 <i class="bi bi-x-circle"></i> Reset
             </a>
         </div>
@@ -47,9 +48,9 @@
 </form>
 
 <div class="container my-4 d-flex flex-column justify-content-between" style="min-height: 80vh;">
-    <h1 class="text-center mb-3 text-success fw-bold">@ViewData["Title"]</h1>
+    <h1 class="text-center mb-3 text-success fw-bold" aria-label="@ViewData["Title"]">@ViewData["Title"]</h1>
     <div class="d-flex justify-content-start mb-3">
-        <a asp-action="AddEdit" asp-controller="Product" class="btn btn-success">
+        <a asp-action="AddEdit" asp-controller="Product" class="btn btn-success" aria-label="Add new product">
             <i class="bi bi-plus-circle"></i> Create New Item
         </a>
     </div>
@@ -58,30 +59,30 @@
         @foreach (ProductViewModel product in Model.Products)
         {
             <div class="col">
-                <div class="card h-100 shadow-lg border-0" style="background-color: #f9f5d985">
+                <div class="card h-100 shadow-lg border-0" style="background-color: #f9f5d985" aria-labelledby="product-title-@product.ProductId">
                     <div class="product-wrapper">
                         <img src="@Url.Content("~/images/" + product?.ImageUrl)"
                              class="card-img-top img-fluid" width="336" height="220"
-                             style="height: 220px; object-fit: cover;" alt="@product?.Name" loading="lazy" />
+                             style="height: 220px; object-fit: cover;" alt="Image of @product?.Name" loading="lazy" />
 
-                        <a asp-action="Details" asp-controller="Product" asp-route-id="@product.ProductId"
-                           class="btn btn-lg btn-success details-btn">
+                        <a asp-action="Details" asp-controller="Product" asp-route-id="@product?.ProductId"
+                           class="btn btn-lg btn-success details-btn" aria-label="View details for @product?.Name">
                             Details
                         </a>
                     </div>
                     <div class="card-body">
-                        <h2 class="card-title fw-bolder text-success">@product?.Name</h2>
+                        <h2 class="card-title fw-bolder text-success" id="product-title-@product?.ProductId">@product?.Name</h2>
                         <p class="card-text text-muted">@product?.Description</p>
-                        <p class="text-muted"><strong>Category:</strong> <span class="text-dark">@product.CategoryName</span></p>
+                        <p class="text-muted"><strong>Category:</strong> <span class="text-dark">@product?.CategoryName</span></p>
                         <div class="d-flex justify-content-around">
                         <p class="card-text"><strong>Price:</strong> @product?.Price.ToString("C")</p>
                         <p class="card-text"><strong>Stock:</strong> @product?.Stock</p>
                         </div>
                     </div>
                     <div class="card-footer border-0 d-flex justify-content-between">
-                        <a asp-action="AddEdit" asp-route-id="@product?.ProductId" class="btn btn-secondary btn-sm" style="width: 75.53px"><i class="bi bi-pencil-square"></i> Edit</a>
+                        <a asp-action="AddEdit" asp-route-id="@product?.ProductId" class="btn btn-secondary btn-sm" style="width: 75.53px" aria-label="Edit @product?.Name"><i class="bi bi-pencil-square"></i> Edit</a>
                         <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#deleteModal" data-product-id="@product.ProductId" data-product-name="@product.Name">
+                                data-bs-target="#deleteModal" data-product-id="@product?.ProductId" data-product-name="@product?.Name" aria-label="Delete @product?.Name">
                             <i class="bi bi-trash-fill"></i> Delete
                         </button>
                     </div>
@@ -89,8 +90,8 @@
             </div>
         }
     </div>
-    <div class="pagination-wrapper m-4">
-        <nav class="d-flex justify-content-center">
+    <div class="m-4">
+        <nav class="d-flex justify-content-center" role="navigation" aria-label="Pagination">
             <ul class="pagination pagination-sm">
                 @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
                 {
@@ -101,7 +102,7 @@
                                searchTerm = Model.Filter.SearchTerm,
                                categoryId = Model.Filter.SelectedCategoryId,
                                sortBy = Model.Filter.SortBy
-                           })" style="margin: 0 2px;">
+                           })" style="margin: 0 2px;" aria-label="Go to page @i">
                             @i
                         </a>
                     </li>

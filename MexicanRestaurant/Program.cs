@@ -6,6 +6,7 @@ using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Infrastructure.Data;
 using MexicanRestaurant.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 
 DotNetEnv.Env.Load();
@@ -44,12 +45,19 @@ builder.Services.AddMiniProfiler(options =>
     options.TrackConnectionOpenClose = true;
 }).AddEntityFramework();
 
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSession(op =>
 {
-    op.IdleTimeout = TimeSpan.FromDays(10);
+    op.IdleTimeout = TimeSpan.FromHours(1);
     op.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
@@ -71,7 +79,7 @@ app.UseHttpsRedirection();
 
 app.Use(async (context, next) =>
 {
-    context.Response.Headers.Add("Content-Security-Policy",
+    context.Response.Headers.Append("Content-Security-Policy",
         "default-src 'self'; " +
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
         "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
@@ -80,6 +88,8 @@ app.Use(async (context, next) =>
         "connect-src 'self' http://localhost:* https://localhost:* ws://localhost:* wss://localhost:*;");
     await next();
 });
+
+app.UseResponseCompression();
 
 app.UseRouting();
 

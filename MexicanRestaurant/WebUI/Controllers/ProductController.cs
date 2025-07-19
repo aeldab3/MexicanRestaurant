@@ -37,8 +37,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         [HttpGet]
         public async Task<IActionResult> AddEdit(int id)
         {
-            ViewBag.Categories = await _sharedLookupService.GetCategorySelectListAsync();
-            ViewBag.Ingredients = await _sharedLookupService.GetAllIngredientsAsync();
+            await LoadFormData();
 
             if (id == 0)
             {
@@ -59,8 +58,7 @@ namespace MexicanRestaurant.WebUI.Controllers
         {
             try
             {
-                ViewBag.Categories = await _sharedLookupService.GetCategorySelectListAsync();
-                ViewBag.Ingredients = await _sharedLookupService.GetAllIngredientsAsync();
+                await LoadFormData();
 
                 if (model.CategoryId == 0)
                     ModelState.AddModelError("CategoryId", "Please select a category.");
@@ -71,11 +69,11 @@ namespace MexicanRestaurant.WebUI.Controllers
                     product.ImageFile = model.ImageFile;
                     var existingImageUrl = model.ExistingImageUrl ?? string.Empty;
                     await _productService.AddOrUpdateProductAsync(product, model.SelectedIngredientIds, existingImageUrl);
+                    TempData["Success"] = model.ProductId == 0 ? "Product added successfully." : "Product updated successfully.";
                     return RedirectToAction("Index", "Product");
                 }
 
-                ViewBag.Categories = await _sharedLookupService.GetCategorySelectListAsync();
-                ViewBag.Ingredients = await _sharedLookupService.GetAllIngredientsAsync();
+                await LoadFormData();
                 ViewBag.Operation = model.ProductId == 0 ? "Add" : "Edit";
                 return View(model);
             }
@@ -83,7 +81,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             {
                 _logger.LogError(ex, $"Error processing your request.");
                 TempData["ErrorMessage"] = "An error occurred while processing your request.";
-                return RedirectToAction("Index");
+                return RedirectToAction("AddEdit");
             }
         }
 
@@ -112,7 +110,13 @@ namespace MexicanRestaurant.WebUI.Controllers
         {
             try
             {
+                if (await _productService.GetExistingProductByIdAsync(id) == null)
+                {
+                    TempData["ErrorMessage"] = "Product not found.";
+                    return RedirectToAction("Index");
+                }
                 await _productService.DeleteProductAsync(id);
+                TempData["Success"] = "Product deleted successfully.";
             }
             catch (Exception ex)
             {
@@ -121,6 +125,12 @@ namespace MexicanRestaurant.WebUI.Controllers
             }
             return RedirectToAction("Index");
 
+        }
+
+        private async Task LoadFormData()
+        {
+            ViewBag.Categories = await _sharedLookupService.GetCategorySelectListAsync();
+            ViewBag.Ingredients = await _sharedLookupService.GetAllIngredientsAsync();
         }
     }
 }

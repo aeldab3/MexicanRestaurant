@@ -1,4 +1,6 @@
-﻿using MexicanRestaurant.Core.Specifications;
+﻿using MexicanRestaurant.Core.Models;
+using MexicanRestaurant.Core.Specifications;
+using System.Linq.Expressions;
 
 namespace MexicanRestaurant.Core.Interfaces
 {
@@ -12,5 +14,6 @@ namespace MexicanRestaurant.Core.Interfaces
         Task UpdateAsync(T entity);
         Task DeleteAsync(int id);
         IQueryable<T> Table { get; }
+        Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate);
     }
 }

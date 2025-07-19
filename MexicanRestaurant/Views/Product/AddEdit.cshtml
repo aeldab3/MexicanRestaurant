@@ -5,24 +5,10 @@
 } 
 
 <div class="container mt-4">
-    <h1 class="text-center text-success mb-4">@ViewData["Title"]</h1>
+    <h1 class="text-center text-success mb-4" aria-label="@ViewData["Title"]">@ViewData["Title"]</h1>
     <div class="row justify-content-center">
         <div class="col-md-8">
             <form asp-action="AddEdit" method="post" enctype="multipart/form-data" class="p-4 shadow-lg rounded">
-                @if (!ViewData.ModelState.IsValid)
-                {
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach (var state in ViewData.ModelState.Values)
-                            {
-                                foreach (var error in state.Errors)
-                                {
-                                    <li>@error.ErrorMessage</li>
-                                }
-                            }
-                        </ul>
-                    </div>
-                }
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="ProductId" />
                 <input type="hidden" asp-for="ExistingImageUrl" />
@@ -30,67 +16,76 @@
                 {
                     <div class="mt-2">
                         <small class="text-muted">Current Image:</small>
-                        <img src="~/images/@Model.ImageUrl" class="img-thumbnail mt-1" style="max-height: 100px;" />
+                        <img src="~/images/@Model.ImageUrl" class="img-thumbnail mt-1" style="max-height: 100px;" width="100" height="100" alt="Current product image" loading="lazy" />
                     </div>
                 }
 
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label fw-bold"></label>
-                    <input asp-for="Name" class="form-control" />
+                    <label asp-for="Name" class="form-label fw-bold" aria-label="Name"></label>
+                    <input asp-for="Name" class="form-control" aria-describedby="NameHelp" />
+                    <small id="NameHelp" class="form-text text-muted visually-hidden">Enter the name of the product.</small>
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Description" class="form-label fw-bold"></label>
-                    <input asp-for="Description" class="form-control" />
+                    <label asp-for="Description" class="form-label fw-bold" aria-label="Description"></label>
+                    <input asp-for="Description" class="form-control" aria-describedby="DescHelp" />
+                    <small id="DescHelp" class="form-text text-muted visually-hidden">Enter a description of the product.</small>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                    <label asp-for="Price" class="form-label fw-bold"></label>
-                    <input asp-for="Price" class="form-control" />
+                    <label asp-for="Price" class="form-label fw-bold" aria-label="Price"></label>
+                    <input asp-for="Price" class="form-control" aria-describedby="PriceHelp" />
+                    <small id="PriceHelp" class="form-text text-muted visually-hidden">Enter the price in USD.</small>
                     <span asp-validation-for="Price" class="text-danger"></span>
                     </div>
+
                     <div class="col-md-6 mb-3">
-                    <label asp-for="Stock" class="form-label fw-bold">Quantity In Stock</label>
-                    <input asp-for="Stock" class="form-control" />
+                    <label asp-for="Stock" class="form-label fw-bold" aria-label="Stock">Quantity In Stock</label>
+                    <input asp-for="Stock" class="form-control" aria-describedby="StockHelp" />
+                    <small id="StockHelp" class="form-text text-muted visually-hidden">Available quantity in stock.</small>
                     <span asp-validation-for="Stock" class="text-danger"></span>
                     </div>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="CategoryId" class="form-label fw-bold">Category</label>
-                    <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
-                    <option value="">Select Category</option>
+                    <label asp-for="CategoryId" class="form-label fw-bold" aria-label="Category">Category</label>
+                    <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories" aria-describedby="CategoryHelp">
+                        <option value="">Select Category</option>
                     </select>
+                    <small id="CategoryHelp" class="form-text text-muted visually-hidden">Choose the category the product belongs to.</small>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="ImageFile" class="form-label fw-bold">Upload Image</label>
+                    <label asp-for="ImageFile" class="form-label fw-bold" aria-label="Upload Image">Upload Image</label>
                     <div class="d-flex align-items-center gap-4">
-                        <button type="button" class="btn btn-outline-secondary" onclick="document.getElementById('imageFileInput').click();">
+                        <button type="button" class="btn btn-outline-dark" onclick="document.getElementById('imageFileInput').click();">
                             <i class="bi bi-upload"></i> Upload
                         </button>
                         <span id="fileName" class="text-muted">No file chosen</span>
                     </div>
-                    <input asp-for="ImageFile" type="file" id="imageFileInput" name="ImageFile" class="d-none" accept="image/*" onchange="updateFileName(this)" />
+                    <input asp-for="ImageFile" type="file" id="imageFileInput" name="ImageFile" class="d-none" accept="image/*" onchange="updateFileName(this)" aria-describedby="ImageHelp" />
+                    <small id="ImageHelp" class="form-text text-muted visually-hidden">Choose an image file to upload for the product.</small>
                     <span asp-validation-for="ImageFile" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Ingredients</label>
+                    <label class="form-label fw-bold" aria-label="Ingredients">Ingredients</label>
                     <div class="row">
                         @foreach (Ingredient ingredient in ViewBag.Ingredients)
                         {
                             var isChecked = Model.SelectedIngredientIds != null && Model.SelectedIngredientIds.Contains(ingredient.IngredientId);
                             <div class="col-6 col-sm-4 col-lg-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="ingredient_@ingredient.IngredientId"
-                                           name="SelectedIngredientIds" value="@ingredient.IngredientId"
-                                           @(isChecked ? "checked" : "") />
-                                    <label class="form-check-label" for="ingredient_@ingredient.IngredientId">@ingredient.Name</label>
+                                    <label class="form-check-label" for="ingredient_@ingredient.IngredientId" id="ingredientLabel_@ingredient.IngredientId" >
+                                        <input class="form-check-input" type="checkbox" id="ingredient_@ingredient.IngredientId"
+                                               name="SelectedIngredientIds" value="@ingredient.IngredientId"
+                                               @(isChecked ? "checked" : "") aria-describedby="ingredientLabel_@ingredient.IngredientId" />
+                                        @ingredient.Name
+                                    </label>
                                 </div>
                             </div>
                         }
@@ -98,22 +93,23 @@
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <button type="submit" class="btn btn-success">@ViewBag.Operation</button>
                     <a asp-action="Index" asp-controller="Product" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-success">@ViewBag.Operation</button>
                 </div>
             </form>
-            <script>
-                function updateFileName(input) {
-                    const fileNameSpan = document.getElementById('fileName');
-                    if (input.files && input.files.length > 0) {
-                        fileNameSpan.textContent = input.files[0].name;
-                    } else {
-                        fileNameSpan.textContent = 'No file chosen';
-                    }
-                }
-            </script>
-
          </div>
     </div>
 </div>
-
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+<script>
+    function updateFileName(input) {
+        const fileNameSpan = document.getElementById('fileName');
+        if (input.files && input.files.length > 0) {
+            fileNameSpan.textContent = input.files[0].name;
+        } else {
+            fileNameSpan.textContent = 'No file chosen';
+        }
+    }
+</script>

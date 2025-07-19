@@ -2,6 +2,7 @@
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace MexicanRestaurant.Infrastructure.Repositories
 {
@@ -75,6 +76,13 @@ namespace MexicanRestaurant.Infrastructure.Repositories
         }
 
         public IQueryable<T> Table => _context.Set<T>();
+
+        public async Task<bool> ExistsAsync(Expression<Func<T, bool>> predicate)
+        {
+            if (predicate == null)
+                throw new ArgumentNullException(nameof(predicate), "Predicate cannot be null");
+            return await _dbSet.AnyAsync(predicate);
+        }
 
         private IQueryable<T> ApplyOptions(QueryOptions<T> options)
         {

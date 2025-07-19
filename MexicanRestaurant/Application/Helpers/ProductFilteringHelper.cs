@@ -1,5 +1,6 @@
 ﻿using MexicanRestaurant.Core.Extensions;
 using MexicanRestaurant.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace MexicanRestaurant.Application.Helpers
@@ -11,7 +12,10 @@ namespace MexicanRestaurant.Application.Helpers
             Expression<Func<Product, bool>> filter = p => true;
 
             if (!string.IsNullOrEmpty(searchTerm))
-                filter = filter.AndAlso(p => p.Name.Contains(searchTerm.ToLower()) || p.Description.Contains(searchTerm.ToLower()));
+                filter = filter.AndAlso(p => 
+                    EF.Functions.Like(p.Name, $"%{searchTerm}%") || 
+                    EF.Functions.Like(p.Description, $"{searchTerm}")
+                );
 
             if (categoryId.HasValue && categoryId.Value > 0)
                 filter = filter.AndAlso(p => p.CategoryId == categoryId.Value);

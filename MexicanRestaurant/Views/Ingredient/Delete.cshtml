@@ -4,18 +4,19 @@
 }
 
 <div class="container my-4">
-    <h1 class="text-center text-danger mb-4 fw-bold">@ViewData["Title"]</h1>
+    <h1 class="text-center text-danger mb-4 fw-bold" aria-label="Ingredient Delete: @Model.Name">@ViewData["Title"]</h1>
         <div class="row justify-content-center">
             <div class="col-md-8">
             <div class="card shadow-lg border-0" style="background-color: #f9f5d985">
                     <div class="card-body">
-                    <h4 class="text-center mb-4">Are you sure you want to delete @Model.Name ingredient?</h4>
+                    <h2 class="text-center mb-4">Are you sure you want to delete @Model.Name ingredient?</h2>
                     <form asp-action="Delete" method="post">
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="IngredientId" />
                         <div class="mb-3">
-                            <label asp-for="Name" class="form-label fw-bold"></label>
-                            <input asp-for="Name" class="form-control" readonly />
+                            <label asp-for="Name" class="form-label fw-bold" aria-describedby="ingredientNameDesc"></label>
+                            <input asp-for="Name" class="form-control" aria-describedby="ingredientNameDesc" readonly />
+                            <small id="ingredientNameDesc" class="form-text text-muted visually-hidden">Enter the name of the ingredient</small>
                         </div>
                         <div class="d-flex justify-content-between">
                             <a asp-action="Index" class="btn btn-secondary">Cancel</a>
