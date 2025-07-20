@@ -123,11 +123,11 @@
             });
         </text>
      }
-     @if (TempData["ErrorMessage"] != null)
+     @if (Context.Items["GlobalErrorMessage"] != null)
      {
         <text>
             window.addEventListener('DOMContentLoaded', () => {
-                    showToast('@TempData["ErrorMessage"]', 'error');
+                    showToast('@Context.Items["GlobalErrorMessage"]', 'error');
             });
         </text>
      }

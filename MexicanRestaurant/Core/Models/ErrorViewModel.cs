@@ -6,6 +6,6 @@ namespace MexicanRestaurant.Core.Models
 
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
 
-        public string Message { get; internal set; }
+        public string? Message { get; internal set; }
     }
 }

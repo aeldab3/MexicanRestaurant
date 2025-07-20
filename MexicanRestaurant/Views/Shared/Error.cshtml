@@ -1,26 +1,18 @@
-﻿@using MexicanRestaurant.Core.Models
-@model ErrorViewModel
+﻿@model ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "Oops! Something went wrong";
+    Layout = "_Layout";
+
+    var exception = ViewData["Exception"] as Exception;
+    var errorMessage = exception?.Message ?? Model?.Message;
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
-
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
-
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+<div class="container mt-5 text-center">
+    <h1 class="text-danger">😕 Oops!</h1>
+    <h2 class="text-muted">@(!string.IsNullOrWhiteSpace(errorMessage) ? errorMessage : "An unexpected error occurred while processing your request.")</h2>
+    @if (!string.IsNullOrEmpty(Model?.RequestId))
+    {
+        <3><strong>Request ID:</strong> <code>@Model.RequestId</code></3>
+    }
+    <a class="btn btn-success mt-3" href="/">Return to Home Page</a>
+</div>

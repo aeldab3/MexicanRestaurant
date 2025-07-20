@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using MexicanRestaurant.Application.Helpers;
 using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Views.Shared;
@@ -14,13 +15,11 @@ namespace MexicanRestaurant.WebUI.Controllers
         private readonly IProductService _productService;
         private readonly ISharedLookupService _sharedLookupService;
         private readonly IMapper _mapper;
-        private readonly ILogger<ProductController> _logger;
-        public ProductController(IProductService productService, ISharedLookupService sharedLookupService, IMapper mapper, ILogger<ProductController> logger)
+        public ProductController(IProductService productService, ISharedLookupService sharedLookupService, IMapper mapper)
         {
             _productService = productService;
             _sharedLookupService = sharedLookupService;
             _mapper = mapper;
-            _logger = logger;
         }
 
         [Authorize(Roles = "Admin, Manager")]
@@ -44,8 +43,8 @@ namespace MexicanRestaurant.WebUI.Controllers
                 ViewBag.Operation = "Add";
                 return View(new ProductFormViewModel());
             }
-            Product product = await _productService.GetExistingProductByIdAsync(id);
-            if (product == null) return NotFound("Product not found");
+            Product product = await _productService.GetExistingProductByIdAsync(id) 
+                              ?? throw new ProductNotFoundException($"Product with ID {id} was not found.");
             var model = _mapper.Map<ProductFormViewModel>(product);
             model.ExistingImageUrl = product.ImageUrl;
             ViewBag.Operation = "Edit";
@@ -56,8 +55,6 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEdit(ProductFormViewModel model)
         {
-            try
-            {
                 await LoadFormData();
 
                 if (model.CategoryId == 0)
@@ -70,37 +67,20 @@ namespace MexicanRestaurant.WebUI.Controllers
                     var existingImageUrl = model.ExistingImageUrl ?? string.Empty;
                     await _productService.AddOrUpdateProductAsync(product, model.SelectedIngredientIds, existingImageUrl);
                     TempData["Success"] = model.ProductId == 0 ? "Product added successfully." : "Product updated successfully.";
-                    return RedirectToAction("Index", "Product");
+                    return RedirectToAction("Index");
                 }
-
                 await LoadFormData();
                 ViewBag.Operation = model.ProductId == 0 ? "Add" : "Edit";
                 return View(model);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error processing your request.");
-                TempData["ErrorMessage"] = "An error occurred while processing your request.";
-                return RedirectToAction("AddEdit");
-            }
         }
 
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            try 
-            { 
-                var model = await _productService.GetProductViewModelByIdAsync(id);
-                if (model == null) return NotFound();
+                var model = await _productService.GetProductViewModelByIdAsync(id) 
+                            ?? throw new ProductNotFoundException($"Product with ID {id} was not found.");
                 return View(model);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error fetching product details for ID {id}.");
-                TempData["ErrorMessage"] = "An error occurred while fetching product details.";
-                return RedirectToAction("Index");
-            }
         }
 
         [HttpPost]
@@ -108,23 +88,11 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                if (await _productService.GetExistingProductByIdAsync(id) == null)
-                {
-                    TempData["ErrorMessage"] = "Product not found.";
-                    return RedirectToAction("Index");
-                }
-                await _productService.DeleteProductAsync(id);
-                TempData["Success"] = "Product deleted successfully.";
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error deleting product with ID {id}.");
-                TempData["ErrorMessage"] = "An error occurred while deleting the product.";
-            }
+            var product = await _productService.GetExistingProductByIdAsync(id)
+                          ?? throw new ProductNotFoundException($"Product with ID {id} was not found.");
+            await _productService.DeleteProductAsync(id);
+            TempData["Success"] = "Product deleted successfully.";
             return RedirectToAction("Index");
-
         }
 
         private async Task LoadFormData()

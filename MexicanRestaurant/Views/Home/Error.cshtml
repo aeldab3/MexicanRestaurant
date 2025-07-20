@@ -2,16 +2,17 @@
 @{
     ViewData["Title"] = "Oops! Something went wrong";
     Layout = "_Layout";
+
+    var exception = ViewData["Exception"] as Exception;
+    var errorMessage = exception?.Message ?? Model?.Message;
 }
 
 <div class="container mt-5 text-center">
-    <h1 class="display-4 text-danger">😕 Oops!</h1>
-    <p class="lead">An unexpected error occurred while processing your request.</p>
-
+    <h1 class="text-danger">😕 Oops!</h1>
+    <h2 class="text-muted">@(!string.IsNullOrWhiteSpace(errorMessage) ? errorMessage : "An unexpected error occurred while processing your request.")</h2>
     @if (!string.IsNullOrEmpty(Model?.RequestId))
     {
-        <p><strong>Request ID:</strong> <code>@Model.RequestId</code></p>
+        <h3><strong>Request ID:</strong> <code>@Model.RequestId</code></h3>
     }
-
-    <a class="btn btn-primary mt-3" href="/">Return to Home Page</a>
+    <a class="btn btn-success mt-3" href="/">Return to Home Page</a>
 </div>

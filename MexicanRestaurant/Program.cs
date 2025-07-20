@@ -9,8 +9,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 
-DotNetEnv.Env.Load();
 var builder = WebApplication.CreateBuilder(args);
+DotNetEnv.Env.Load();
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -30,8 +30,7 @@ builder.Services.AddScoped<IPaginatedProductFetcher, PaginatedProductFetcher>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IAuditLogHelper, AuditLogHelper>();
 builder.Services.AddSingleton<ISessionService, SessionService>();
-builder.Services.AddAutoMapper(typeof(OrderProfile));
-builder.Services.AddAutoMapper(typeof(ProductProfile));
+builder.Services.AddAutoMapper(typeof(OrderProfile).Assembly);
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
@@ -52,7 +51,10 @@ builder.Services.AddResponseCompression(options =>
     options.Providers.Add<GzipCompressionProvider>();
 });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<GlobalExceptionFilter>();
+});
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSession(op =>
@@ -77,6 +79,15 @@ else
 
 app.UseHttpsRedirection();
 
+app.UseRouting();
+
+app.UseMiniProfiler();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.UseSession();
+
 app.Use(async (context, next) =>
 {
     context.Response.Headers.Append("Content-Security-Policy",
@@ -89,14 +100,9 @@ app.Use(async (context, next) =>
     await next();
 });
 
+app.UseStatusCodePagesWithReExecute("/Home/StatusCode", "?code={0}");
+
 app.UseResponseCompression();
-
-app.UseRouting();
-
-app.UseMiniProfiler();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 var scopeFactory = app.Services.GetRequiredService<IServiceScopeFactory>();
 using (var scope = scopeFactory.CreateScope())
@@ -105,8 +111,6 @@ using (var scope = scopeFactory.CreateScope())
 }
 
 app.MapStaticAssets();
-
-app.UseSession();
 
 app.MapControllerRoute(
     name: "areas",
