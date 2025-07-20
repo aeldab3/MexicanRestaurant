@@ -48,14 +48,7 @@ namespace MexicanRestaurant.Application.Services
             if (string.IsNullOrEmpty(imageName)) return;
             var imagePath = Path.Combine(_env.WebRootPath, folderName, imageName);
             if (File.Exists(imagePath))
-                try
-                {
-                    await Task.Run(() => File.Delete(imagePath));
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidOperationException($"Error deleting image: {imageName}. {ex.Message}", ex);
-                }
+                await Task.Run(() => File.Delete(imagePath));
         }
     }
 }

@@ -12,7 +12,7 @@
     <h2 class="text-muted">@(!string.IsNullOrWhiteSpace(errorMessage) ? errorMessage : "An unexpected error occurred while processing your request.")</h2>
     @if (!string.IsNullOrEmpty(Model?.RequestId))
     {
-        <3><strong>Request ID:</strong> <code>@Model.RequestId</code></3>
+        <h3><strong>Request ID:</strong> <code>@Model.RequestId</code></h3>
     }
     <a class="btn btn-success mt-3" href="/">Return to Home Page</a>
 </div>

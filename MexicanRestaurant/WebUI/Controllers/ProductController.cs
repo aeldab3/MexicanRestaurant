@@ -69,6 +69,7 @@ namespace MexicanRestaurant.WebUI.Controllers
                     TempData["Success"] = model.ProductId == 0 ? "Product added successfully." : "Product updated successfully.";
                     return RedirectToAction("Index");
                 }
+                ViewData["Error"] = "There were errors in the form. Please correct them and try again.";
                 await LoadFormData();
                 ViewBag.Operation = model.ProductId == 0 ? "Add" : "Edit";
                 return View(model);
@@ -78,9 +79,9 @@ namespace MexicanRestaurant.WebUI.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-                var model = await _productService.GetProductViewModelByIdAsync(id) 
-                            ?? throw new ProductNotFoundException($"Product with ID {id} was not found.");
-                return View(model);
+            var model = await _productService.GetProductViewModelByIdAsync(id) 
+                        ?? throw new ProductNotFoundException($"Product with ID {id} was not found.");
+            return View(model);
         }
 
         [HttpPost]

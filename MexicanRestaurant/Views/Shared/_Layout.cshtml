@@ -115,6 +115,7 @@
             timerProgressBar: true
         });
     };
+
      @if (TempData["Success"] != null)
      {
         <text>
@@ -123,6 +124,16 @@
             });
         </text>
      }
+
+     @if (TempData["Error"] != null)
+     {
+        <text>
+            window.addEventListener('DOMContentLoaded', () => {
+                showToast('@TempData["Error"]', 'error');
+            });
+        </text>
+     }
+
      @if (Context.Items["GlobalErrorMessage"] != null)
      {
         <text>

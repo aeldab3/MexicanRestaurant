@@ -10,36 +10,26 @@ namespace MexicanRestaurant.Application.Services
     public class AuditLogService : IAuditLogService
     {
         private readonly IRepository<AuditLog> _auditRepo;
-        private readonly ILogger<AuditLogService> _logger;
 
-        public AuditLogService(IRepository<AuditLog> auditRepo, ILogger<AuditLogService> logger)
+        public AuditLogService(IRepository<AuditLog> auditRepo)
         {
             _auditRepo = auditRepo;
-            _logger = logger;
         }
 
         public async Task LogAsync(string userId, string email, string role, string action, string entity, string entityId, string details)
         {
-            try
+            var log = new AuditLog
             {
-                var log = new AuditLog
-                {
-                    UserId = userId,
-                    Email = email,
-                    Role = role,
-                    ActionType = action,
-                    EntityName = entity,
-                    EntityId = entityId,
-                    Details = details,
-                    Timestamp = DateTime.UtcNow
-                };
-                await _auditRepo.AddAsync(log);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error logging audit action: {Action} for entity: {Entity} with ID: {EntityId}", action, entity, entityId);
-                return;
-            }
+                UserId = userId,
+                Email = email,
+                Role = role,
+                ActionType = action,
+                EntityName = entity,
+                EntityId = entityId,
+                Details = details,
+                Timestamp = DateTime.UtcNow
+            };
+            await _auditRepo.AddAsync(log);
         }
 
         public async Task<AuditLogViewModel> GetPagedLogsAsync(PaginationInfo pagination)

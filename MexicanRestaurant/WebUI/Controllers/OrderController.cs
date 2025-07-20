@@ -17,9 +17,8 @@ namespace MexicanRestaurant.WebUI.Controllers
         private readonly IOrderProcessor _orderProcessor;
         private readonly ICheckoutService _checkoutService;
         private readonly ISharedLookupService _sharedLookupService;
-        private readonly ILogger<OrderController> _logger;
 
-        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, ISharedLookupService sharedLookupService, ILogger<OrderController> logger)
+        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, ISharedLookupService sharedLookupService)
         {
             _userManager = userManager;
             _orderCartService = orderCartService;
@@ -27,33 +26,23 @@ namespace MexicanRestaurant.WebUI.Controllers
             _orderProcessor = orderProcessor;
             _checkoutService = checkoutService;
             _sharedLookupService = sharedLookupService;
-            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> Create(int page = 1, string searchTerm = "", int? categoryId = null, string sortBy = "")
         {
-            try
-            {
-                var model = _orderCartService.GetCurrentOrderFromSession();
-                var newModel = await _orderViewModelFactory.InitializeOrderViewModelAsync(
-                    new FilterOptionsViewModel { SearchTerm = searchTerm, SelectedCategoryId = categoryId, SortBy = sortBy },
-                    new PaginationInfo { CurrentPage = page, PageSize = 8 });
+            var model = _orderCartService.GetCurrentOrderFromSession();
+            var newModel = await _orderViewModelFactory.InitializeOrderViewModelAsync(
+                new FilterOptionsViewModel { SearchTerm = searchTerm, SelectedCategoryId = categoryId, SortBy = sortBy },
+                new PaginationInfo { CurrentPage = page, PageSize = 8 });
 
-                if (model != null)
-                {
-                    newModel.OrderItems = model.OrderItems;
-                    newModel.TotalAmount = model.TotalAmount;
-                }
-                _orderCartService.SaveCurrentOrderToSession(newModel);
-                return View(newModel);
-            }
-            catch (Exception ex)
+            if (model != null)
             {
-                _logger.LogError(ex, "Error creating order view model");
-                TempData["ErrorMessage"] = "An error occurred while creating the order view model.";
-                return RedirectToAction("Create", "Order");
+                newModel.OrderItems = model.OrderItems;
+                newModel.TotalAmount = model.TotalAmount;
             }
+            _orderCartService.SaveCurrentOrderToSession(newModel);
+            return View(newModel);
         }
 
         [HttpPost]
@@ -61,17 +50,16 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddItem(int prodId, int prodQty, int page = 1)
         {
-            try { 
-                await _orderCartService.AddToOrderAsync(prodId, prodQty);
-                var model = _orderCartService.GetCurrentOrderFromSession();
-                var totalQuantity = model.OrderItems.Sum(item => item.Quantity);
-                return Json(new { success = true, totalQuantity });
-            }
-            catch (Exception ex)
+            await _orderCartService.AddToOrderAsync(prodId, prodQty);
+            var model = _orderCartService.GetCurrentOrderFromSession();
+            var totalQuantity = model.OrderItems.Sum(item => item.Quantity);
+            if (totalQuantity == 0)
             {
-                _logger.LogError(ex, "Error adding item to order");
-                return Json(new { success = false, message = "An error occurred while adding the item to the order." });
+                TempData["Error"] = "Your cart is empty. Please add items before proceeding to checkout.";
+                return RedirectToAction("Create");
             }
+            TempData["Success"] = "Item added to cart successfully.";
+            return Json(new { success = true, totalQuantity });
         }
 
         [HttpGet]
@@ -80,7 +68,10 @@ namespace MexicanRestaurant.WebUI.Controllers
          {
             var model = _orderCartService.GetCurrentOrderFromSession();
             if (model == null || model.OrderItems.Count == 0)
+            {
+                TempData["Error"] = "Your cart is empty.";
                 return RedirectToAction("Create");
+            }
             return View(model);
          }
 
@@ -104,17 +95,9 @@ namespace MexicanRestaurant.WebUI.Controllers
         [HttpGet]
         public async Task<IActionResult> Checkout()
         {
-            try
-            {
-                var userId = _userManager.GetUserId(User);
-                var checkoutVM = await _checkoutService.PrepareCheckoutAsync(userId);
-                return View(checkoutVM);
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "Your cart is empty. Please add items before proceeding to checkout.";
-                return RedirectToAction("Cart");
-            }
+            var userId = _userManager.GetUserId(User);
+            var checkoutVM = await _checkoutService.PrepareCheckoutAsync(userId);
+            return View(checkoutVM);
         }
 
         [Authorize]
@@ -122,31 +105,26 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(CheckoutViewModel checkoutVM)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    var cart = _orderCartService.GetCurrentOrderFromSession();
-                    checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
-                    checkoutVM.OrderItems = cart?.OrderItems ?? new List<OrderItemViewModel>();
-                    checkoutVM.TotalAmount = cart?.TotalAmount ?? 0;
-
-                    ViewBag.Step = "1";
-                    return View(checkoutVM);
-                }
-
-                var userId = _userManager.GetUserId(User);
-                await _checkoutService.ProcessCheckoutAsync(userId, checkoutVM);
-                TempData["Success"] = "Your order has been done successfully.";
-                return RedirectToAction("ViewOrders");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in do this porccess");
-                TempData["ErrorMessage"] = "An error occurred while checkout the order.";
+                var cart = _orderCartService.GetCurrentOrderFromSession();
                 checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
+                checkoutVM.OrderItems = cart?.OrderItems ?? new List<OrderItemViewModel>();
+                checkoutVM.TotalAmount = cart?.TotalAmount ?? 0;
+                ViewBag.Step = "1";
+                TempData["Error"] = "Please correct the errors in the form.";
                 return View(checkoutVM);
             }
+
+            var userId = _userManager.GetUserId(User);
+            if (userId is null)
+            {
+                TempData["Error"] = "You must be logged in to complete the checkout process.";
+                return RedirectToAction("Login", "Account");
+            }
+            await _checkoutService.ProcessCheckoutAsync(userId, checkoutVM);
+            TempData["Success"] = "Your order has been done successfully.";
+            return RedirectToAction("ViewOrders");
         }
 
         [HttpGet]
@@ -155,6 +133,11 @@ namespace MexicanRestaurant.WebUI.Controllers
         {
             var userId = _userManager.GetUserId(User);
             var pagination = new PaginationInfo { CurrentPage = page, PageSize = 15 };
+            if (userId is null)
+            {
+                TempData["Error"] = "You must be logged in to view your orders.";
+                return RedirectToAction("Login", "Account");
+            }
             var model = await _orderProcessor.GetPagedUserOrdersAsync(userId, pagination);
             return View(model);
         }
