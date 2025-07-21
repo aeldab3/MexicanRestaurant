@@ -108,6 +108,8 @@ namespace MexicanRestaurant.WebUI.Controllers
             if (!ModelState.IsValid)
             {
                 var cart = _orderCartService.GetCurrentOrderFromSession();
+                if (checkoutVM.ShippingAddress is null)
+                    checkoutVM.ShippingAddress = new ShippingAddressViewModel();
                 checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
                 checkoutVM.OrderItems = cart?.OrderItems ?? new List<OrderItemViewModel>();
                 checkoutVM.TotalAmount = cart?.TotalAmount ?? 0;

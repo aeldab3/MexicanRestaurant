@@ -23,12 +23,12 @@
                             <h4 class="mb-3">📍 Shipping Address</h4>
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label asp-for="ShippingAddress.FirstName" class="form-label"></label>
+                                    <label asp-for="ShippingAddress.FirstName" class="form-label">First Name</label>
                                     <input asp-for="ShippingAddress.FirstName" class="form-control" />
                                     <span asp-validation-for="ShippingAddress.FirstName" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-6">
-                                    <label asp-for="ShippingAddress.LastName" class="form-label"></label>
+                                    <label asp-for="ShippingAddress.LastName" class="form-label">Last Name</label>
                                     <input asp-for="ShippingAddress.LastName" class="form-control" />
                                     <span asp-validation-for="ShippingAddress.LastName" class="text-danger"></span>
                                 </div>
@@ -53,7 +53,7 @@
                                     <span asp-validation-for="ShippingAddress.Zipcode" class="text-danger"></span>
                                 </div>
                                 <div class="col-12">
-                                    <label asp-for="ShippingAddress.PhoneNumber" class="form-label"></label>
+                                    <label asp-for="ShippingAddress.PhoneNumber" class="form-label">Phone Number</label>
                                     <input asp-for="ShippingAddress.PhoneNumber" class="form-control" />
                                     <span asp-validation-for="ShippingAddress.PhoneNumber" class="text-danger"></span>
                                 </div>
@@ -72,8 +72,8 @@
                                 foreach (var method in Model.AvailableDeliveryMethods)
                                 {
                                     <div class="form-check mb-2">
-                                        <input class="form-check-input" type="radio" asp-for="SelectedDeliveryMethodId" value="@method.Id" data-price="@method.Price" required />
                                         <label class="form-check-label">
+                                            <input class="form-check-input" type="radio" asp-for="SelectedDeliveryMethodId" value="@method.Id" data-price="@method.Price" required />
                                             <strong>@method.ShortName</strong> - @method.Description (@method.Price.ToString("C"))
                                         </label>
                                     </div>
@@ -99,8 +99,8 @@
                             <p><strong>Delivery:</strong> <span id="reviewDelivery"></span></p>
 
                             <div class="table-responsive">
-                                <table class="table table-bordered">
-                                    <thead class="table-light">
+                                <table class="table table-bordered table-striped table-hover">
+                                    <thead class="table-success">
                                         <tr><th>Product</th><th>Qty</th><th>Price</th></tr>
                                     </thead>
                                     <tbody>
@@ -142,19 +142,38 @@
         document.addEventListener("DOMContentLoaded", function () {
             const steps = document.querySelectorAll(".checkout-step");
             let currentStep = 0;
-
             const showStep = (index) => {
                 steps.forEach((step, i) => {
                     step.style.display = i === index ? "block" : "none";
                 });
             };
-
             document.querySelectorAll(".next-step").forEach(btn => {
                 btn.addEventListener("click", () => {
-                    if (currentStep < steps.length - 1) {
+                    if (currentStep == 0) {
+                        const firstName = document.querySelector('[name="ShippingAddress.FirstName"]').value;
+                        const lastName = document.querySelector('[name="ShippingAddress.LastName"]').value;
+                        const phone = document.querySelector('[name="ShippingAddress.PhoneNumber"]').value;
+                        const street = document.querySelector('[name="ShippingAddress.Street"]').value;
+                        const city = document.querySelector('[name="ShippingAddress.City"]').value;
+                        const zipCode = document.querySelector('[name="ShippingAddress.Zipcode"]').value;
+
+                        if (!firstName || !lastName || ! phone || !street || !city || !zipCode) {
+                            showToast('Please fill in all shipping address fields.', 'warning');
+                            return;
+                        }
                         currentStep++;
-                        showStep(currentStep);
-                        if (currentStep === 2) updateReviewStep();
+                    }
+                    else if (currentStep == 1) {
+                        const deliverySelected = document.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
+                        if (!deliverySelected) {
+                            showToast('Please select a delivery method.', 'warning');
+                            return;
+                        }
+                        currentStep++;
+                    }
+                    if (currentStep < steps.length){
+                    showStep(currentStep);
+                    if (currentStep === 2) updateReviewStep();
                     }
                 });
             });
@@ -167,9 +186,9 @@
                     }
                 });
             });
-
             showStep(currentStep);
         });
+
         function updateReviewStep() {
             const firstName = document.querySelector('[name="ShippingAddress.FirstName"]').value;
             const lastName = document.querySelector('[name="ShippingAddress.LastName"]').value;
@@ -184,11 +203,11 @@
             deliveryInputs.forEach(input => {
                 if (input.checked) {
                     const label = input.closest('.form-check').querySelector('label');
-                    selectedDeliveryText = label.innerText;
+                    selectedDeliveryText = label.innerText.replace(/\n/g, ' ').trim();
                     deliveryPrice = parseFloat(input.dataset.price || "0");
                 }
             });
-            const productsTotal = parseFloat("@Model.TotalAmount");
+            const productsTotal = parseFloat("@Model.TotalAmount") || 0;
             const grandTotal = productsTotal + deliveryPrice;
 
             document.getElementById("reviewName").innerText = `${firstName} ${lastName}`;
@@ -200,6 +219,5 @@
                 currency: 'USD'
             });
         }
-
     </script>
 }
