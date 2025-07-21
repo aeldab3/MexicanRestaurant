@@ -36,7 +36,8 @@ namespace MexicanRestaurant.Application.Services
                 AvailableDeliveryMethods = deliveryMethods.ToList(),
                 SelectedDeliveryMethodId = 0,
                 OrderItems = cart.OrderItems,
-                TotalAmount = cart.TotalAmount
+                TotalAmount = cart.TotalAmount,
+                SelectedPaymentMethod = "Cash"
             };
         }
 
@@ -69,6 +70,7 @@ namespace MexicanRestaurant.Application.Services
                     PhoneNumber = checkoutVM.ShippingAddress.PhoneNumber
                 },
                 OrderItems = mappedItems,
+                PaymentMethod = checkoutVM.SelectedPaymentMethod
             };
             await _orderRepo.AddAsync(newOrder);
             _orderCartService.SaveCurrentOrderToSession(null);

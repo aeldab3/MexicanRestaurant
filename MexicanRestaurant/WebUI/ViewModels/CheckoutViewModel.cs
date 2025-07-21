@@ -14,5 +14,9 @@ namespace MexicanRestaurant.WebUI.ViewModels
         public List<DeliveryMethod> AvailableDeliveryMethods { get; set; } = new();
         public decimal TotalAmount { get; set; }
         public List<OrderItemViewModel> OrderItems { get; set; } = new();
+        public List<string> AvailablePaymentMethods { get; set; } = new List<string> {"Cash", "Card"};
+
+        [Required]
+        public string SelectedPaymentMethod { get; set; }
     }
 }

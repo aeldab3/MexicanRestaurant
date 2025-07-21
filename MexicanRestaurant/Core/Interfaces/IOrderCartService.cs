@@ -1,8 +1,4 @@
-﻿using MexicanRestaurant.Core.Models;
-using MexicanRestaurant.Views.Shared;
-using MexicanRestaurant.WebUI.ViewModels;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Security.Cryptography;
+﻿using MexicanRestaurant.WebUI.ViewModels;
 
 namespace MexicanRestaurant.Core.Interfaces
 {

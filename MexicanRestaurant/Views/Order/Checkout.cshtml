@@ -20,7 +20,7 @@
 
                         <!-- Step 1: Shipping Address -->
                         <div id="step1" class="checkout-step">
-                            <h4 class="mb-3">📍 Shipping Address</h4>
+                            <h3 class="mb-3">📍 Shipping Address</h3>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label asp-for="ShippingAddress.FirstName" class="form-label">First Name</label>
@@ -59,14 +59,14 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-between mt-4">
-                                <a asp-action="Cart" asp-controller="Order" class="btn btn-secondary shadow-sm">Back</a>
-                                <button type="button" class="btn btn-success shadow-sm next-step">Next</button>
+                                <a asp-action="Cart" asp-controller="Order" class="btn btn-secondary shadow-sm">Back to cart</a>
+                                <button type="button" class="btn btn-success shadow-sm next-step">Continue to Delivery</button>
                             </div>
                         </div>
 
                         <!-- Step 2: Delivery Method -->
                         <div id="step2" class="checkout-step" style="display:none;">
-                            <h4 class="mb-3">🚛 Delivery Method</h4>
+                            <h3 class="mb-3">🚛 Delivery Method</h3>
                             @if (Model.AvailableDeliveryMethods != null && Model.AvailableDeliveryMethods.Any())
                             {
                                 foreach (var method in Model.AvailableDeliveryMethods)
@@ -85,14 +85,14 @@
                             }
                             <span asp-validation-for="SelectedDeliveryMethodId" class="text-danger"></span>
                             <div class="d-flex justify-content-between mt-4">
-                                <button type="button" class="btn btn-secondary shadow-sm prev-step">Back</button>
-                                <button type="button" class="btn btn-success shadow-sm next-step">Next</button>
+                                <button type="button" class="btn btn-secondary shadow-sm prev-step">Back to Address</button>
+                                <button type="button" class="btn btn-success shadow-sm next-step">Continue to Review</button>
                             </div>
                         </div>
 
                         <!-- Step 3: Review -->
                         <div id="step3" class="checkout-step" style="display:none;">
-                            <h4 class="mb-3">🧾 Review Your Order</h4>
+                            <h3 class="mb-3">🧾 Review Your Order</h3>
                             <p><strong>Name:</strong> <span id="reviewName"></span></p>
                             <p><strong>Phone:</strong> <span id="reviewPhone"></span></p>
                             <p><strong>Address:</strong> <span id="reviewAddress"></span></p>
@@ -123,8 +123,27 @@
                             <p class="mt-3 fs-5"><strong>Total:</strong> <span id="reviewTotal">@Model.TotalAmount.ToString("C")</span></p>
 
                             <div class="d-flex justify-content-between mt-4">
-                                <button type="button" class="btn btn-secondary shadow-sm prev-step">Back</button>
-                                <button type="submit" class="btn btn-success shadow-sm">Place Order</button>
+                                <button type="button" class="btn btn-secondary shadow-sm prev-step">Back to Delivery</button>
+                                <button type="button" class="btn btn-success shadow-sm next-step">Continue to Payment</button>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Payment -->
+                        <div id="step4" class="checkout-step" style="display:none;">
+                            <h3 class="mb-3">💳 Payment Method</h3>
+                            @foreach(var method in Model.AvailablePaymentMethods)
+                            {
+                                <div class="form-check mb-2">
+                                    <label class="form-check-label">
+                                        <input class="form-check-input" type="radio" name="SelectedPaymentMethod" value="@method" required />
+                                        @method
+                                    </label>
+                                </div>
+                            }
+                            <span asp-validation-for="SelectedPaymentMethod" class="text-danger"></span>
+                            <div class="d-flex justify-content-between mt-4">
+                                <button type="button" class="btn btn-secondary shadow-sm prev-step">Back to Review</button>
+                                <button type="submit" class="btn btn-success shadow-sm">Submit Order</button>
                             </div>
                         </div>
                     </form>
@@ -175,6 +194,7 @@
                     showStep(currentStep);
                     if (currentStep === 2) updateReviewStep();
                     }
+                    currentStep++;
                 });
             });
 
