@@ -5,6 +5,7 @@ namespace MexicanRestaurant.WebUI.ViewModels
 {
     public class CheckoutViewModel
     {
+        public int OrderId { get; set; }
         [Required]
         public ShippingAddressViewModel ShippingAddress { get; set; } = new ShippingAddressViewModel();
 
@@ -18,5 +19,11 @@ namespace MexicanRestaurant.WebUI.ViewModels
 
         [Required]
         public string SelectedPaymentMethod { get; set; }
+        public string SuccessUrl { get; set; } = "https://localhost:7063/Order/CheckoutSuccess";
+        public string CancelUrl { get; set; } = "https://localhost:7063/Order/CheckoutCancel";
+        public string StripePublishableKey { get; set; }
+        public decimal OrderTotal { get; set; }
+        public string ClientSecret { get; set; }
+
     }
 }

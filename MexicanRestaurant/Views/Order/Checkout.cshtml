@@ -131,15 +131,12 @@
                         <!-- Step 4: Payment -->
                         <div id="step4" class="checkout-step" style="display:none;">
                             <h3 class="mb-3">💳 Payment Method</h3>
-                            @foreach(var method in Model.AvailablePaymentMethods)
-                            {
-                                <div class="form-check mb-2">
-                                    <label class="form-check-label">
-                                        <input class="form-check-input" type="radio" name="SelectedPaymentMethod" value="@method" required />
-                                        @method
-                                    </label>
-                                </div>
-                            }
+                            <select asp-for="SelectedPaymentMethod" class="form-select">
+                                @foreach(var method in Model.AvailablePaymentMethods)
+                                {
+                                    <option value="@method">@method</option>
+                                }
+                            </select>
                             <span asp-validation-for="SelectedPaymentMethod" class="text-danger"></span>
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="button" class="btn btn-secondary shadow-sm prev-step">Back to Review</button>

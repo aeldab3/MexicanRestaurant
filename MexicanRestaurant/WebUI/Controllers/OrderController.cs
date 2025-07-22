@@ -6,6 +6,7 @@ using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 
 namespace MexicanRestaurant.WebUI.Controllers
 {
@@ -17,8 +18,9 @@ namespace MexicanRestaurant.WebUI.Controllers
         private readonly IOrderProcessor _orderProcessor;
         private readonly ICheckoutService _checkoutService;
         private readonly ISharedLookupService _sharedLookupService;
+        private readonly PaymentStrategyResolver _paymentResolver;
 
-        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, ISharedLookupService sharedLookupService)
+        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, ISharedLookupService sharedLookupService, PaymentStrategyResolver paymentResolver)
         {
             _userManager = userManager;
             _orderCartService = orderCartService;
@@ -26,6 +28,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             _orderProcessor = orderProcessor;
             _checkoutService = checkoutService;
             _sharedLookupService = sharedLookupService;
+            _paymentResolver = paymentResolver;
         }
 
         [HttpGet]
@@ -117,16 +120,43 @@ namespace MexicanRestaurant.WebUI.Controllers
                 TempData["Error"] = "Please correct the errors in the form.";
                 return View(checkoutVM);
             }
-
             var userId = _userManager.GetUserId(User);
             if (userId is null)
             {
                 TempData["Error"] = "You must be logged in to complete the checkout process.";
                 return RedirectToAction("Login", "Account");
             }
+
+            var paymentStrategy = _paymentResolver.Resolve(checkoutVM.SelectedPaymentMethod);
+            var result = await paymentStrategy.ProcessPaymentAsync(checkoutVM);
+            if (!result.IsSuccess)
+            {
+                ModelState.AddModelError("", result.Message ?? "Payment failed.");
+                return View("Checkout", checkoutVM);
+            }
+
+            if (!string.IsNullOrEmpty(result.PaymentUrl))
+            {
+                TempData["Success"] = "Payment processed successfully. Redirecting to payment gateway.";
+                return Redirect(result.PaymentUrl);
+            }
             await _checkoutService.ProcessCheckoutAsync(userId, checkoutVM);
             TempData["Success"] = "Your order has been done successfully.";
             return RedirectToAction("ViewOrders");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult CheckoutSuccess()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        [Authorize]
+        public IActionResult CheckoutCancel()
+        {
+            return View();
         }
 
         [HttpGet]
