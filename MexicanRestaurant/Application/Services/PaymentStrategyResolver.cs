@@ -15,8 +15,8 @@ namespace MexicanRestaurant.Application.Services
         {
             return method switch
             {
-                "Card" => _serviceProvider.GetRequiredService<StripePaymentStrategy>(),
-                "Cash" => _serviceProvider.GetRequiredService<CashPaymentStrategy>(),
+                "stripe" => _serviceProvider.GetRequiredService<StripePaymentStrategy>(),
+                "cash" => _serviceProvider.GetRequiredService<CashPaymentStrategy>(),
                 _ => throw new NotSupportedException($"Payment method '{method}' is not supported.")
             };
         }

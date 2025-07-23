@@ -1,17 +1,15 @@
 ﻿using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
-using MexicanRestaurant.WebUI.ViewModels;
 
 namespace MexicanRestaurant.Application.Services
 {
     public class CashPaymentStrategy : IPaymentStrategy
     {
-        public Task<PaymentResult> ProcessPaymentAsync(CheckoutViewModel CheckoutVM)
+        public Task<PaymentResult> ProcessPaymentAsync(PaymentRequest request)
         {
             return Task.FromResult(new PaymentResult
             {
                 IsSuccess = true,
-                PaymentUrl = null
             });
         }
     }

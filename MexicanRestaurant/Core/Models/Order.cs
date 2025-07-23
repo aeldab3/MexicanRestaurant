@@ -13,8 +13,10 @@ namespace MexicanRestaurant.Core.Models
         public int? DeliveryMethodId { get; set; }
         public DeliveryMethod DeliveryMethod { get; set; }
         public OrderStatus Status { get; set; } = OrderStatus.Pending;
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public string PaymentMethod { get; set; }
+        public string PaymentIntentId { get; set; }
 
     }
 }

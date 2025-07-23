@@ -6,7 +6,6 @@ using MexicanRestaurant.WebUI.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace MexicanRestaurant.WebUI.Controllers
 {
@@ -18,9 +17,9 @@ namespace MexicanRestaurant.WebUI.Controllers
         private readonly IOrderProcessor _orderProcessor;
         private readonly ICheckoutService _checkoutService;
         private readonly ISharedLookupService _sharedLookupService;
-        private readonly PaymentStrategyResolver _paymentResolver;
+        private readonly PaymentStrategyResolver _paymentStrategyResolver;
 
-        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, ISharedLookupService sharedLookupService, PaymentStrategyResolver paymentResolver)
+        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, ISharedLookupService sharedLookupService, PaymentStrategyResolver paymentStrategyResolver)
         {
             _userManager = userManager;
             _orderCartService = orderCartService;
@@ -28,7 +27,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             _orderProcessor = orderProcessor;
             _checkoutService = checkoutService;
             _sharedLookupService = sharedLookupService;
-            _paymentResolver = paymentResolver;
+            _paymentStrategyResolver = paymentStrategyResolver;
         }
 
         [HttpGet]
@@ -99,7 +98,13 @@ namespace MexicanRestaurant.WebUI.Controllers
         public async Task<IActionResult> Checkout()
         {
             var userId = _userManager.GetUserId(User);
+            if (userId is null)
+            {
+                TempData["Error"] = "You must be logged in to complete the checkout process.";
+                return RedirectToAction("Login", "Account");
+            }
             var checkoutVM = await _checkoutService.PrepareCheckoutAsync(userId);
+            checkoutVM.StripePublishableKey = Environment.GetEnvironmentVariable("StripePublishableKey") ?? throw new InvalidOperationException("Stripe publishable key is missing");
             return View(checkoutVM);
         }
 
@@ -111,8 +116,7 @@ namespace MexicanRestaurant.WebUI.Controllers
             if (!ModelState.IsValid)
             {
                 var cart = _orderCartService.GetCurrentOrderFromSession();
-                if (checkoutVM.ShippingAddress is null)
-                    checkoutVM.ShippingAddress = new ShippingAddressViewModel();
+                checkoutVM.ShippingAddress ??= new ShippingAddressViewModel();
                 checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
                 checkoutVM.OrderItems = cart?.OrderItems ?? new List<OrderItemViewModel>();
                 checkoutVM.TotalAmount = cart?.TotalAmount ?? 0;
@@ -120,6 +124,7 @@ namespace MexicanRestaurant.WebUI.Controllers
                 TempData["Error"] = "Please correct the errors in the form.";
                 return View(checkoutVM);
             }
+
             var userId = _userManager.GetUserId(User);
             if (userId is null)
             {
@@ -127,22 +132,32 @@ namespace MexicanRestaurant.WebUI.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var paymentStrategy = _paymentResolver.Resolve(checkoutVM.SelectedPaymentMethod);
-            var result = await paymentStrategy.ProcessPaymentAsync(checkoutVM);
-            if (!result.IsSuccess)
+            try
             {
-                ModelState.AddModelError("", result.Message ?? "Payment failed.");
-                return View("Checkout", checkoutVM);
-            }
+                var orderId = await _checkoutService.ProcessCheckoutAsync(userId, checkoutVM);
+                if (checkoutVM.SelectedPaymentMethod == "stripe")
+                {
+                    var paymentRequest = new PaymentRequest
+                    {
+                        Amount = checkoutVM.TotalAmount,
+                        Currency = "usd",
+                        Description = $"Order #{orderId} payment for user {userId}",
+                        OrderId = orderId
+                    };
+                    var paymentStrategy = _paymentStrategyResolver.Resolve(checkoutVM.SelectedPaymentMethod);
+                    var paymentResult = await paymentStrategy.ProcessPaymentAsync(paymentRequest);
+                    if (!paymentResult.IsSuccess)
+                        return Json(new { IsSuccess = false, message = paymentResult.Message });
 
-            if (!string.IsNullOrEmpty(result.PaymentUrl))
-            {
-                TempData["Success"] = "Payment processed successfully. Redirecting to payment gateway.";
-                return Redirect(result.PaymentUrl);
+                    return Json(new { IsSuccess = true, clientSecret = paymentResult.Message });
+                }
+                TempData["Success"] = "Your order has been done successfully.";
+                return RedirectToAction("ViewOrders");
             }
-            await _checkoutService.ProcessCheckoutAsync(userId, checkoutVM);
-            TempData["Success"] = "Your order has been done successfully.";
-            return RedirectToAction("ViewOrders");
+            catch (Exception ex)
+            {
+                return Json(new { IsSuccess = false, message = ex.Message });
+            }
         }
 
         [HttpGet]

@@ -22,12 +22,13 @@
                                 <thead class="table-light text-center">
                                     <tr>
                                         <th scope="col">Order ID</th>
-                                        <th scope="col">Date</th>
-                                        <th scope="col">Total</th>
-                                        <th scope="col">Items</th>
-                                        <th scope="col">Shipping Address</th>
-                                        <th scope="col">Delivery</th>
-                                        <th scope="col">Status</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Items</th>
+                                        <th>Shipping Address</th>
+                                        <th>Delivery</th>
+                                        <th>Payment Method</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -56,6 +57,18 @@
                                             </td>
                                             <td class="text-center">
                                                 @order.DeliveryShortName
+                                            </td>
+                                            <td class="text-center">
+                                                @if (!string.IsNullOrEmpty(order.PaymentMethod))
+                                                {
+                                                    <span class="badge @(order.PaymentMethod.ToLower() == "stripe" ? "bg-success" : "bg-secondary") text-white">
+                                                        @order.PaymentMethod
+                                                    </span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-secondary text-white">Not Specified</span>
+                                                }
                                             </td>
                                             <td class="text-center">
                                                 @switch (order.Status)

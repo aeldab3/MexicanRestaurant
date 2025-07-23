@@ -34,7 +34,8 @@ namespace MexicanRestaurant.Application.MappingProfiles
             CreateMap<Order, OrderListItemViewModel>()
                 .ForMember(dest => dest.DeliveryShortName, opt => opt.MapFrom(src => src.DeliveryMethod.ShortName))
                 .ForMember(dest => dest.UserFullName, opt => opt.MapFrom(src => src.User.FirstName + " " + src.User.LastName))
-                .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email));
+                .ForMember(dest => dest.UserEmail, opt => opt.MapFrom(src => src.User.Email))
+                .ForMember(dest => dest.PaymentMethod, opt => opt.MapFrom(src => src.PaymentMethod));
 
             CreateMap<Address, ShippingAddressViewModel>();
         }

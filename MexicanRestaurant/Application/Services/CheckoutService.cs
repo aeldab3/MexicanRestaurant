@@ -4,6 +4,7 @@ using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.WebUI.ViewModels;
+using Stripe;
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -12,13 +13,15 @@ namespace MexicanRestaurant.Application.Services
         private readonly IOrderCartService _orderCartService;
         private readonly IRepository<DeliveryMethod> _deliveryRepo;
         private readonly IRepository<Order> _orderRepo;
+        private readonly PaymentStrategyResolver _paymentStrategyResolver;
         private readonly IMapper _mapper;
 
-        public CheckoutService(IOrderCartService orderCartService, IRepository<DeliveryMethod> deliveryRepo, IRepository<Order> orderRepo, IMapper mapper)
+        public CheckoutService(IOrderCartService orderCartService, IRepository<DeliveryMethod> deliveryRepo, IRepository<Order> orderRepo, PaymentStrategyResolver paymentStrategyResolver, IMapper mapper)
         {
             _orderCartService = orderCartService;
             _deliveryRepo = deliveryRepo;
             _orderRepo = orderRepo;
+            _paymentStrategyResolver = paymentStrategyResolver;
             _mapper = mapper;
         }
 
@@ -27,9 +30,9 @@ namespace MexicanRestaurant.Application.Services
             var cart = _orderCartService.GetCurrentOrderFromSession();
             if (cart == null || !cart.OrderItems.Any())
                 throw new InvalidOperationException("Cart is empty");
-            
+
             var deliveryMethods = await _deliveryRepo.GetAllAsync();
-            
+
             return new CheckoutViewModel
             {
                 ShippingAddress = new ShippingAddressViewModel(),
@@ -37,7 +40,7 @@ namespace MexicanRestaurant.Application.Services
                 SelectedDeliveryMethodId = 0,
                 OrderItems = cart.OrderItems,
                 TotalAmount = cart.TotalAmount,
-                SelectedPaymentMethod = "Cash"
+                SelectedPaymentMethod = "cash"
             };
         }
 
@@ -59,7 +62,8 @@ namespace MexicanRestaurant.Application.Services
                 DeliveryMethodId = selectedDeliveryMethod.Id,
                 DeliveryMethod = selectedDeliveryMethod,
                 Status = OrderStatus.Pending,
-                ShippingAddress = new Address
+                PaymentStatus = checkoutVM.SelectedPaymentMethod == "stripe" ? PaymentStatus.Pending : PaymentStatus.Succeeded,
+                ShippingAddress = new Core.Models.Address
                 {
                     FirstName = checkoutVM.ShippingAddress.FirstName,
                     LastName = checkoutVM.ShippingAddress.LastName,
@@ -73,7 +77,15 @@ namespace MexicanRestaurant.Application.Services
                 PaymentMethod = checkoutVM.SelectedPaymentMethod
             };
             await _orderRepo.AddAsync(newOrder);
+
+            if (checkoutVM.SelectedPaymentMethod == "cash")
+            {
+                newOrder.Status = OrderStatus.Confirmed;
+                newOrder.PaymentStatus = PaymentStatus.Succeeded;
+                await _orderRepo.UpdateAsync(newOrder);
+            }
             _orderCartService.SaveCurrentOrderToSession(null);
+            return newOrder.OrderId;
         }
     }
 }

@@ -96,10 +96,12 @@ app.Use(async (context, next) =>
     context.Response.Headers.Append("Content-Security-Policy",
         "default-src 'self'; " +
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; " +
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net  https://js.stripe.com; " +
         "font-src 'self' https://cdn.jsdelivr.net; " +
         "img-src 'self' data:; " +
-        "connect-src 'self' http://localhost:* https://localhost:* ws://localhost:* wss://localhost:*;");
+        "connect-src 'self' http://localhost:* https://localhost:* ws://localhost:* wss://localhost:*;" +
+        "frame-src 'self' https://js.stripe.com https://hooks.stripe.com;"
+        );
     await next();
 });
 

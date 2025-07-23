@@ -131,16 +131,20 @@
                         <!-- Step 4: Payment -->
                         <div id="step4" class="checkout-step" style="display:none;">
                             <h3 class="mb-3">💳 Payment Method</h3>
-                            <select asp-for="SelectedPaymentMethod" class="form-select">
+                            <select asp-for="SelectedPaymentMethod" class="form-select" id="paymentMethodSelect">
                                 @foreach(var method in Model.AvailablePaymentMethods)
                                 {
                                     <option value="@method">@method</option>
                                 }
                             </select>
                             <span asp-validation-for="SelectedPaymentMethod" class="text-danger"></span>
+                            <div id="stripePaymentForm" style="display:none;" class="mt-3">
+                                <div id="card-element" class="form-control"></div>
+                                <div id="card-errors" role="alert" class="text-danger"></div>
+                            </div>
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="button" class="btn btn-secondary shadow-sm prev-step">Back to Review</button>
-                                <button type="submit" class="btn btn-success shadow-sm">Submit Order</button>
+                                <button type="submit" class="btn btn-success shadow-sm" id="submitPayment">Submit Order</button>
                             </div>
                         </div>
                     </form>
@@ -154,17 +158,47 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const steps = document.querySelectorAll(".checkout-step");
             let currentStep = 0;
+            const stripe = Stripe('@Model.StripePublishableKey')
+            const elements = stripe.elements();
+            let cardElement;
+
+            // Initialize Stripe card element when payment step is shown
+            const paymentMethodSelect = document.getElementById("paymentMethodSelect");
+            paymentMethodSelect.addEventListener("change", function () {
+                const stripeForm = document.getElementById('stripePaymentForm');
+                if (this.value == 'stripe') {
+                    stripeForm.style.display = 'block';
+                    if (!cardElement) {
+                        cardElement = elements.create('card');
+                        cardElement.mount('#card-element')
+                    }
+                } else {
+                    stripeForm.style.display = 'none';
+                }
+            });
+
             const showStep = (index) => {
                 steps.forEach((step, i) => {
                     step.style.display = i === index ? "block" : "none";
                 });
+
+                // Initialize Stripe form if on payment step and Stripe is selected
+                if (index === 3 && paymentMethodSelect.value === 'stripe') {
+                    document.getElementById('stripePaymentForm').style.display = 'block';
+                    if (!cardElement) {
+                        cardElement = elements.create('card');
+                        cardElement.mount('#card-element');
+                    }
+                }
             };
             document.querySelectorAll(".next-step").forEach(btn => {
                 btn.addEventListener("click", () => {
+                    console.log("Next button clicked, currentStep:", currentStep);
                     if (currentStep == 0) {
                         const firstName = document.querySelector('[name="ShippingAddress.FirstName"]').value;
                         const lastName = document.querySelector('[name="ShippingAddress.LastName"]').value;
@@ -187,6 +221,10 @@
                         }
                         currentStep++;
                     }
+                    else if (currentStep == 2) {
+                        currentStep++;
+                    }
+
                     if (currentStep < steps.length){
                     showStep(currentStep);
                     if (currentStep === 2) updateReviewStep();
@@ -202,6 +240,46 @@
                         showStep(currentStep);
                     }
                 });
+            });
+
+            // Handle Stripe Payment
+            const checkoutForm = document.getElementById('checkoutForm');
+            const submitPaymentBtn = document.getElementById('submitPayment');
+            submitPaymentBtn.addEventListener('click', async (e) => {
+                if (paymentMethodSelect.value === 'stripe') {
+                    e.preventDefault();
+                    const cardErrors = document.getElementById('card-errors');
+                    console.log("Submitting payment with form data:", new FormData(checkoutForm));
+                    // Submit form via AJAX to get ClientSecret
+                    const formData = new FormData(checkoutForm);
+                    const response = await fetch('/Order/Checkout', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        }
+                    });
+                    const result = await response.json();
+                    console.log("Result:", result);
+                    if (!result.IsSuccess) {
+                        cardErrors.textContent = result.message;
+                        return;
+                    }
+
+                    // Confirm Payment Intent with Stripe.js
+                    const { error, paymentIntent } = await stripe.confirmCardPayment(result.clientSecret, {
+                        payment_method: {
+                            card: cardElement
+                        }
+                    });
+
+                    if (error) {
+                        cardErrors.textContent = error.message;
+                    } else if (paymentIntent.status === 'succeeded') {
+                        checkoutForm.submit();
+                    }
+                }
             });
             showStep(currentStep);
         });

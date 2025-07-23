@@ -1,5 +1,4 @@
-﻿using MexicanRestaurant.Core.Models;
-using MexicanRestaurant.Views.Shared;
+﻿using MexicanRestaurant.Views.Shared;
 
 namespace MexicanRestaurant.WebUI.ViewModels
 {
