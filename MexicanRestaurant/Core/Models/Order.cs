@@ -17,6 +17,5 @@ namespace MexicanRestaurant.Core.Models
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public string PaymentMethod { get; set; }
         public string PaymentIntentId { get; set; }
-
     }
 }

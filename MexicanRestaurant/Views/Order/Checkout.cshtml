@@ -24,37 +24,37 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label asp-for="ShippingAddress.FirstName" class="form-label">First Name</label>
-                                    <input asp-for="ShippingAddress.FirstName" class="form-control" />
+                                    <input asp-for="ShippingAddress.FirstName" class="form-control" required />
                                     <span asp-validation-for="ShippingAddress.FirstName" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-6">
                                     <label asp-for="ShippingAddress.LastName" class="form-label">Last Name</label>
-                                    <input asp-for="ShippingAddress.LastName" class="form-control" />
+                                    <input asp-for="ShippingAddress.LastName" class="form-control" required />
                                     <span asp-validation-for="ShippingAddress.LastName" class="text-danger"></span>
                                 </div>
                                 <div class="col-12">
                                     <label asp-for="ShippingAddress.Street" class="form-label"></label>
-                                    <input asp-for="ShippingAddress.Street" class="form-control" />
+                                    <input asp-for="ShippingAddress.Street" class="form-control" required />
                                     <span asp-validation-for="ShippingAddress.Street" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-4">
                                     <label asp-for="ShippingAddress.City" class="form-label"></label>
-                                    <input asp-for="ShippingAddress.City" class="form-control" />
+                                    <input asp-for="ShippingAddress.City" class="form-control" required />
                                     <span asp-validation-for="ShippingAddress.City" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-4">
                                     <label asp-for="ShippingAddress.State" class="form-label"></label>
-                                    <input asp-for="ShippingAddress.State" class="form-control" />
+                                    <input asp-for="ShippingAddress.State" class="form-control" required />
                                     <span asp-validation-for="ShippingAddress.State" class="text-danger"></span>
                                 </div>
                                 <div class="col-md-4">
                                     <label asp-for="ShippingAddress.Zipcode" class="form-label"></label>
-                                    <input asp-for="ShippingAddress.Zipcode" class="form-control" />
+                                    <input asp-for="ShippingAddress.Zipcode" class="form-control" required />
                                     <span asp-validation-for="ShippingAddress.Zipcode" class="text-danger"></span>
                                 </div>
                                 <div class="col-12">
                                     <label asp-for="ShippingAddress.PhoneNumber" class="form-label">Phone Number</label>
-                                    <input asp-for="ShippingAddress.PhoneNumber" class="form-control" />
+                                    <input asp-for="ShippingAddress.PhoneNumber" class="form-control" required />
                                     <span asp-validation-for="ShippingAddress.PhoneNumber" class="text-danger"></span>
                                 </div>
                             </div>
@@ -167,6 +167,11 @@
             const elements = stripe.elements();
             let cardElement;
 
+            const initialStep = parseInt('@(ViewBag.Step ?? "0")');
+            if (!isNaN(initialStep)) {
+                currentStep = initialStep;
+            }
+
             // Initialize Stripe card element when payment step is shown
             const paymentMethodSelect = document.getElementById("paymentMethodSelect");
             paymentMethodSelect.addEventListener("change", function () {
@@ -199,6 +204,8 @@
             document.querySelectorAll(".next-step").forEach(btn => {
                 btn.addEventListener("click", () => {
                     console.log("Next button clicked, currentStep:", currentStep);
+                    let proceedToNextStep = true;
+
                     if (currentStep == 0) {
                         const firstName = document.querySelector('[name="ShippingAddress.FirstName"]').value;
                         const lastName = document.querySelector('[name="ShippingAddress.LastName"]').value;
@@ -209,27 +216,22 @@
 
                         if (!firstName || !lastName || ! phone || !street || !city || !zipCode) {
                             showToast('Please fill in all shipping address fields.', 'warning');
-                            return;
+                            proceedToNextStep = false;
                         }
-                        currentStep++;
                     }
-                    else if (currentStep == 1) {
+                    else if (currentStep === 1) {
                         const deliverySelected = document.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
                         if (!deliverySelected) {
                             showToast('Please select a delivery method.', 'warning');
-                            return;
+                            proceedToNextStep = false;
                         }
+                    }
+                    if (proceedToNextStep && currentStep < steps.length -1){
                         currentStep++;
-                    }
-                    else if (currentStep == 2) {
-                        currentStep++;
-                    }
-
-                    if (currentStep < steps.length){
-                    showStep(currentStep);
-                    if (currentStep === 2) updateReviewStep();
-                    }
-                    currentStep++;
+                        showStep(currentStep);
+                        if (currentStep === 2) updateReviewStep();
+                    }else if (proceedToNextStep && currentStep === steps.length -1) {}
+                    console.log("Next button clicked, currentStep (after increment):", currentStep);
                 });
             });
 
@@ -246,27 +248,49 @@
             const checkoutForm = document.getElementById('checkoutForm');
             const submitPaymentBtn = document.getElementById('submitPayment');
             submitPaymentBtn.addEventListener('click', async (e) => {
-                if (paymentMethodSelect.value === 'stripe') {
-                    e.preventDefault();
-                    const cardErrors = document.getElementById('card-errors');
-                    console.log("Submitting payment with form data:", new FormData(checkoutForm));
-                    // Submit form via AJAX to get ClientSecret
-                    const formData = new FormData(checkoutForm);
-                    const response = await fetch('/Order/Checkout', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                        }
-                    });
-                    const result = await response.json();
-                    console.log("Result:", result);
-                    if (!result.IsSuccess) {
-                        cardErrors.textContent = result.message;
-                        return;
-                    }
+                const selectedPaymentMethod = paymentMethodSelect.value;
+                const firstName = document.querySelector('[name="ShippingAddress.FirstName"]');
+                const lastName = document.querySelector('[name="ShippingAddress.LastName"]');
+                const phone = document.querySelector('[name="ShippingAddress.PhoneNumber"]');
+                const street = document.querySelector('[name="ShippingAddress.Street"]');
+                const city = document.querySelector('[name="ShippingAddress.City"]');
+                const zipCode = document.querySelector('[name="ShippingAddress.Zipcode"]');
+                const deliverySelected = document.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
 
+                if (!firstName.value || !lastName.value || !phone.value || !street.value || !city.value || !zipCode.value || !deliverySelected) {
+                    showToast('Please fill in all required fields (Address and Delivery Method).', 'error');
+                    currentStep = 0;
+                    showStep(currentStep);
+                    return;
+                }
+
+                e.preventDefault();
+                const cardErrors = document.getElementById('card-errors');
+                cardErrors.textContent = '';
+                console.log("Submitting payment with form data:", new FormData(checkoutForm));
+
+                // Submit form via AJAX to get ClientSecret
+                const formData = new FormData(checkoutForm);
+                const requestVerificationToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                formData.append('__RequestVerificationToken', requestVerificationToken);
+                const response = await fetch('/Order/Checkout', {
+                    method: 'POST',
+                    body: formData,
+                });
+                const result = await response.json();
+                console.log("Result:", result);
+                if (!result.IsSuccess) {
+                    cardErrors.textContent = result.message;
+                     if (result.errors && result.errors.length > 0) {
+                         showToast(result.errors.join('<br>'), 'error');
+                     }
+                      if (currentStep !== 0) {
+                          showStep(0);
+                      }
+                    return;
+                }
+
+                if (selectedPaymentMethod === 'stripe') {
                     // Confirm Payment Intent with Stripe.js
                     const { error, paymentIntent } = await stripe.confirmCardPayment(result.clientSecret, {
                         payment_method: {
@@ -276,9 +300,14 @@
 
                     if (error) {
                         cardErrors.textContent = error.message;
+                        showToast(error.message, 'error');
                     } else if (paymentIntent.status === 'succeeded') {
-                        checkoutForm.submit();
+                        showToast('Payment successful!', 'success');
+                        window.location.href = '/Order/CheckoutSuccess';
                     }
+                } else if (selectedPaymentMethod === 'cash') {
+                    showToast('Order placed successfully (Cash on Delivery)!', 'success');
+                    window.location.href = result.redirectUrl;
                 }
             });
             showStep(currentStep);

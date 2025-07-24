@@ -18,6 +18,5 @@ namespace MexicanRestaurant.Core.Specifications
         public int PageSize { get; set; }
         public bool DisablePaging { get; set; } = false;
         public bool HasPaging => PageNumber > 0 && PageSize > 0;
-
     }
 }

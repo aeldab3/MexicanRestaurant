@@ -113,50 +113,41 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(CheckoutViewModel checkoutVM)
         {
+            var cart = _orderCartService.GetCurrentOrderFromSession();
+            checkoutVM.ShippingAddress ??= new ShippingAddressViewModel();
+            checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
+            checkoutVM.OrderItems = cart?.OrderItems ?? new List<OrderItemViewModel>();
+            checkoutVM.TotalAmount = cart?.TotalAmount ?? 0;
+
             if (!ModelState.IsValid)
             {
-                var cart = _orderCartService.GetCurrentOrderFromSession();
-                checkoutVM.ShippingAddress ??= new ShippingAddressViewModel();
-                checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
-                checkoutVM.OrderItems = cart?.OrderItems ?? new List<OrderItemViewModel>();
-                checkoutVM.TotalAmount = cart?.TotalAmount ?? 0;
-                ViewBag.Step = "1";
+                var errors = ModelState.Values.SelectMany(v => v.Errors)
+                                              .Select(e => e.ErrorMessage)
+                                              .ToList();
+                ViewBag.Step = "0";
                 TempData["Error"] = "Please correct the errors in the form.";
-                return View(checkoutVM);
+                return Json(new { IsSuccess = false, message = "Please correct the errors in the form.", errors = errors });
             }
 
             var userId = _userManager.GetUserId(User);
             if (userId is null)
             {
                 TempData["Error"] = "You must be logged in to complete the checkout process.";
-                return RedirectToAction("Login", "Account");
+                return Json(new { IsSuccess = false, message = "You must be logged in to complete the checkout process." });
             }
 
             try
             {
                 var orderId = await _checkoutService.ProcessCheckoutAsync(userId, checkoutVM);
-                if (checkoutVM.SelectedPaymentMethod == "stripe")
-                {
-                    var paymentRequest = new PaymentRequest
-                    {
-                        Amount = checkoutVM.TotalAmount,
-                        Currency = "usd",
-                        Description = $"Order #{orderId} payment for user {userId}",
-                        OrderId = orderId
-                    };
-                    var paymentStrategy = _paymentStrategyResolver.Resolve(checkoutVM.SelectedPaymentMethod);
-                    var paymentResult = await paymentStrategy.ProcessPaymentAsync(paymentRequest);
-                    if (!paymentResult.IsSuccess)
-                        return Json(new { IsSuccess = false, message = paymentResult.Message });
-
-                    return Json(new { IsSuccess = true, clientSecret = paymentResult.Message });
-                }
-                TempData["Success"] = "Your order has been done successfully.";
-                return RedirectToAction("ViewOrders");
+   
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Json(new { IsSuccess = false, message = ex.Message });
             }
             catch (Exception ex)
             {
-                return Json(new { IsSuccess = false, message = ex.Message });
+                return Json(new { IsSuccess = false, message = "An unexpected error occurred during checkout. Please try again." });
             }
         }
 

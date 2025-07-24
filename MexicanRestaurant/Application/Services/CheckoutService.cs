@@ -4,7 +4,6 @@ using MexicanRestaurant.Core.Interfaces;
 using MexicanRestaurant.Core.Models;
 using MexicanRestaurant.Core.Specifications;
 using MexicanRestaurant.WebUI.ViewModels;
-using Stripe;
 
 namespace MexicanRestaurant.Application.Services
 {
@@ -44,7 +43,7 @@ namespace MexicanRestaurant.Application.Services
             };
         }
 
-        public async Task ProcessCheckoutAsync(string userId, CheckoutViewModel checkoutVM)
+        public async Task<int> ProcessCheckoutAsync(string userId, CheckoutViewModel checkoutVM)
         {
             var cart = _orderCartService.GetCurrentOrderFromSession();
             if (cart == null || !cart.OrderItems.Any())
@@ -63,7 +62,7 @@ namespace MexicanRestaurant.Application.Services
                 DeliveryMethod = selectedDeliveryMethod,
                 Status = OrderStatus.Pending,
                 PaymentStatus = checkoutVM.SelectedPaymentMethod == "stripe" ? PaymentStatus.Pending : PaymentStatus.Succeeded,
-                ShippingAddress = new Core.Models.Address
+                ShippingAddress = new Address
                 {
                     FirstName = checkoutVM.ShippingAddress.FirstName,
                     LastName = checkoutVM.ShippingAddress.LastName,
@@ -78,7 +77,24 @@ namespace MexicanRestaurant.Application.Services
             };
             await _orderRepo.AddAsync(newOrder);
 
-            if (checkoutVM.SelectedPaymentMethod == "cash")
+            var paymentStrategy = _paymentStrategyResolver.Resolve(checkoutVM.SelectedPaymentMethod);
+            var paymentRequest = new PaymentRequest
+            {
+                Amount = checkoutVM.TotalAmount,
+                Currency = "usd",
+                Description = $"Order #{newOrder.OrderId} payment for user {userId}",
+                OrderId = newOrder.OrderId
+            };
+            var paymentResult = await paymentStrategy.ProcessPaymentAsync(paymentRequest);
+            if (!paymentResult.IsSuccess)
+                throw new InvalidOperationException(paymentResult.Message);
+
+            if (checkoutVM.SelectedPaymentMethod == "stripe")
+            {
+                newOrder.PaymentIntentId = paymentResult.PaymentIntentId;
+                await _orderRepo.UpdateAsync(newOrder);
+            }
+            else if (checkoutVM.SelectedPaymentMethod == "cash")
             {
                 newOrder.Status = OrderStatus.Confirmed;
                 newOrder.PaymentStatus = PaymentStatus.Succeeded;
