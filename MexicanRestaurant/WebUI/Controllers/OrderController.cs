@@ -17,9 +17,8 @@ namespace MexicanRestaurant.WebUI.Controllers
         private readonly IOrderProcessor _orderProcessor;
         private readonly ICheckoutService _checkoutService;
         private readonly ISharedLookupService _sharedLookupService;
-        private readonly PaymentStrategyResolver _paymentStrategyResolver;
 
-        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, ISharedLookupService sharedLookupService, PaymentStrategyResolver paymentStrategyResolver)
+        public OrderController(IOrderCartService orderCartService, UserManager<ApplicationUser> userManager, IOrderViewModelFactory orderViewModelFactory, IOrderProcessor orderProcessor, ICheckoutService checkoutService, ISharedLookupService sharedLookupService)
         {
             _userManager = userManager;
             _orderCartService = orderCartService;
@@ -27,7 +26,6 @@ namespace MexicanRestaurant.WebUI.Controllers
             _orderProcessor = orderProcessor;
             _checkoutService = checkoutService;
             _sharedLookupService = sharedLookupService;
-            _paymentStrategyResolver = paymentStrategyResolver;
         }
 
         [HttpGet]
@@ -113,20 +111,18 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Checkout(CheckoutViewModel checkoutVM)
         {
-            var cart = _orderCartService.GetCurrentOrderFromSession();
-            checkoutVM.ShippingAddress ??= new ShippingAddressViewModel();
-            checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
-            checkoutVM.OrderItems = cart?.OrderItems ?? new List<OrderItemViewModel>();
-            checkoutVM.TotalAmount = cart?.TotalAmount ?? 0;
+            ModelState.Remove("StripePublishableKey");
 
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors)
-                                              .Select(e => e.ErrorMessage)
-                                              .ToList();
+                var cart = _orderCartService.GetCurrentOrderFromSession();
+                checkoutVM.ShippingAddress ??= new ShippingAddressViewModel();
+                checkoutVM.AvailableDeliveryMethods = await _sharedLookupService.GetAllDeliveryMethodsAsync();
+                checkoutVM.OrderItems = cart?.OrderItems ?? new List<OrderItemViewModel>();
+                checkoutVM.TotalAmount = cart?.TotalAmount ?? 0;
                 ViewBag.Step = "0";
                 TempData["Error"] = "Please correct the errors in the form.";
-                return Json(new { IsSuccess = false, message = "Please correct the errors in the form.", errors = errors });
+                return Json(new { IsSuccess = false, message = "Please correct the errors in the form." });
             }
 
             var userId = _userManager.GetUserId(User);
@@ -138,8 +134,11 @@ namespace MexicanRestaurant.WebUI.Controllers
 
             try
             {
-                var orderId = await _checkoutService.ProcessCheckoutAsync(userId, checkoutVM);
-   
+                var result = await _checkoutService.ProcessCheckoutAsync(userId, checkoutVM);
+
+                if (checkoutVM.SelectedPaymentMethod == "stripe")
+                    return Json(new { IsSuccess = true, clientSecret = result?.ClientSecret });
+                return Json(new { IsSuccess = true, message = "Order processed successfully." });
             }
             catch (InvalidOperationException ex)
             {
@@ -147,20 +146,13 @@ namespace MexicanRestaurant.WebUI.Controllers
             }
             catch (Exception ex)
             {
-                return Json(new { IsSuccess = false, message = "An unexpected error occurred during checkout. Please try again." });
+                return Json(new { IsSuccess = false, message = "An unexpected error occurred. Please try again." });
             }
         }
 
         [HttpGet]
         [Authorize]
         public IActionResult CheckoutSuccess()
-        {
-            return View();
-        }
-
-        [HttpGet]
-        [Authorize]
-        public IActionResult CheckoutCancel()
         {
             return View();
         }

@@ -144,7 +144,7 @@
                             </div>
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="button" class="btn btn-secondary shadow-sm prev-step">Back to Review</button>
-                                <button type="submit" class="btn btn-success shadow-sm" id="submitPayment">Submit Order</button>
+                                <button type="button" class="btn btn-success shadow-sm" id="submitPayment">Submit Order</button>
                             </div>
                         </div>
                     </form>
@@ -203,9 +203,7 @@
             };
             document.querySelectorAll(".next-step").forEach(btn => {
                 btn.addEventListener("click", () => {
-                    console.log("Next button clicked, currentStep:", currentStep);
                     let proceedToNextStep = true;
-
                     if (currentStep == 0) {
                         const firstName = document.querySelector('[name="ShippingAddress.FirstName"]').value;
                         const lastName = document.querySelector('[name="ShippingAddress.LastName"]').value;
@@ -248,6 +246,7 @@
             const checkoutForm = document.getElementById('checkoutForm');
             const submitPaymentBtn = document.getElementById('submitPayment');
             submitPaymentBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
                 const selectedPaymentMethod = paymentMethodSelect.value;
                 const firstName = document.querySelector('[name="ShippingAddress.FirstName"]');
                 const lastName = document.querySelector('[name="ShippingAddress.LastName"]');
@@ -267,19 +266,16 @@
                 e.preventDefault();
                 const cardErrors = document.getElementById('card-errors');
                 cardErrors.textContent = '';
-                console.log("Submitting payment with form data:", new FormData(checkoutForm));
 
                 // Submit form via AJAX to get ClientSecret
                 const formData = new FormData(checkoutForm);
-                const requestVerificationToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                formData.append('__RequestVerificationToken', requestVerificationToken);
                 const response = await fetch('/Order/Checkout', {
                     method: 'POST',
                     body: formData,
                 });
                 const result = await response.json();
                 console.log("Result:", result);
-                if (!result.IsSuccess) {
+                if (!result.isSuccess) {
                     cardErrors.textContent = result.message;
                      if (result.errors && result.errors.length > 0) {
                          showToast(result.errors.join('<br>'), 'error');
@@ -289,25 +285,39 @@
                       }
                     return;
                 }
-
-                if (selectedPaymentMethod === 'stripe') {
-                    // Confirm Payment Intent with Stripe.js
-                    const { error, paymentIntent } = await stripe.confirmCardPayment(result.clientSecret, {
-                        payment_method: {
-                            card: cardElement
+                if (result.isSuccess) {
+                    if (selectedPaymentMethod === 'stripe') {
+                        // Confirm Payment Intent with Stripe.js
+                        const { error, paymentIntent } = await stripe.confirmCardPayment(result.clientSecret, {
+                            payment_method: {
+                                card: cardElement
+                            }
+                        });
+                        if (error) {
+                            cardErrors.textContent = error.message;
+                            showToast(error.message, 'error');
+                        } else if (paymentIntent.status === 'succeeded') {
+                            showToast('Payment successful!', 'success');
+                            console.log('Redirecting after payment success (Cash or Stripe)');
+                            window.location.href = '/Order/CheckoutSuccess';
                         }
-                    });
-
-                    if (error) {
-                        cardErrors.textContent = error.message;
-                        showToast(error.message, 'error');
-                    } else if (paymentIntent.status === 'succeeded') {
-                        showToast('Payment successful!', 'success');
-                        window.location.href = '/Order/CheckoutSuccess';
+                    } else if (selectedPaymentMethod === 'cash') {
+                        console.log("📦 Selected payment method:", selectedPaymentMethod);
+                        showToast('Order placed successfully (Cash on Delivery)!', 'success');
+                        console.log('Redirecting after payment success (Cash or Stripe)');
+                        window.location.href = '/Order/ViewOrders';
                     }
-                } else if (selectedPaymentMethod === 'cash') {
-                    showToast('Order placed successfully (Cash on Delivery)!', 'success');
-                    window.location.href = result.redirectUrl;
+                }
+                else 
+                {
+                    // فشل في السيرفر
+                    cardErrors.textContent = result.message;
+                    if (result.errors && result.errors.length > 0) {
+                        showToast(result.errors.join('<br>'), 'error');
+                    }
+                    if (currentStep !== 0) {
+                        showStep(0);
+                    }
                 }
             });
             showStep(currentStep);

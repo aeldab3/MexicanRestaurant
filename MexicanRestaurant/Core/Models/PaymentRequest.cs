@@ -6,6 +6,5 @@
         public decimal Amount { get; set; }
         public string Currency { get; set; } = "usd";
         public string Description { get; set; }
-        public string PaymentMethodId { get; set; }
     }
 }

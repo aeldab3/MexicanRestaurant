@@ -30,7 +30,8 @@ namespace MexicanRestaurant.Application.Services
                 {
                     IsSuccess = true,
                     Message = intent.ClientSecret,
-                    PaymentIntentId = intent.Id
+                    PaymentIntentId = intent.Id,
+                    ClientSecret = intent.ClientSecret
                 };
             }
             catch (StripeException ex)

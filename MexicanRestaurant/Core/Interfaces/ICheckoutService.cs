@@ -5,6 +5,6 @@ namespace MexicanRestaurant.Core.Interfaces
     public interface ICheckoutService
     {
         Task<CheckoutViewModel> PrepareCheckoutAsync(string userId);
-        Task<int> ProcessCheckoutAsync(string userId, CheckoutViewModel model);
+        Task<CheckoutResultViewModel> ProcessCheckoutAsync(string userId, CheckoutViewModel model);
     }
 }

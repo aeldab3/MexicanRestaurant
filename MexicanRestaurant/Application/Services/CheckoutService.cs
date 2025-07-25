@@ -43,7 +43,7 @@ namespace MexicanRestaurant.Application.Services
             };
         }
 
-        public async Task<int> ProcessCheckoutAsync(string userId, CheckoutViewModel checkoutVM)
+        public async Task<CheckoutResultViewModel> ProcessCheckoutAsync(string userId, CheckoutViewModel checkoutVM)
         {
             var cart = _orderCartService.GetCurrentOrderFromSession();
             if (cart == null || !cart.OrderItems.Any())
@@ -75,15 +75,14 @@ namespace MexicanRestaurant.Application.Services
                 OrderItems = mappedItems,
                 PaymentMethod = checkoutVM.SelectedPaymentMethod
             };
-            await _orderRepo.AddAsync(newOrder);
 
+            string paymentIntentId = string.Empty;
             var paymentStrategy = _paymentStrategyResolver.Resolve(checkoutVM.SelectedPaymentMethod);
             var paymentRequest = new PaymentRequest
             {
-                Amount = checkoutVM.TotalAmount,
+                Amount = newOrder.TotalAmount,
                 Currency = "usd",
-                Description = $"Order #{newOrder.OrderId} payment for user {userId}",
-                OrderId = newOrder.OrderId
+                Description = $"The Order payment for user {userId}",
             };
             var paymentResult = await paymentStrategy.ProcessPaymentAsync(paymentRequest);
             if (!paymentResult.IsSuccess)
@@ -92,16 +91,24 @@ namespace MexicanRestaurant.Application.Services
             if (checkoutVM.SelectedPaymentMethod == "stripe")
             {
                 newOrder.PaymentIntentId = paymentResult.PaymentIntentId;
-                await _orderRepo.UpdateAsync(newOrder);
+                paymentIntentId = paymentResult.PaymentIntentId;
             }
             else if (checkoutVM.SelectedPaymentMethod == "cash")
             {
                 newOrder.Status = OrderStatus.Confirmed;
                 newOrder.PaymentStatus = PaymentStatus.Succeeded;
-                await _orderRepo.UpdateAsync(newOrder);
+                newOrder.PaymentIntentId = "cash_" + Guid.NewGuid();
             }
+
+            await _orderRepo.AddAsync(newOrder);
             _orderCartService.SaveCurrentOrderToSession(null);
-            return newOrder.OrderId;
+
+            return new CheckoutResultViewModel
+            {
+                OrderId = newOrder.OrderId,
+                PaymentIntentId = paymentIntentId,
+                ClientSecret = paymentResult.ClientSecret,
+            };
         }
     }
 }

@@ -1,14 +1,14 @@
 ﻿@using MexicanRestaurant.WebUI.ViewModels
 @model OrderViewModel
 
-<div class="table-responsive">
+<div class="table-responsive" role="region" aria-label="User order cart table">
     <table class="table align-middle table-hover">
-        <thead>
+        <thead class="table-success">
             <tr class="text-center">
-                <th style="width: 40%">Product</th>
-                <th style="width: 20%">Quantity</th>
-                <th style="width: 20%">Unit Price</th>
-                <th style="width: 20%">Total</th>
+                <th scope="col" style="width: 40%">Product</th>
+                <th scope="col" style="width: 20%">Quantity</th>
+                <th scope="col" style="width: 20%">Unit Price</th>
+                <th scope="col" style="width: 20%">Total</th>
             </tr>
         </thead>
         <tbody>
@@ -18,20 +18,23 @@
                 var outOfStock = fullProduct != null && fullProduct.Stock == 0;
                 <tr>
                     <td>
-                        <div class="d-flex align-items-center gap-3">
-                            <img src="@Url.Content("~/images/" + item.Product.ImageUrl)" class="cart-img" />
-                            <span class="fw-semibold text-dark">@item.Product.Name</span>
-                        </div>
+                        <figure class="d-flex align-items-center gap-3 m-0">
+                            <img src="@Url.Content("~/images/" + item.Product.ImageUrl)" alt="Image of @item.Product.Name" class="cart-img" width="64" height="64" />
+                            <figcaption class="fw-semibold text-dark">@item.Product.Name</figcaption>
+                        </figure>
                     </td>
 
                     <td>
-                        <div class="d-flex justify-content-center align-items-center gap-2">
-                            <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center btn-decrease" style="width: 32px; height: 32px;" data-product-id="@item.ProductId" data-quantity="@item.Quantity">
-                                @Html.Raw(item.Quantity > 1 ? "-" : "<i class='bi bi-trash'></i>")
+                        <div class="d-flex justify-content-center align-items-center gap-2" role="group" aria-label="Change quantity of @item.Product.Name">
+                            <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center btn-decrease" 
+                                    style="width: 32px; height: 32px;" data-product-id="@item.ProductId" data-quantity="@item.Quantity" aria-label="Decrease quantity or Remove @item.Product.Name" >
+                                @Html.Raw(item.Quantity > 1 ? "-" : "<i class='bi bi-trash' aria-hidden='true'></i>")
                             </button>
-                            <span class="item-qty" data-product-id="@item.ProductId">@item.Quantity</span>
+
+                            <span class="item-qty" data-product-id="@item.ProductId" aria-live="polite">@item.Quantity</span>
+
                             <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center btn-increase"
-                                    style="width: 32px; height: 32px;" data-product-id="@item.ProductId" data-stock="@fullProduct?.Stock ?? 0"
+                                    style="width: 32px; height: 32px;" data-product-id="@item.ProductId" data-stock="@fullProduct?.Stock ?? 0" aria-label="Increase quantity of @item.Product.Name"
                                     @(outOfStock? "disabled" : "")>+
                             </button>
                         </div>
@@ -46,8 +49,8 @@
             }
 
             <tr class="table-success fw-bold">
-                <td colspan="3" class="text-end">Total:</td>
-                <td class="text-end fw-bold" id="order-total">@Model.TotalAmount.ToString("C")</td>
+                <td colspan="3" class="text-end" scope="row">Total:</td>
+                <td class="text-end fw-bold" id="order-total" aria-label="Total order amount">@Model.TotalAmount.ToString("C")</td>
             </tr>
         </tbody>
     </table>
