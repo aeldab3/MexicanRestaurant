@@ -20,12 +20,14 @@ namespace MexicanRestaurant.WebUI.Controllers
         public async Task<IActionResult> Index()
         {
             var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
+            var StripeWebhookSecret = Environment.GetEnvironmentVariable("StripeWebhookSecret") ?? throw new InvalidOperationException("Stripe webhook secret not configured.");
             try
             {
                 var stripeEvent = EventUtility.ConstructEvent(
                     json,
                     Request.Headers["Stripe-Signature"],
-                    Environment.GetEnvironmentVariable("StripeWebhookSecret") ?? throw new InvalidOperationException("Stripe webhook secret not configured.")
+                    StripeWebhookSecret,
+                    throwOnApiVersionMismatch: true
                 );
 
                 if (stripeEvent.Type == "payment_intent.succeeded")
@@ -34,10 +36,7 @@ namespace MexicanRestaurant.WebUI.Controllers
                     if (paymentIntent == null)
                         return BadRequest("Invalid payment intent data.");
 
-                    var options = new QueryOptions<Order>
-                    {
-                        Where = o => o.PaymentIntentId == paymentIntent.Id
-                    };
+                    var options = new QueryOptions<Order>{Where = o => o.PaymentIntentId == paymentIntent.Id};
                     var order = (await _orderRepo.GetAllAsync(options)).FirstOrDefault();
                     if (order == null)
                         return NotFound("Order not found.");
@@ -53,10 +52,7 @@ namespace MexicanRestaurant.WebUI.Controllers
                     if (paymentIntent == null)
                         return BadRequest("Invalid payment intent data.");
 
-                    var options = new QueryOptions<Order>
-                    {
-                        Where = o => o.PaymentIntentId == paymentIntent.Id
-                    };
+                    var options = new QueryOptions<Order>{Where = o => o.PaymentIntentId == paymentIntent.Id};
                     var order = (await _orderRepo.GetAllAsync(options)).FirstOrDefault();
                     if (order == null)
                         return NotFound("Order not found.");
@@ -65,6 +61,10 @@ namespace MexicanRestaurant.WebUI.Controllers
                     await _orderRepo.UpdateAsync(order);
                 }
                 return Ok("Webhook received successfully.");
+            }
+            catch (StripeException ex)
+            {
+                return BadRequest($"Stripe error: {ex.Message}");
             }
             catch (Exception ex)
             {

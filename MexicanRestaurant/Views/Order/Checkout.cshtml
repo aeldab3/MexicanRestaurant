@@ -144,7 +144,7 @@
                             </div>
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="button" class="btn btn-secondary shadow-sm prev-step">Back to Review</button>
-                                <button type="button" class="btn btn-success shadow-sm" id="submitPayment">Submit Order</button>
+                                <button type="button" class="btn btn-success shadow-sm" id="submitPayment" aria-label="Submit your order">Submit Order</button>
                             </div>
                         </div>
                     </form>
@@ -161,197 +161,105 @@
     <script src="https://js.stripe.com/v3/"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const steps = document.querySelectorAll(".checkout-step");
-            let currentStep = 0;
+            const checkoutForm = document.getElementById('checkoutForm');
+            const steps = [...document.querySelectorAll(".checkout-step")];
+            let currentStep = parseInt('@(ViewBag.Step ?? "0")') || 0;
+
             const stripe = Stripe('@Model.StripePublishableKey')
             const elements = stripe.elements();
             let cardElement;
+            const paymentSelect = document.getElementById("paymentMethodSelect");
+            const stripeForm = document.getElementById('stripePaymentForm');
+            const submitBtn = document.getElementById('submitPayment');
 
-            const initialStep = parseInt('@(ViewBag.Step ?? "0")');
-            if (!isNaN(initialStep)) {
-                currentStep = initialStep;
-            }
-
-            // Initialize Stripe card element when payment step is shown
-            const paymentMethodSelect = document.getElementById("paymentMethodSelect");
-            paymentMethodSelect.addEventListener("change", function () {
-                const stripeForm = document.getElementById('stripePaymentForm');
-                if (this.value == 'stripe') {
+            const showStep = i => {
+                steps.forEach((step, idx) => step.style.display =  idx === i ? "block" : "none");
+                if (i === 3 && paymentSelect.value === 'stripe') {
                     stripeForm.style.display = 'block';
-                    if (!cardElement) {
-                        cardElement = elements.create('card');
-                        cardElement.mount('#card-element')
-                    }
-                } else {
-                    stripeForm.style.display = 'none';
-                }
-            });
-
-            const showStep = (index) => {
-                steps.forEach((step, i) => {
-                    step.style.display = i === index ? "block" : "none";
-                });
-
-                // Initialize Stripe form if on payment step and Stripe is selected
-                if (index === 3 && paymentMethodSelect.value === 'stripe') {
-                    document.getElementById('stripePaymentForm').style.display = 'block';
                     if (!cardElement) {
                         cardElement = elements.create('card');
                         cardElement.mount('#card-element');
                     }
+                } else {
+                    stripeForm.style.display = 'none';
                 }
             };
-            document.querySelectorAll(".next-step").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    let proceedToNextStep = true;
-                    if (currentStep == 0) {
-                        const firstName = document.querySelector('[name="ShippingAddress.FirstName"]').value;
-                        const lastName = document.querySelector('[name="ShippingAddress.LastName"]').value;
-                        const phone = document.querySelector('[name="ShippingAddress.PhoneNumber"]').value;
-                        const street = document.querySelector('[name="ShippingAddress.Street"]').value;
-                        const city = document.querySelector('[name="ShippingAddress.City"]').value;
-                        const zipCode = document.querySelector('[name="ShippingAddress.Zipcode"]').value;
+          
+            const validateStep = () => {
+                if (currentStep === 0) {
+                    return [...checkoutForm.querySelectorAll('[name^="ShippingAddress."]')].every(input => input.value.trim() !== '');
+                }
+                if (currentStep === 1) {
+                    return !!checkoutForm.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
+                }
+                return true;
+            }
 
-                        if (!firstName || !lastName || ! phone || !street || !city || !zipCode) {
-                            showToast('Please fill in all shipping address fields.', 'warning');
-                            proceedToNextStep = false;
-                        }
-                    }
-                    else if (currentStep === 1) {
-                        const deliverySelected = document.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
-                        if (!deliverySelected) {
-                            showToast('Please select a delivery method.', 'warning');
-                            proceedToNextStep = false;
-                        }
-                    }
-                    if (proceedToNextStep && currentStep < steps.length -1){
-                        currentStep++;
-                        showStep(currentStep);
-                        if (currentStep === 2) updateReviewStep();
-                    }else if (proceedToNextStep && currentStep === steps.length -1) {}
-                    console.log("Next button clicked, currentStep (after increment):", currentStep);
-                });
-            });
+            function updateReview() {
+                const getVal = name => document.querySelector(`[name="${name}"]`)?.value || "";
+                document.getElementById("reviewName").textContent = `${getVal("ShippingAddress.FirstName")} ${getVal("ShippingAddress.LastName")}`;
+                document.getElementById("reviewPhone").textContent = getVal("ShippingAddress.PhoneNumber");
+                document.getElementById("reviewAddress").textContent = `${getVal("ShippingAddress.Street")}, ${getVal("ShippingAddress.City")}, ${getVal("ShippingAddress.Zipcode")}`;
 
-            document.querySelectorAll(".prev-step").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    if (currentStep > 0) {
-                        currentStep--;
-                        showStep(currentStep);
-                    }
-                });
-            });
+                const deliveryInputs = checkoutForm.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
+                const label = deliveryInputs?.closest('label')?.textContent || "Not selected";
+                const deliveryCost = parseFloat(deliveryInputs?.dataset.price || "0");
+                const productTotal = parseFloat("@Model.TotalAmount") || 0;
 
-            // Handle Stripe Payment
-            const checkoutForm = document.getElementById('checkoutForm');
-            const submitPaymentBtn = document.getElementById('submitPayment');
-            submitPaymentBtn.addEventListener('click', async (e) => {
+                document.getElementById("reviewDelivery").innerText = label.trim();
+                document.getElementById("reviewTotal").textContent = (productTotal + deliveryCost).toLocaleString("en-US", { style: "currency", currency: "USD" });
+            };
+
+            document.querySelectorAll(".next-step").forEach(btn => btn.addEventListener("click", () => {
+                if (validateStep()) {
+                    currentStep++;
+                    showStep(currentStep);
+                    if (currentStep ===2) updateReview();
+                } else {
+                    showToast('Please fill in all required fields.', 'warning');
+                }
+            }));
+
+            document.querySelectorAll(".prev-step").forEach(btn => btn.addEventListener("click", () => {
+                if (currentStep > 0) {
+                    currentStep--;
+                    showStep(currentStep);
+                }
+            }));
+
+            paymentSelect.addEventListener("change", () => showStep(currentStep));
+            submitBtn.addEventListener("click", async e => {
                 e.preventDefault();
-                const selectedPaymentMethod = paymentMethodSelect.value;
-                const firstName = document.querySelector('[name="ShippingAddress.FirstName"]');
-                const lastName = document.querySelector('[name="ShippingAddress.LastName"]');
-                const phone = document.querySelector('[name="ShippingAddress.PhoneNumber"]');
-                const street = document.querySelector('[name="ShippingAddress.Street"]');
-                const city = document.querySelector('[name="ShippingAddress.City"]');
-                const zipCode = document.querySelector('[name="ShippingAddress.Zipcode"]');
-                const deliverySelected = document.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
-
-                if (!firstName.value || !lastName.value || !phone.value || !street.value || !city.value || !zipCode.value || !deliverySelected) {
-                    showToast('Please fill in all required fields (Address and Delivery Method).', 'error');
+                if (!validateStep()) {
+                    showToast("Please complete required info.", "error");
                     currentStep = 0;
                     showStep(currentStep);
                     return;
                 }
 
-                e.preventDefault();
-                const cardErrors = document.getElementById('card-errors');
-                cardErrors.textContent = '';
-
-                // Submit form via AJAX to get ClientSecret
                 const formData = new FormData(checkoutForm);
-                const response = await fetch('/Order/Checkout', {
-                    method: 'POST',
-                    body: formData,
-                });
-                const result = await response.json();
-                console.log("Result:", result);
-                if (!result.isSuccess) {
-                    cardErrors.textContent = result.message;
-                     if (result.errors && result.errors.length > 0) {
-                         showToast(result.errors.join('<br>'), 'error');
-                     }
-                      if (currentStep !== 0) {
-                          showStep(0);
-                      }
+                const result = await fetch('/Order/Checkout', { method: 'POST', body: formData });
+                const data = await result.json();
+
+                if (!data.isSuccess) {
+                    showToast(data.message || "Payment failed.", "error");
                     return;
                 }
-                if (result.isSuccess) {
-                    if (selectedPaymentMethod === 'stripe') {
-                        // Confirm Payment Intent with Stripe.js
-                        const { error, paymentIntent } = await stripe.confirmCardPayment(result.clientSecret, {
-                            payment_method: {
-                                card: cardElement
-                            }
-                        });
-                        if (error) {
-                            cardErrors.textContent = error.message;
-                            showToast(error.message, 'error');
-                        } else if (paymentIntent.status === 'succeeded') {
-                            showToast('Payment successful!', 'success');
-                            console.log('Redirecting after payment success (Cash or Stripe)');
-                            window.location.href = '/Order/CheckoutSuccess';
-                        }
-                    } else if (selectedPaymentMethod === 'cash') {
-                        console.log("📦 Selected payment method:", selectedPaymentMethod);
-                        showToast('Order placed successfully (Cash on Delivery)!', 'success');
-                        console.log('Redirecting after payment success (Cash or Stripe)');
-                        window.location.href = '/Order/ViewOrders';
+
+                if (paymentSelect.value === "stripe") {
+                    const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
+                        payment_method: { card: cardElement }
+                    });
+                    if (error) {
+                        showToast(error.message, "error");
+                    } else if (paymentIntent.status === "succeeded") {
+                        window.location.href = "/Order/CheckoutSuccess";
                     }
-                }
-                else 
-                {
-                    // فشل في السيرفر
-                    cardErrors.textContent = result.message;
-                    if (result.errors && result.errors.length > 0) {
-                        showToast(result.errors.join('<br>'), 'error');
-                    }
-                    if (currentStep !== 0) {
-                        showStep(0);
-                    }
+                } else {
+                    window.location.href = "/Order/CheckoutSuccess";
                 }
             });
             showStep(currentStep);
         });
-
-        function updateReviewStep() {
-            const firstName = document.querySelector('[name="ShippingAddress.FirstName"]').value;
-            const lastName = document.querySelector('[name="ShippingAddress.LastName"]').value;
-            const phone = document.querySelector('[name="ShippingAddress.PhoneNumber"]').value;
-            const street = document.querySelector('[name="ShippingAddress.Street"]').value;
-            const city = document.querySelector('[name="ShippingAddress.City"]').value;
-            const zipCode = document.querySelector('[name="ShippingAddress.Zipcode"]').value;
-
-            const deliveryInputs = document.querySelectorAll('input[name="SelectedDeliveryMethodId"]');
-            let selectedDeliveryText = 'Not selected';
-            let deliveryPrice = 0;
-            deliveryInputs.forEach(input => {
-                if (input.checked) {
-                    const label = input.closest('.form-check').querySelector('label');
-                    selectedDeliveryText = label.innerText.replace(/\n/g, ' ').trim();
-                    deliveryPrice = parseFloat(input.dataset.price || "0");
-                }
-            });
-            const productsTotal = parseFloat("@Model.TotalAmount") || 0;
-            const grandTotal = productsTotal + deliveryPrice;
-
-            document.getElementById("reviewName").innerText = `${firstName} ${lastName}`;
-            document.getElementById("reviewPhone").innerText = `${phone}`;
-            document.getElementById("reviewAddress").innerText = `${street}, ${city}, and Zipcode is: ${zipCode}`;
-            document.getElementById("reviewDelivery").innerText = selectedDeliveryText;
-            document.getElementById("reviewTotal").innerText = grandTotal.toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'USD'
-            });
-        }
     </script>
 }
