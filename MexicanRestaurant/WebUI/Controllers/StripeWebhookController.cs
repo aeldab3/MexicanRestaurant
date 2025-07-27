@@ -30,25 +30,29 @@ namespace MexicanRestaurant.WebUI.Controllers
                     StripeWebhookSecret
                 );
 
-                if (stripeEvent.Type == "payment_intent.succeeded")
+                switch (stripeEvent.Type)
                 {
-                    var order = await GetOrderFromEvent(stripeEvent);
-                    if (order == null)
-                        return NotFound("Order not found.");
+                    case "payment_intent.succeeded":
+                        var order = await GetOrderFromEvent(stripeEvent);
+                        if (order == null)
+                            return NotFound("Order not found.");
 
-                    // Update the order status and payment status
-                    order.Status = OrderStatus.Confirmed;
-                    order.PaymentStatus = PaymentStatus.Succeeded;
-                    await _orderRepo.UpdateAsync(order);
-                }
-                else if (stripeEvent.Type == "payment_intent.payment_failed")
-                {
-                    var order = await GetOrderFromEvent(stripeEvent);
-                    if (order == null)
-                        return NotFound("Order not found.");
-                    order.Status = OrderStatus.Cancelled;
-                    order.PaymentStatus = PaymentStatus.Failed;
-                    await _orderRepo.UpdateAsync(order);
+                        order.Status = OrderStatus.Confirmed;
+                        order.PaymentStatus = PaymentStatus.Succeeded;
+                        await _orderRepo.UpdateAsync(order);
+                        break;
+
+                    case "payment_intent.payment_failed":
+                        var failedOrder = await GetOrderFromEvent(stripeEvent);
+                        if (failedOrder == null)
+                            return NotFound("Order not found.");
+                        failedOrder.Status = OrderStatus.Cancelled;
+                        failedOrder.PaymentStatus = PaymentStatus.Failed;
+                        await _orderRepo.UpdateAsync(failedOrder);
+                        break;
+
+                    default:
+                        return Ok($"Received event: {stripeEvent.Type}");
                 }
                 return Ok("Webhook received successfully.");
             }
@@ -70,6 +74,10 @@ namespace MexicanRestaurant.WebUI.Controllers
 
             var options = new QueryOptions<Order> { Where = o => o.PaymentIntentId == paymentIntent.Id };
             var order = (await _orderRepo.GetAllAsync(options)).FirstOrDefault();
+            if (order == null)
+            {
+                Console.WriteLine($"Order not found for PaymentIntentId: {paymentIntent.Id}");
+            }
             return order;
         }
     }

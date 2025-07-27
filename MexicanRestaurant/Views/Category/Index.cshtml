@@ -1,0 +1,110 @@
+﻿@model IEnumerable<Category>
+@{
+    ViewData["Title"] = "Categories";
+    ViewData["MetaDescription"] = "Browse and manage categories.";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-12">
+            <div class="card shadow-sm rounded">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" aria-label="Category Management Section Heading">📂 @ViewData["Title"]</h5>
+                        <a asp-action="Create" class="btn btn-light btn-sm" aria-label="Add New Category">
+                            <i class="bi bi-plus-circle"></i> Add Category
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body table-responsive">
+                    @if (!Model.Any())
+                    {
+                        <div class="alert alert-info text-center">No categories available.</div>
+                    }
+                    else
+                    {
+                        <table class="table table-bordered table-striped table-hover align-middle">
+                            <caption class="visually-hidden">List of all categories</caption>
+                            <thead class="table-success">
+                                <tr class="text-center">
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-center">
+                                @foreach (var category in Model)
+                                {
+                                    <tr>
+                                        <td>@category.CategoryId</td>
+                                        <td>@category.Name</td>
+                                        <td>
+                                            <div class="btn-group" role="group" aria-label="Actions for category @category.Name">
+                                                <a asp-action="Details" asp-route-id="@category.CategoryId" class="btn btn-info btn-sm mx-2" title="Details">
+                                                    <i class="bi bi-info-circle"></i> Details
+                                                </a>
+                                                <a asp-action="Edit" asp-route-id="@category.CategoryId" class="btn btn-secondary btn-sm mx-2" title="Edit">
+                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                </a>
+                                                <button type="button" class="btn btn-danger btn-sm mx-2"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteModal"
+                                                        data-category-id="@category.CategoryId"
+                                                        data-category-name="@category.Name"
+                                                        title="Delete @category.Name">
+                                                    <i class="bi bi-trash-fill"></i> Delete
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+
+                <div class="card-footer text-muted text-end">
+                    Total Categories: <strong>@Model.Count()</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-action="Delete">
+            @Html.AntiForgeryToken()
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <strong id="modalCategoryName"></strong>?
+                    <input type="hidden" name="id" id="modalCategoryId" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const categoryId = button.getAttribute('data-category-id');
+            const categoryName = button.getAttribute('data-category-name');
+
+            document.getElementById('modalCategoryId').value = categoryId;
+            document.getElementById('modalCategoryName').textContent = categoryName;
+        });
+    </script>
+}

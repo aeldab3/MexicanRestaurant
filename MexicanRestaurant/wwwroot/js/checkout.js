@@ -44,7 +44,19 @@
         const deliveryInputs = checkoutForm.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
         const label = deliveryInputs?.closest('label')?.textContent || "Not selected";
         const deliveryCost = parseFloat(deliveryInputs?.dataset.price || "0");
-        const productTotal = parseFloat(checkoutData.dataset.totalAmount) || 0;
+
+        let productTotal = parseFloat(checkoutData.dataset.totalAmount.replace(/[^0-9.-]+/g, "")) || 0;
+        const productRows = document.querySelectorAll("#step3 table tbody tr");
+        if (productRows.length > 0) {
+            productTotal = 0;
+            productRows.forEach(row => {
+                const priceCell = row.querySelector("td:last-child");
+                if (priceCell) {
+                    const priceText = priceCell.textContent.replace(/[^0-9.-]+/g, "");
+                    productTotal += parseFloat(priceText) || 0;
+                }
+            });
+        }
 
         document.getElementById("reviewDelivery").innerText = label.trim();
         document.getElementById("reviewTotal").textContent = (productTotal + deliveryCost).toLocaleString("en-US", { style: "currency", currency: "USD" });

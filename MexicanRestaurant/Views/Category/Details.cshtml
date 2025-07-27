@@ -1,24 +1,25 @@
-﻿@model MexicanRestaurant.Core.Models.Ingredient
+﻿@model Category
 @{
-    ViewData["Title"] = "Ingredient Details";
-    ViewData["MetaDescription"] = "View details of the ingredient and its usage in products.";
+    ViewData["Title"] = "Categories";
+    ViewData["MetaDescription"] = "Explore our delicious Mexican food categories, from tacos to enchiladas. Find your favorite dishes easily.";
 }
+
 
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card shadow-lg border-0">
                 <div class="card-header bg-success text-white text-center">
-                    <h2 class="fw-bold mb-0" aria-label="Ingredient Details: @Model.Name">@Model.Name</h2>
-                    <p class="fw-light mb-0">Used in Products</p>
+                    <h2 class="fw-bold mb-0" aria-label="Category Details: @Model.Name">@Model.Name</h2>
+                    <p class="fw-light mb-0">Contains these products</p>
                 </div>
                 <div class="card-body">
-                    @if (Model.ProductIngredients != null && Model.ProductIngredients.Any())
+                    @if (Model.Products != null && Model.Products.Any())
                     {
                         <div class="table-responsive">
                             <table class="table table-hover align-middle">
-                                <caption class="visually-hidden">List of Products using this ingredient</caption>
-                                <thead class="table-light">
+                                <caption class="visually-hidden">List of Products in the Category</caption>
+                                <thead class="table-success">
                                     <tr>
                                         <th style="width: 20%;">Product Name</th>
                                         <th>Description</th>
@@ -26,14 +27,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var pi in Model.ProductIngredients)
+                                    @foreach (var p in Model.Products)
                                     {
-                                        <tr onclick="location.href='@Url.Action("Details", "Product", new { id = pi.Product.ProductId })'" style="cursor: pointer;">
-                                            <td scope="row" class="fw-semibold text-nowrap">@Html.DisplayFor(m => pi.Product.Name)</td>
+                                        <tr onclick="location.href='@Url.Action("Details", "Product", new { id = p.ProductId })'" style="cursor: pointer;">
+                                            <td scope="row" class="fw-semibold text-nowrap">@Html.DisplayFor(m => p.Name)</td>
                                             <td>
-                                                @pi.Product.Description@Html.DisplayFor(m => pi.Product.Description)
+                                                @p.Description@Html.DisplayFor(m => p.Description)
                                             </td>
-                                            <td>@pi.Product.Price.ToString("C")</td>
+                                            <td>@p.Price.ToString("C")</td>
                                         </tr>
                                     }
                                 </tbody>
@@ -42,7 +43,7 @@
                     }
                     else
                     {
-                        <p class="text-muted text-center">No products use this ingredient.</p>
+                        <p class="text-muted text-center">No Products in this Category.</p>
                     }
                 </div>
                 <div class="card-footer bg-white border-top-0 text-start">

@@ -1,0 +1,33 @@
+﻿@model Category
+@{
+    ViewData["Title"] = "Create Category";
+    ViewData["MetaDescription"] = "Add a new category to organize your Mexican dishes.";
+}
+
+<div class="container my-4">
+    <h1 class="text-center text-success mb-4 fw-bold" aria-label="Category Create Heading">@ViewData["Title"]</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0" style="background-color: #f9f5d985">
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-bold" aria-describedby="categoryNameDesc"></label>
+                            <input asp-for="Name" class="form-control aria-describedby=" categoryNameDesc"" />
+                            <small id="categoryNameDesc" class="form-text text-muted visually-hidden">Enter the name of the Category</small>
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Return</a>
+                            <button type="submit" class="btn btn-success"><i class="bi bi-plus-circle"></i> Create</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
