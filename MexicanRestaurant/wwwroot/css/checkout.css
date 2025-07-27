@@ -1,0 +1,127 @@
+﻿.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    background-color: transparent;
+}
+
+.dot-spinner {
+    --uib-size: 2.5rem;
+    --uib-speed: 0.9s;
+    --uib-color: #28a745;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--uib-size);
+    height: var(--uib-size);
+}
+
+.dot-spinner__dot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(calc(var(--uib-index, 0) * 45deg));
+    transform-origin: center center;
+}
+
+.dot-spinner__dot::before {
+    content: '';
+    display: block;
+    width: 25%;
+    height: 25%;
+    background-color: var(--uib-color);
+    border-radius: 50%;
+    animation: dot-spinner 1.2s infinite ease-in-out both;
+}
+
+.dot-spinner__dot:nth-child(1) {
+    --uib-index: 0;
+}
+
+.dot-spinner__dot:nth-child(2) {
+    --uib-index: 1;
+}
+
+.dot-spinner__dot:nth-child(3) {
+    --uib-index: 2;
+}
+
+.dot-spinner__dot:nth-child(4) {
+    --uib-index: 3;
+}
+
+.dot-spinner__dot:nth-child(5) {
+    --uib-index: 4;
+}
+
+.dot-spinner__dot:nth-child(6) {
+    --uib-index: 5;
+}
+
+.dot-spinner__dot:nth-child(7) {
+    --uib-index: 6;
+}
+
+.dot-spinner__dot:nth-child(8) {
+    --uib-index: 7;
+}
+
+@keyframes dot-spinner {
+    0%, 100% {
+        transform: scale(0);
+    }
+
+    50% {
+        transform: scale(1);
+    }
+}
+
+.loader-text {
+    display: block;
+    margin-top: 10px;
+    color: #28a745;
+    font-size: 16px;
+}
+
+.submit-icon {
+    margin-right: 5px;
+    transition: transform 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.btn-success:disabled {
+    opacity: 0.65;
+}
+
+.btn-success:disabled .submit-icon i {
+    animation: spin 1s linear infinite;
+    opacity: 1;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

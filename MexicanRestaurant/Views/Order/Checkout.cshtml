@@ -14,7 +14,12 @@
                     <p class="fw-light mb-0">Enter your shipping info and choose delivery method</p>
                 </div>
 
-                <div class="card-body p-4">
+                <div class="card-body p-4 position-relative">
+                    <div id="checkout-data"
+                         data-step="@(ViewBag.Step ?? 0)"
+                         data-stripe-key="@Model.StripePublishableKey"
+                         data-total-amount="@Model.TotalAmount.ToString("C")">
+                    </div>
                     <form asp-action="Checkout" method="post" id="checkoutForm">
                         @Html.AntiForgeryToken()
 
@@ -144,10 +149,27 @@
                             </div>
                             <div class="d-flex justify-content-between mt-4">
                                 <button type="button" class="btn btn-secondary shadow-sm prev-step">Back to Review</button>
-                                <button type="button" class="btn btn-success shadow-sm" id="submitPayment" aria-label="Submit your order">Submit Order</button>
+                                <button type="button" class="btn btn-success shadow-sm position-relative" id="submitPayment" aria-label="Submit your order">
+                                    Submit Order <span class="submit-icon"><i class="bi bi-arrow-clockwise"></i></span>
+                                </button>
                             </div>
                         </div>
                     </form>
+                    <div id="overlay" class="overlay" style="display: none;">
+                        <div class="loader">
+                            <div class="dot-spinner">
+                                <div class="dot-spinner__dot"></div>
+                                <div class="dot-spinner__dot"></div>
+                                <div class="dot-spinner__dot"></div>
+                                <div class="dot-spinner__dot"></div>
+                                <div class="dot-spinner__dot"></div>
+                                <div class="dot-spinner__dot"></div>
+                                <div class="dot-spinner__dot"></div>
+                                <div class="dot-spinner__dot"></div>
+                            </div>
+                            <span class="loader-text">Processing your order...</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -158,108 +180,7 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <link rel="stylesheet" href="~/css/checkout.css" asp-append-version="true" />
+    <script src="~/js/checkout.js" asp-append-version="true"></script>
     <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const checkoutForm = document.getElementById('checkoutForm');
-            const steps = [...document.querySelectorAll(".checkout-step")];
-            let currentStep = parseInt('@(ViewBag.Step ?? "0")') || 0;
-
-            const stripe = Stripe('@Model.StripePublishableKey')
-            const elements = stripe.elements();
-            let cardElement;
-            const paymentSelect = document.getElementById("paymentMethodSelect");
-            const stripeForm = document.getElementById('stripePaymentForm');
-            const submitBtn = document.getElementById('submitPayment');
-
-            const showStep = i => {
-                steps.forEach((step, idx) => step.style.display =  idx === i ? "block" : "none");
-                if (i === 3 && paymentSelect.value === 'stripe') {
-                    stripeForm.style.display = 'block';
-                    if (!cardElement) {
-                        cardElement = elements.create('card');
-                        cardElement.mount('#card-element');
-                    }
-                } else {
-                    stripeForm.style.display = 'none';
-                }
-            };
-          
-            const validateStep = () => {
-                if (currentStep === 0) {
-                    return [...checkoutForm.querySelectorAll('[name^="ShippingAddress."]')].every(input => input.value.trim() !== '');
-                }
-                if (currentStep === 1) {
-                    return !!checkoutForm.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
-                }
-                return true;
-            }
-
-            function updateReview() {
-                const getVal = name => document.querySelector(`[name="${name}"]`)?.value || "";
-                document.getElementById("reviewName").textContent = `${getVal("ShippingAddress.FirstName")} ${getVal("ShippingAddress.LastName")}`;
-                document.getElementById("reviewPhone").textContent = getVal("ShippingAddress.PhoneNumber");
-                document.getElementById("reviewAddress").textContent = `${getVal("ShippingAddress.Street")}, ${getVal("ShippingAddress.City")}, ${getVal("ShippingAddress.Zipcode")}`;
-
-                const deliveryInputs = checkoutForm.querySelector('input[name="SelectedDeliveryMethodId"]:checked');
-                const label = deliveryInputs?.closest('label')?.textContent || "Not selected";
-                const deliveryCost = parseFloat(deliveryInputs?.dataset.price || "0");
-                const productTotal = parseFloat("@Model.TotalAmount") || 0;
-
-                document.getElementById("reviewDelivery").innerText = label.trim();
-                document.getElementById("reviewTotal").textContent = (productTotal + deliveryCost).toLocaleString("en-US", { style: "currency", currency: "USD" });
-            };
-
-            document.querySelectorAll(".next-step").forEach(btn => btn.addEventListener("click", () => {
-                if (validateStep()) {
-                    currentStep++;
-                    showStep(currentStep);
-                    if (currentStep ===2) updateReview();
-                } else {
-                    showToast('Please fill in all required fields.', 'warning');
-                }
-            }));
-
-            document.querySelectorAll(".prev-step").forEach(btn => btn.addEventListener("click", () => {
-                if (currentStep > 0) {
-                    currentStep--;
-                    showStep(currentStep);
-                }
-            }));
-
-            paymentSelect.addEventListener("change", () => showStep(currentStep));
-            submitBtn.addEventListener("click", async e => {
-                e.preventDefault();
-                if (!validateStep()) {
-                    showToast("Please complete required info.", "error");
-                    currentStep = 0;
-                    showStep(currentStep);
-                    return;
-                }
-
-                const formData = new FormData(checkoutForm);
-                const result = await fetch('/Order/Checkout', { method: 'POST', body: formData });
-                const data = await result.json();
-
-                if (!data.isSuccess) {
-                    showToast(data.message || "Payment failed.", "error");
-                    return;
-                }
-
-                if (paymentSelect.value === "stripe") {
-                    const { error, paymentIntent } = await stripe.confirmCardPayment(data.clientSecret, {
-                        payment_method: { card: cardElement }
-                    });
-                    if (error) {
-                        showToast(error.message, "error");
-                    } else if (paymentIntent.status === "succeeded") {
-                        window.location.href = "/Order/CheckoutSuccess";
-                    }
-                } else {
-                    window.location.href = "/Order/CheckoutSuccess";
-                }
-            });
-            showStep(currentStep);
-        });
-    </script>
 }

@@ -10,6 +10,7 @@ namespace MexicanRestaurant.Application.Services
             return Task.FromResult(new PaymentResult
             {
                 IsSuccess = true,
+                Message = "Cash payment processed successfully."
             });
         }
     }
