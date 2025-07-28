@@ -46,3 +46,13 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+.navbar-toggler:focus,
+.navbar-toggler:active {
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.5);
+    outline: none;
+    border-color: #198754;
+}
+
+.navbar-toggler-icon {
+    filter: brightness(0) saturate(100%) invert(32%) sepia(90%) saturate(500%) hue-rotate(85deg) brightness(95%) contrast(90%);
+}

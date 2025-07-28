@@ -4,7 +4,6 @@ using MexicanRestaurant.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace MexicanRestaurant.Areas.Admin.Controllers
 {
@@ -54,7 +53,7 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                 IdentityRole adminRole = await _roleManager.FindByNameAsync("Admin");
                 if (adminRole != null && await _userManager.IsInRoleAsync(user, adminRole.Name))
                 {
-                    TempData["ErrorMessage"] = "Cannot delete an Admin user.";
+                    TempData["Error"] = "Cannot delete an Admin user.";
                     return RedirectToAction("Index");
                 }
 
@@ -65,12 +64,12 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                     TempData["Success"] = "User deleted successfully.";
                 }
                 else
-                    TempData["ErrorMessage"] = "Failed to delete user.";
+                    TempData["Error"] = "Failed to delete user.";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error deleting user with ID {id}.");
-                TempData["ErrorMessage"] = "An error occurred while deleting the user.";
+                TempData["Error"] = "An error occurred while deleting the user.";
             }
             return RedirectToAction("Index");
         }
@@ -95,12 +94,12 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                     TempData["Success"] = $"User {user.UserName} added to role {roleName} successfully.";
                 }
                 else
-                    TempData["ErrorMessage"] = "Failed to add user to role.";
+                    TempData["Error"] = "Failed to add user to role.";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error adding user with ID {userId} to role {roleName}.");
-                TempData["ErrorMessage"] = "An error occurred while adding the user to the role.";
+                TempData["Error"] = "An error occurred while adding the user to the role.";
             }
             return RedirectToAction("Index");
         }
@@ -120,7 +119,7 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
 
                 if (role.Name.Equals("Admin", StringComparison.OrdinalIgnoreCase) && await _userManager.IsInRoleAsync(user, roleName))
                 {
-                    TempData["ErrorMessage"] = "Cannot remove user from the Admin role.";
+                    TempData["Error"] = "Cannot remove user from the Admin role.";
                     return RedirectToAction("Index");
                 }
 
@@ -131,12 +130,12 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                     TempData["Success"] = $"User {user.UserName} removed from role {roleName} successfully.";
                 }
                 else
-                    TempData["ErrorMessage"] = "Failed to remove user from role.";
+                    TempData["Error"] = "Failed to remove user from role.";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error removing user with ID {userId} from role {roleName}.");
-                TempData["ErrorMessage"] = "An error occurred while removing the user from the role.";
+                TempData["Error"] = "An error occurred while removing the user from the role.";
             }
             return RedirectToAction("Index");
         }
@@ -149,11 +148,11 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(roleName))
-                    TempData["ErrorMessage"] = "Role name cannot be empty.";
+                    TempData["Error"] = "Role name cannot be empty.";
 
                 if (await _roleManager.RoleExistsAsync(roleName))
                 {
-                    TempData["ErrorMessage"] = "Role already exists.";
+                    TempData["Error"] = "Role already exists.";
                     return RedirectToAction("Index");
                 }
 
@@ -166,12 +165,12 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                     TempData["Success"] = $"Role {roleName} created successfully.";
                 }
                 else
-                    TempData["ErrorMessage"] = "Failed to create role.";
+                    TempData["Error"] = "Failed to create role.";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error creating role {roleName}.");
-                TempData["ErrorMessage"] = "An error occurred while creating the role.";
+                TempData["Error"] = "An error occurred while creating the role.";
             }
             return RedirectToAction("Index");
         }
@@ -184,17 +183,17 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
             try
             {
                 if (string.IsNullOrWhiteSpace(roleName))
-                    TempData["ErrorMessage"] = "Role name cannot be empty.";
+                    TempData["Error"] = "Role name cannot be empty.";
 
                 IdentityRole role = await _roleManager.FindByNameAsync(roleName);
                 if (role == null)
                 {
-                    TempData["ErrorMessage"] = "Role not found.";
+                    TempData["Error"] = "Role not found.";
                     return RedirectToAction("Index");
                 }
                 if (role.Name.Equals("Admin", StringComparison.OrdinalIgnoreCase))
                 {
-                    TempData["ErrorMessage"] = "Cannot delete the Admin role.";
+                    TempData["Error"] = "Cannot delete the Admin role.";
                     return RedirectToAction("Index");
                 }
 
@@ -205,12 +204,12 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
                     TempData["Success"] = $"Role {roleName} deleted successfully.";
                 }
                 else
-                    TempData["ErrorMessage"] = "Failed to delete role.";
+                    TempData["Error"] = "Failed to delete role.";
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error deleting role {roleName}.");
-                TempData["ErrorMessage"] = "An error occurred while deleting the role.";
+                TempData["Error"] = "An error occurred while deleting the role.";
             }
             return RedirectToAction("Index");
         }

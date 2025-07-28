@@ -47,7 +47,7 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading admin dashboard");
-                TempData["ErrorMessage"] = "An error occurred while loading the dashboard. Please try again later.";
+                TempData["Error"] = "An error occurred while loading the dashboard. Please try again later.";
                 return View(new AdminDashboardViewModel());
             }
         }

@@ -2,8 +2,11 @@
 @{
     int cartCount = Model.OrderItems?.Sum(item => item.Quantity) ?? 0;
 }
-<i class="bi bi-cart2"></i>
-<span class="position-absolute start-100 translate-middle badge rounded-pill bg-success">
-    @cartCount
-    <span class="visually-hidden">Cart Quantity</span>
+<span class="position-relative d-inline-block">
+    <i class="bi bi-cart2 fs-5"></i>
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success">
+        @cartCount
+        <span class="visually-hidden">Cart Quantity</span>
+    </span>
 </span>
+

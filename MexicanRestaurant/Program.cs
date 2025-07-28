@@ -40,12 +40,12 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddMiniProfiler(options =>
-{
-    options.RouteBasePath = "/profiler";
-    options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
-    options.TrackConnectionOpenClose = true;
-}).AddEntityFramework();
+//builder.Services.AddMiniProfiler(options =>
+//{
+//    options.RouteBasePath = "/profiler";
+//    options.ColorScheme = StackExchange.Profiling.ColorScheme.Auto;
+//    options.TrackConnectionOpenClose = true;
+//}).AddEntityFramework();
 
 builder.Services.AddResponseCompression(options =>
 {

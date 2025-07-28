@@ -1,0 +1,70 @@
+﻿.full-width-home {
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    width: 100vw;
+    background-image: url('/images/mexicanResturant.webp');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 88vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.full-width-home .home-content {
+    z-index: 2;
+    color: white;
+    text-align: center;
+    text-shadow: 1px 1px 5px #000;
+}
+
+.full-width-home h1 {
+    font-size: 4rem;
+}
+
+.full-width-home h2 {
+    font-size: 2rem;
+}
+
+.full-width-home p {
+    font-size: 1.5rem;
+}
+
+.full-width-home .btn {
+    margin-top: 2rem;
+}
+
+@media (max-width: 667px) {
+    .full-width-home {
+        min-height: 86vh !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .full-width-home h1 {
+        font-size: 2.5rem !important;
+    }
+
+    .full-width-home h2 {
+        font-size: 1.5rem !important;
+    }
+
+    .full-width-home p {
+        font-size: 1.1rem !important;
+    }
+
+    .full-width-home .btn {
+        margin-top: 1rem !important;
+        font-size: 1rem !important;
+        padding: 0.5rem 1.5rem !important;
+    }
+}
+.section {
+    padding: 3rem 1rem;
+    text-align: center;
+}

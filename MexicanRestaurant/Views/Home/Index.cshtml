@@ -1,7 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Welcome to Mexican Restaurant";
     ViewData["MetaDescription"] = "Discover the authentic taste of Mexico at our restaurant. Order delicious tacos, burritos, and more";
-
+    ViewData["MetaKeywords"] = "Mexican food, tacos, burritos, authentic Mexican restaurant, order online, Mexican cuisine";
 }
 
 <main>
@@ -15,50 +15,4 @@
     </section>
 </main>
 
-<style>
-    .full-width-home {
-        position: relative;
-        left: 50%;
-        right: 50%;
-        margin-left: -50vw;
-        margin-right: -50vw;
-        width: 100vw;
-        background-image: url('/images/mexicanResturant.webp');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        min-height: 87vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1;
-    }
-
-    .full-width-home .home-content {
-        z-index: 2;
-        color: white;
-        text-align: center;
-        text-shadow: 1px 1px 5px #000;
-    }
-
-    .full-width-home h1 {
-        font-size: 4rem;
-    }
-
-    .full-width-home h2 {
-        font-size: 2rem;
-    }
-
-    .full-width-home p {
-        font-size: 1.5rem;
-    }
-
-    .full-width-home .btn {
-        margin-top: 2rem;
-    }
-
-    .section {
-        padding: 3rem 1rem;
-        text-align: center;
-    }
-</style>
+<link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />

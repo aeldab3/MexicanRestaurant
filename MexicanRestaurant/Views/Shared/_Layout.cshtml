@@ -13,6 +13,7 @@
         {
             <meta name="description" content="Your default description for pages without a specific one." />
         }
+        <meta name="keywords" content="@ViewData["MetaKeywords"]">
         <script type="importmap"></script>  
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />  
         <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />  
@@ -98,10 +99,10 @@
         <script src="~/js/site.js" asp-append-version="true"></script>  
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         @await RenderSectionAsync("Scripts", required: false)  
-        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+        @* @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
         {
             @MiniProfiler.Current.RenderIncludes(Context, position: RenderPosition.BottomRight, showTrivial: true, showTimeWithChildren: true)
-        }
+        } *@
     </body>  
 </html>
 

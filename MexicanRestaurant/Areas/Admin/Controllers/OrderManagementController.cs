@@ -77,7 +77,7 @@ namespace MexicanRestaurant.Areas.Admin.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating order status");
-                TempData["ErrorMessage"] = "An error occurred while loading the dashboard. Please try again later.";
+                TempData["Error"] = "An error occurred while update the order status. Please try again later.";
                 return View("Error", new { message = "An error occurred while updating the order status." });
             }
         }
