@@ -2,13 +2,14 @@
 @model RegisterModel
 @{
     ViewData["Title"] = "Register";
+    ViewData["MetaDescription"] = "Create a new account to enjoy our delicious Mexican food and manage your orders easily.";
 }
 
 <div class="container mt-4">
-    <h1 class="text-center text-success mb-4">@ViewData["Title"]</h1>
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <form asp-route-returnUrl="@Model.ReturnUrl" method="post" class="p-4 shadow-lg rounded">
+            <form asp-route-returnUrl="@Model.ReturnUrl" method="post" class="p-4 shadow-lg rounded bg-white">
+                <h2 class="text-center text-success fw-bold mb-4">Create a new account</h2>
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
                 <div class="row">
                     <div class="mb-3 col-md-6">
@@ -25,9 +26,40 @@
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Input.DateOfBirth" class="form-label fw-bold"></label>
-                    <input asp-for="Input.DateOfBirth" class="form-control" type="date"/>
-                    <span asp-validation-for="Input.DateOfBirth" class="text-danger"></span>
+                    <label class="form-label fw-bold">Date of Birth</label>
+                    <div class="d-flex gap-2">
+                        <select asp-for="Input.Day" class="form-select">
+                            <option value="">Day</option>
+                            @for (int day = 1; day <= 31; day++)
+                            {
+                                <option value="@day">@day</option>
+                            }
+                        </select>
+
+                        <select asp-for="Input.Month" class="form-select">
+                            <option value="">Month</option>
+                            @{
+                                var months = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.MonthNames;
+                                for (int i = 0; i < 12; i++)
+                                {
+                                    <option value="@(i + 1)">@(months[i])</option>
+                                }
+                            }
+                        </select>
+
+                        <select asp-for="Input.Year" class="form-select">
+                            <option value="">Year</option>
+                            @{
+                                for (int y = DateTime.Now.Year; y >= 1900; y--)
+                                {
+                                    <option value="@y">@y</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <span asp-validation-for="Input.Day" class="text-danger"></span>
+                    <span asp-validation-for="Input.Month" class="text-danger"></span>
+                    <span asp-validation-for="Input.Year" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">

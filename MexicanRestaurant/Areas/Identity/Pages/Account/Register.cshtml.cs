@@ -2,23 +2,24 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 #nullable disable
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Threading;
-using System.Threading.Tasks;
+using MexicanRestaurant.Core.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using MexicanRestaurant.Core.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace MexicanRestaurant.Areas.Identity.Pages.Account
 {
@@ -82,9 +83,26 @@ namespace MexicanRestaurant.Areas.Identity.Pages.Account
             public string LastName { get; set; }
 
             [Required]
-            [DataType(DataType.Date)]
-            [Display(Name = "Date of Birth")]
-            public DateTime? DateOfBirth { get; set; }
+            [Range(1, 31)]
+            [Display(Name = "Day")]
+            public int? Day { get; set; }
+
+            [Required]
+            [Range(1, 12)]
+            [Display(Name = "Month")]
+            public int? Month { get; set; }
+
+            [Required]
+            [Range(1900, 2100)]
+            [Display(Name = "Year")]
+            public int? Year { get; set; }
+
+            [NotMapped]
+            public DateTime? DateOfBirth =>
+                Day.HasValue && Month.HasValue && Year.HasValue
+                    ? new DateTime(Year.Value, Month.Value, Day.Value)
+                    : null;
+
 
             [Required(ErrorMessage = "Please select gender")]
             [Display(Name = "Gender")]
