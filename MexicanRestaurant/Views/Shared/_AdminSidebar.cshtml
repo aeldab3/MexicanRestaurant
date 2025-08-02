@@ -3,17 +3,17 @@
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     <aside class="admin-sidebar d-none d-lg-block">
         <div class="text-center d-flex justify-content-center align-items-center my-4">
-            <img src="~/images/logo-AE.webp" style="width: 60px; height: auto;" alt="icon image" width="60" />
+            <img src="~/images/logo-AE.webp" style="width: 60px; height: auto;" alt="icon image" width="60" loading="lazy" />
         </div>
         <h2 class="text-white text-center mb-4">Admin Panel</h2>
-        <nav class="nav flex-column px-3 text-center" aria-label="Admin Sidebar Navigation">
-            <a class="nav-link admin-link @(currentController == "Dashboard" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a>
-            <a class="nav-link admin-link @(currentController == "User" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="User" asp-action="Index">👥 User Management</a>
-            <a class="nav-link admin-link @(currentController == "OrderManagement" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="OrderManagement" asp-action="Index">🧾 Order Management</a>
-            <a class="nav-link admin-link @(currentController == "AuditLog" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="AuditLog" asp-action="Index">📋 Audit Logs</a>
-            <a class="nav-link admin-link @(currentController == "Product" ? "active-admin-link" : "")" asp-area="" asp-controller="Product" asp-action="Index">🌮 Products</a>
-            <a class="nav-link admin-link @(currentController == "Category" ? "active-admin-link" : "")" asp-area="" asp-controller="Category" asp-action="Index">📂 Categories</a>
-            <a class="nav-link admin-link @(currentController == "Ingredient" ? "active-admin-link" : "")" asp-area="" asp-controller="Ingredient" asp-action="Index">🌶️ Ingredients</a>
+        <nav class="nav flex-column px-3 text-start" aria-label="Admin Sidebar Navigation">
+            <a class="nav-link admin-link @(currentController == "Dashboard" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="Dashboard" asp-action="Index"><img src="~/images/dashboard.webp" alt="dashboard image" height="24" loading="lazy" class="me-1" /> Dashboard</a>
+            <a class="nav-link admin-link @(currentController == "User" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="User" asp-action="Index"><img src="~/images/users.webp" alt="user management image" height="24" loading="lazy" class="me-1" /> User Management</a>
+            <a class="nav-link admin-link @(currentController == "OrderManagement" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="OrderManagement" asp-action="Index"><img src="~/images/order.webp" alt="order management image" height="24" loading="lazy" class="me-1" /> Order Management</a>
+            <a class="nav-link admin-link @(currentController == "AuditLog" ? "active-admin-link" : "")" asp-area="Admin" asp-controller="AuditLog" asp-action="Index"><img src="~/images/audit.webp" alt="audit image" height="24" loading="lazy" class="me-1" /> Audit Logs</a>
+            <a class="nav-link admin-link @(currentController == "Product" ? "active-admin-link" : "")" asp-area="" asp-controller="Product" asp-action="Index"><img src="~/images/product-management.webp" alt="products management image" height="24" loading="lazy" class="me-1" /> Products</a>
+            <a class="nav-link admin-link @(currentController == "Category" ? "active-admin-link" : "")" asp-area="" asp-controller="Category" asp-action="Index"><img src="~/images/categorization.webp" alt="categories management image" height="24" loading="lazy" class="me-1" /> Categories</a>
+            <a class="nav-link admin-link @(currentController == "Ingredient" ? "active-admin-link" : "")" asp-area="" asp-controller="Ingredient" asp-action="Index"><img src="~/images/ingredients.webp" alt="ingredients management image" height="24" loading="lazy" class="me-1" /> Ingredients</a>
         </nav>
     </aside>
 }
@@ -42,8 +42,11 @@
 
     .admin-link:hover {
         background-color: #145c3d;
+        border-left: 4px solid #ffc107;
         text-decoration: none;
         color: #fff;
+        padding-right: 20px;
+        transition: padding-right 0.2s ease;
     }
 
     .active-admin-link {

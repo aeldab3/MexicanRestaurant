@@ -6,7 +6,7 @@
     ViewData["MetaDescription"] = "Admin dashboard for the Mexican Restaurant application, providing an overview of key metrics and system status.";
 }
 
-<form method="get" class="row g-2 my-4">
+<form method="get" class="row g-3 my-4 align-items-end">
     <div class="col-md-4">
         <label for="startDate" class="form-label text-dark fw-bold">From Date</label>
         <input type="date" name="startDate" id="startDate" class="form-control" value="@Model.StartDate?.ToString("yyyy-MM-dd")" />
@@ -15,13 +15,20 @@
         <label for="endDate" class="form-label text-dark fw-bold">To Date</label>
         <input type="date" name="endDate" id="endDate" class="form-control" value="@Model.EndDate?.ToString("yyyy-MM-dd")" />
     </div>
-    <div class="col-md-4 d-flex align-items-end">
-        <button type="submit" class="btn btn-success w-100">🔍 Filter by Date</button>
+    <div class="col-md-4">
+        <div class="d-flex flex-wrap gap-2">
+            <button type="submit" class="btn btn-success flex-fill" aria-label="Apply filters by date">
+                <i class="bi bi-funnel-fill me-1"></i> Filter
+            </button>
+            <a href="@Url.Action("Index", "Dashboard")" class="btn btn-secondary flex-fill" aria-label="Reset filters">
+                <i class="bi bi-x-circle me-1"></i> Reset
+            </a>
+        </div>
     </div>
 </form>
 
 <div class="container">
-    <h2 class="mb-4 text-center text-success">📊 Admin Dashboard</h2>
+    <h2 class="mb-4 text-center text-success">Admin Dashboard</h2>
 
     <div class="row g-4">
         <div class="col-md-3 col-sm-6">
@@ -33,7 +40,7 @@
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card text-dark bg-primary h-100 shadow-sm">
+            <div class="card text-dark h-100 shadow-sm" style="background-color: #F0B27A">
                 <div class="card-body text-center">
                     <h3 class="mb-1">Total Orders</h3>
                     <h4 class="mb-0">@Model.TotalOrders</h4>
@@ -41,7 +48,7 @@
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card text-dark bg-info h-100 shadow-sm">
+            <div class="card text-dark h-100 shadow-sm" style="background-color: #F7DC6F">
                 <div class="card-body text-center">
                     <h3 class="mb-1">Total Products</h3>
                     <h4 class="mb-0">@Model.TotalProducts</h4>
@@ -49,7 +56,7 @@
             </div>
         </div>
         <div class="col-md-3 col-sm-6">
-            <div class="card text-dark bg-warning h-100 shadow-sm">
+            <div class="card text-dark h-100 shadow-sm" style="background-color: #76D7C4">
                 <div class="card-body text-center">
                     <h3 class="mb-1">Total Revenue</h3>
                     <h4 class="mb-0">$@Model.TotalRevenue.ToString("N2")</h4>
@@ -113,7 +120,7 @@
                     datasets: [{
                         label: 'Sales Count',
                         data: topSales,
-                        backgroundColor: ['#198754', '#36A2EB', '#FFCE56', '#FF6384', '#FF9F40'],
+                        backgroundColor: ['#198754', '#F0B27A', '#F7DC6F', '#76D7C4', '#F1948A'],
                         borderWidth: 1
                     }]
                 },
@@ -134,7 +141,7 @@
                     labels: categoryLabels,
                     datasets: [{
                         data: categoryValues,
-                        backgroundColor: ['#FFCE56', '#36A2EB', '#198754', '#FF6384', '#FF9F40'],
+                        backgroundColor: ['#F0B27A', '#F7DC6F', '#198754', '#76D7C4', '#F1948A'],
                     }]
                 },
                 options: {

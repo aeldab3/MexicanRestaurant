@@ -10,7 +10,7 @@
 @if (SignInManager.IsSignedIn(User))
 {
     <li class="nav-item mx-2">
-        <a class="nav-link position-relative" asp-action="Cart" asp-controller="Order">
+        <a class="nav-link position-relative" asp-area="" asp-action="Cart" asp-controller="Order">
             <span id="cart-icon-container">
                     @await Html.PartialAsync("_CartIconPartial", _sessionService.Get<OrderViewModel>("OrderViewModel") ?? new OrderViewModel())
             </span>

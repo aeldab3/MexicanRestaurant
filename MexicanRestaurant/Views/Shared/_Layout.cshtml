@@ -22,7 +22,7 @@
         <link rel="icon" type="image/png" href="~/images/Logo-AE.png" />  
         <link rel="preload" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     </head>  
-    <body class="d-flex flex-column min-vh-100" style="background-color:#f9f5d9">
+    <body class="d-flex flex-column min-vh-100" style="background-color:#FDFBF9">
         @{
             var currentArea = Context.GetRouteValue("area")?.ToString();
             var showSidebar = currentArea == "Admin";
@@ -32,9 +32,9 @@
             var showAdminSidebar = (User.IsInRole("Admin") || User.IsInRole("Manager")) && (showSidebar || isProduct || isCategory || isIngredient);
         }
         <header>  
-            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow" style="background-color:#f9f5d9">
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow" style="background-color:#FDFBF9">
                 <div class="container-fluid"> 
-                    <a class="navbar-brand text-success" asp-area="" asp-controller="Home" asp-action="Index">  
+                    <a class="navbar-brand text-success mx-3" asp-area="" asp-controller="Home" asp-action="Index">  
                         <img src="~/images/Logo-AE.png" alt="Logo" style="height: 25px; margin:0" />  
                         <strong>Mexican Restaurant</strong>
                     </a>  
@@ -42,35 +42,42 @@
                     aria-expanded="false" aria-label="Toggle navigation">  
                         <span class="navbar-toggler-icon"></span>  
                     </button>  
-                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">  
-                        <ul class="navbar-nav flex-grow-1">
-                            @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
-                            {
-                                <li class="nav-item d-lg-block d-none">  
-                                    <a class="nav-link text-dark" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Admin Panel</a>
-                                </li>
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between align-items-center w-100">  
+                        <div class="d-flex justify-content-sm-center justify-content-start flex-grow-1">
+                            <ul class="navbar-nav">
+                                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                                {
+                                    <li class="nav-item d-lg-block d-none mx-3">  
+                                        <a class="nav-link text-dark" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Admin Panel</a>
+                                    </li>
     
-                                <li class="nav-item dropdown d-lg-none">
-                                    <span class="nav-link dropdown-toggle text-dark" data-bs-toggle="dropdown" style="cursor:pointer">Admin Panel</span>
-                                    <ul class="dropdown-menu" style="background-color:#f9f5d9;">
-                                        <li><a class="dropdown-item text-dark" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
-                                        <li><a class="dropdown-item text-dark" asp-area="Admin" asp-controller="User" asp-action="Index">User Management</a></li>
-                                        <li><a class="dropdown-item text-dark" asp-area="Admin" asp-controller="OrderManagement" asp-action="Index">Order Management</a></li>
-                                        <li><a class="dropdown-item text-dark" asp-area="Admin" asp-controller="AuditLog" asp-action="Index">Audit Logs</a></li>
-                                        <li><a class="dropdown-item text-dark" asp-area="" asp-controller="Product" asp-action="Index">Manage Products</a></li>
-                                        <li><a class="dropdown-item text-dark" asp-area="" asp-controller="Category" asp-action="Index">Manage Categories</a></li>
-                                        <li><a class="dropdown-item text-dark" asp-area="" asp-controller="Ingredient" asp-action="Index">Manage Ingredients</a></li>
-                                    </ul>
+                                    <li class="nav-item dropdown d-lg-none mx-3">
+                                        <span class="nav-link dropdown-toggle text-dark" data-bs-toggle="dropdown" style="cursor:pointer">Admin Panel</span>
+                                        <ul class="dropdown-menu" style="background-color:#FDFBF9;">
+                                            <li><a class="dropdown-item text-dark" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                                            <li><a class="dropdown-item text-dark" asp-area="Admin" asp-controller="User" asp-action="Index">User Management</a></li>
+                                            <li><a class="dropdown-item text-dark" asp-area="Admin" asp-controller="OrderManagement" asp-action="Index">Order Management</a></li>
+                                            <li><a class="dropdown-item text-dark" asp-area="Admin" asp-controller="AuditLog" asp-action="Index">Audit Logs</a></li>
+                                            <li><a class="dropdown-item text-dark" asp-area="" asp-controller="Product" asp-action="Index">Manage Products</a></li>
+                                            <li><a class="dropdown-item text-dark" asp-area="" asp-controller="Category" asp-action="Index">Manage Categories</a></li>
+                                            <li><a class="dropdown-item text-dark" asp-area="" asp-controller="Ingredient" asp-action="Index">Manage Ingredients</a></li>
+                                        </ul>
+                                    </li>
+                                }
+                                <li class="nav-item">  
+                                    <a class="nav-link text-dark mx-3" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                                 </li>
-                            }
-                            <li class="nav-item">  
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                            </li>
-                            <li class="nav-item">  
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Order" asp-action="Create">Create Order</a>  
-                            </li>  
-                        </ul>  
-                        <partial name="_LoginPartial" />  
+                                <li class="nav-item">  
+                                    <a class="nav-link text-dark mx-3" asp-area="" asp-controller="Order" asp-action="Create">Create Order</a>  
+                                </li>  
+                                <li class="nav-item">  
+                                    <a class="nav-link text-dark mx-3" asp-area="" asp-controller="Order" asp-action="ViewOrders">Orders</a>  
+                                </li>  
+                            </ul>  
+                        </div>
+                        <div class="d-flex mx-3">
+                             <partial name="_LoginPartial" />
+                        </div>
                     </div>  
                 </div>  
             </nav>  

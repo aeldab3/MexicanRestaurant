@@ -61,7 +61,7 @@
                     <form asp-action="AddItem" asp-route-page="@Model.Pagination.CurrentPage" method="post" class="h-100">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="prodId" value="@product.ProductId" />
-                        <div class="card shadow-lg border-0 h-100" style="background-color: #f9f5d985">
+                        <div class="card shadow-lg border-0 h-100" style="background-color: #FDFBF985">
                             <div class="product-wrapper">
                                 <img src="@Url.Content("~/images/" + product?.ImageUrl)"
                                      class="card-img-top img-fluid"
@@ -72,10 +72,10 @@
                                 </a>
                             </div>                        
                             <div class="card-body d-flex flex-column justify-content-between">
-                                <h2 class="card-title text-success fw-bolder">@product.Name</h2>
+                                <h2 class="card-title text-success fw-bolder fs-4">@product.Name</h2>
                                 <p class="card-text text-muted"><strong>@product?.Price.ToString("C")</strong></p>
     
-                                <div class="input-group mb-2">
+                                <div class="input-group mb-3">
                                     <input type="hidden" name="prodId" value="@product.ProductId" />
                                     <label for="prodQty-@product.ProductId" class="visually-hidden">Quantity</label>
                                     <input type="number" name="prodQty" class="form-control" id="prodQty-@product.ProductId" value="1" min="1" max="@product.Stock" />
@@ -83,13 +83,13 @@
 
                                 @if (product.Stock == 0)
                                 {
-                                    <button type="button" class="btn btn-secondary w-100 mt-auto btn-out-of-stock" data-prod-name="@product.Name" style="cursor: not-allowed;">
+                                    <button type="button" class="btn btn-secondary w-100 btn-out-of-stock" data-prod-name="@product.Name" style="cursor: not-allowed;">
                                         Out of Stock
                                     </button>
                                 }
                                 else 
                                 {
-                                    <button type="button" class="btn btn-success w-100 mt-auto btn-add-to-cart" data-prod-id="@product.ProductId" data-stock="@product.Stock">
+                                    <button type="button" class="btn btn-success w-100 btn-add-to-cart" data-prod-id="@product.ProductId" data-stock="@product.Stock">
                                         <i class="bi bi-cart-plus"></i> Add to Cart
                                     </button>
                                 }
