@@ -75,14 +75,14 @@
                         <p class="card-text text-muted">@product?.Description</p>
                         <p class="text-muted"><strong>Category:</strong> <span class="text-dark">@product?.CategoryName</span></p>
                         <div class="d-flex justify-content-around">
-                        <p class="card-text"><strong>Price:</strong> @product?.Price.ToString("C")</p>
-                        <p class="card-text"><strong>Stock:</strong> @product?.Stock</p>
+                            <p class="card-text"><strong>Price:</strong> @product?.Price.ToString("C")</p>
+                            <p class="card-text"><strong>Stock:</strong> @product?.Stock</p>
                         </div>
                     </div>
                     <div class="card-footer border-0 d-flex justify-content-between">
                         <a asp-action="AddEdit" asp-route-id="@product?.ProductId" class="btn btn-secondary btn-sm" style="width: 75.53px" aria-label="Edit @product?.Name"><i class="bi bi-pencil-square"></i> Edit</a>
                         <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal"
-                                data-bs-target="#deleteModal" data-product-id="@product?.ProductId" data-product-name="@product?.Name" aria-label="Delete @product?.Name">
+                            data-bs-target="#deleteModal" data-product-id="@product?.ProductId" data-product-name="@product?.Name" aria-label="Delete @product?.Name">
                             <i class="bi bi-trash-fill"></i> Delete
                         </button>
                     </div>

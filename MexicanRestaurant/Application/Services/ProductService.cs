@@ -104,7 +104,7 @@ namespace MexicanRestaurant.Application.Services
             }
 
             var httpContext = _httpContextAccessor.HttpContext ?? throw new InvalidOperationException("HTTP context is not available for logging.");
-            await _auditLogHelper.LogActionAsync(httpContext, isCreate ? "Create" : "Update", "Product", product.ProductId.ToString(), $"Product: {product.Name}, Price: {product.Price}");
+            await _auditLogHelper.LogActionAsync(httpContext, isCreate ? "Create" : "Update", "Product", product.ProductId.ToString(), $"Product: {product.Name}, Price: {product.Price}, Stock: {product.Stock}");
         }
 
         public async Task DeleteProductAsync(int id)

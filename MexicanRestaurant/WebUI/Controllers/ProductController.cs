@@ -55,24 +55,24 @@ namespace MexicanRestaurant.WebUI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEdit(ProductFormViewModel model)
         {
-                await LoadFormData();
+            await LoadFormData();
 
-                if (model.CategoryId == 0)
-                    ModelState.AddModelError("CategoryId", "Please select a category.");
+            if (model.CategoryId == 0)
+                ModelState.AddModelError("CategoryId", "Please select a category.");
 
-                if (ModelState.IsValid)
-                {
-                    var product = _mapper.Map<Product>(model);
-                    product.ImageFile = model.ImageFile;
-                    var existingImageUrl = model.ExistingImageUrl ?? string.Empty;
-                    await _productService.AddOrUpdateProductAsync(product, model.SelectedIngredientIds, existingImageUrl);
-                    TempData["Success"] = model.ProductId == 0 ? "Product added successfully." : "Product updated successfully.";
-                    return RedirectToAction("Index");
-                }
-                ViewData["Error"] = "There were errors in the form. Please correct them and try again.";
-                await LoadFormData();
-                ViewBag.Operation = model.ProductId == 0 ? "Add" : "Edit";
-                return View(model);
+            if (ModelState.IsValid)
+            {
+                var product = _mapper.Map<Product>(model);
+                product.ImageFile = model.ImageFile;
+                var existingImageUrl = model.ExistingImageUrl ?? string.Empty;
+                await _productService.AddOrUpdateProductAsync(product, model.SelectedIngredientIds, existingImageUrl);
+                TempData["Success"] = model.ProductId == 0 ? "Product added successfully." : "Product updated successfully.";
+                return RedirectToAction("Index");
+            }
+            ViewData["Error"] = "There were errors in the form. Please correct them and try again.";
+            await LoadFormData();
+            ViewBag.Operation = model.ProductId == 0 ? "Add" : "Edit";
+            return View(model);
         }
 
         [Authorize]

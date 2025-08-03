@@ -16,7 +16,6 @@ namespace MexicanRestaurant.Core.Extensions
                 ),
                 parameter
             );
-
             return combined;
         }
     }
