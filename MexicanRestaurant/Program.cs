@@ -123,6 +123,12 @@ app.MapControllerRoute(
     .WithStaticAssets();
 
 app.MapControllerRoute(
+    name: "product-details",
+    pattern: "product/{slug}",
+    defaults: new { controller = "Product", action = "Details" })
+    .WithStaticAssets();
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();

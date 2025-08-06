@@ -65,7 +65,7 @@
                              class="card-img-top img-fluid" width="336" height="220"
                              style="height: 220px; object-fit: cover;" alt="Image of @product?.Name" loading="lazy" />
 
-                        <a asp-action="Details" asp-controller="Product" asp-route-id="@product?.ProductId"
+                        <a asp-action="Details" asp-controller="Product" asp-route-slug="@product?.Slug"
                            class="btn btn-lg btn-success details-btn" aria-label="View details for @product?.Name">
                             Details
                         </a>

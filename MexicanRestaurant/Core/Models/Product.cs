@@ -11,6 +11,7 @@ namespace MexicanRestaurant.Core.Models
         public decimal Price { get; set; }
         public int Stock { get; set; }
         public int CategoryId { get; set; }
+        public string Slug { get; set; } = string.Empty;
 
         [NotMapped]
         public IFormFile? ImageFile { get; set; }

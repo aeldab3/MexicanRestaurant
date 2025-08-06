@@ -8,7 +8,7 @@ namespace MexicanRestaurant.Core.Interfaces
     {
         Task<int> GetTotalProductsAsync();
         Task<Product> GetExistingProductByIdAsync(int id);
-        Task<ProductViewModel?> GetProductViewModelByIdAsync(int id);
+        Task<ProductViewModel?> GetProductViewModelBySlugAsync(string slug);
         Task AddOrUpdateProductAsync(Product product, int[] ingredientIds, string existingImageUrl);
         Task DeleteProductAsync(int id);
         Task<ProductListViewModel> GetPagedProductsAsync(FilterOptionsViewModel filter, PaginationInfo pagination);

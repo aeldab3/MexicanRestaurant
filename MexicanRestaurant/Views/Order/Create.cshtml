@@ -66,22 +66,22 @@
                                 <img src="@Url.Content("~/images/" + product?.ImageUrl)"
                                      class="card-img-top img-fluid"
                                      style="height: 220px; object-fit: cover;" alt="@product?.Name" height="220" width="255" loading="lazy"/>
-                                <a asp-action="Details" asp-controller="Product" asp-route-id="@product.ProductId"
+                                <a asp-action="Details" asp-controller="Product" asp-route-slug="@product?.Slug"
                                    class="btn btn-lg btn-success details-btn">
                                     Details
                                 </a>
                             </div>                        
                             <div class="card-body d-flex flex-column justify-content-between">
-                                <h2 class="card-title text-success fw-bolder fs-4">@product.Name</h2>
+                                <h2 class="card-title text-success fw-bolder fs-4">@product?.Name</h2>
                                 <p class="card-text text-muted"><strong>@product?.Price.ToString("C")</strong></p>
     
                                 <div class="input-group mb-3">
-                                    <input type="hidden" name="prodId" value="@product.ProductId" />
-                                    <label for="prodQty-@product.ProductId" class="visually-hidden">Quantity</label>
-                                    <input type="number" name="prodQty" class="form-control" id="prodQty-@product.ProductId" value="1" min="1" max="@product.Stock" />
+                                    <input type="hidden" name="prodId" value="@product?.ProductId" />
+                                    <label for="prodQty-@product?.ProductId" class="visually-hidden">Quantity</label>
+                                    <input type="number" name="prodQty" class="form-control" id="prodQty-@product?.ProductId" value="1" min="1" max="@product?.Stock" />
                                 </div>
 
-                                @if (product.Stock == 0)
+                                @if (product?.Stock == 0)
                                 {
                                     <button type="button" class="btn btn-secondary w-100 btn-out-of-stock" data-prod-name="@product.Name" style="cursor: not-allowed;">
                                         Out of Stock
@@ -89,7 +89,7 @@
                                 }
                                 else 
                                 {
-                                    <button type="button" class="btn btn-success w-100 btn-add-to-cart" data-prod-id="@product.ProductId" data-stock="@product.Stock">
+                                    <button type="button" class="btn btn-success w-100 btn-add-to-cart" data-prod-id="@product?.ProductId" data-stock="@product?.Stock">
                                         <i class="bi bi-cart-plus"></i> Add to Cart
                                     </button>
                                 }

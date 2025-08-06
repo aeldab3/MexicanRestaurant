@@ -45,11 +45,11 @@ namespace MexicanRestaurant.Application.Services
             });
         }
 
-        public async Task<ProductViewModel?> GetProductViewModelByIdAsync(int id)
+        public async Task<ProductViewModel?> GetProductViewModelBySlugAsync(string slug)
         {
             var query = _products.Table
                 .AsNoTracking()
-                .Where(p => p.ProductId == id);
+                .Where(p => p.Slug == slug);
 
             var product = await query.ProjectTo<ProductViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
             return product;
@@ -72,6 +72,7 @@ namespace MexicanRestaurant.Application.Services
             if (isCreate)
             {
                 product.ProductIngredients = ingredientIds.Select(id => new ProductIngredient { IngredientId = id }).ToList();
+                product.Slug = SlugHelper.GenerateSlug(product.Name ?? "");
                 await _products.AddAsync(product);
             }
             else
@@ -90,6 +91,7 @@ namespace MexicanRestaurant.Application.Services
                 existingProduct.Stock = product.Stock;
                 existingProduct.CategoryId = product.CategoryId;
                 existingProduct.ImageUrl = product.ImageUrl;
+                existingProduct.Slug = SlugHelper.GenerateSlug(product.Name ?? "");
 
                 existingProduct?.ProductIngredients?.Clear();
                 foreach (var id in ingredientIds)

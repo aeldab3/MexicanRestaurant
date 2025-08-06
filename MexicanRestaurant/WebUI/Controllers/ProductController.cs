@@ -77,10 +77,10 @@ namespace MexicanRestaurant.WebUI.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(string slug)
         {
-            var model = await _productService.GetProductViewModelByIdAsync(id) 
-                        ?? throw new ProductNotFoundException($"Product with ID {id} was not found.");
+            var model = await _productService.GetProductViewModelBySlugAsync(slug) 
+                        ?? throw new ProductNotFoundException($"Product with Name {slug} was not found.");
             return View(model);
         }
 
